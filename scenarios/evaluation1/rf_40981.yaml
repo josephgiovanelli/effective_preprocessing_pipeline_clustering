@@ -1,0 +1,10 @@
+title: Random Forest on dataset n 40981 with Split policy
+setup:
+  policy: split
+  runtime: 400
+  algorithm: RandomForest
+  dataset: 40981
+control:
+  seed: 42
+policy:
+  step_pipeline: 200

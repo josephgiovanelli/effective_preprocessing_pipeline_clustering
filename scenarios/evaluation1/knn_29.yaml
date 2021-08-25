@@ -1,0 +1,10 @@
+title: K Nearest Neighbors on dataset n 29 with Split policy
+setup:
+  policy: split
+  runtime: 400
+  algorithm: KNearestNeighbors
+  dataset: 29
+control:
+  seed: 42
+policy:
+  step_pipeline: 200
