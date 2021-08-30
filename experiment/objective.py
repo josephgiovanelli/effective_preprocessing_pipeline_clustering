@@ -7,6 +7,7 @@ import sys
 from hyperopt import STATUS_OK, STATUS_FAIL
 import numpy as np
 from sklearn.model_selection import train_test_split, cross_validate
+from sklearn import metrics
 
 from experiment.algorithm import space as ALGORITHM_SPACE
 from experiment.pipeline.prototype import pipeline_conf_to_full_pipeline, get_baseline
@@ -29,9 +30,9 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
 
     pipeline, operators = pipeline_conf_to_full_pipeline(
         pipeline_config, 
-        ALGORITHM_SPACE.algorithms.get(config['algorithm']), 
+        ALGORITHM_SPACE.algorithms.get(algo_config[0]) if algorithm == None else ALGORITHM_SPACE.algorithms.get(algorithm), 
         config['seed'], 
-        algo_config
+        algo_config[1]
     )
   
     history_index = context['history_index'].get(item_hash['config'])
@@ -40,6 +41,7 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
 
     start = time.time()
     try:
+        """
         scores = cross_validate(pipeline, 
                 X,
                 y,
@@ -51,6 +53,10 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
                 verbose=0)
         score = np.mean(scores['test_balanced_accuracy']) // 0.0001 / 10000
         std = np.std(scores['test_balanced_accuracy']) // 0.0001 / 10000
+        """
+        result = pipeline.fit_predict(X, y)
+        score = metrics.adjusted_mutual_info_score(y, result) // 0.0001 / 10000
+        std = 0
         status = STATUS_OK
     except Exception as e:
         score = 0.
@@ -113,6 +119,8 @@ def objective_algo(algo_config, current_pipeline_config, algorithm, X, y, contex
 def objective_joint(wconfig, algorithm, X, y, context, config):
     return objective(wconfig['pipeline'], wconfig['algorithm'], algorithm, X, y, context, config, step='joint')
 
+def objective_union(wconfig, X, y, context, config):
+    return objective(wconfig['pipeline'], wconfig['algorithm'], None, X, y, context, config, step='union')
 
 def get_baseline_score(algorithm, X, y, seed):
     pipeline, _ = pipeline_conf_to_full_pipeline(

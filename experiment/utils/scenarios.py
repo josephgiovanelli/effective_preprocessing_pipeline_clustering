@@ -16,11 +16,18 @@ def validate(scenario):
 	return True #  TODO
 
 def to_config(scenario):
-	config = {
-		'seed': scenario['control']['seed'],
-		'time': scenario['setup']['runtime'],
-	    'algorithm': scenario['setup']['algorithm'],
-	}
+	try:
+		config = {
+			'seed': scenario['control']['seed'],
+			'time': scenario['setup']['runtime'],
+			'algorithm': scenario['setup']['algorithm'],
+		}
+	except:
+		config = {
+			'seed': scenario['control']['seed'],
+			'time': scenario['setup']['runtime'],
+		}
+
 	if scenario['policy'] is not None:
 		config.update(scenario['policy'])
 	return config
