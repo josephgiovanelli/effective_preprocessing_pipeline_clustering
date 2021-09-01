@@ -19,13 +19,15 @@ def to_config(scenario):
 	try:
 		config = {
 			'seed': scenario['control']['seed'],
-			'time': scenario['setup']['runtime'],
+			'runtime': scenario['setup']['runtime'],
+			'budget': scenario['setup']['budget'],
 			'algorithm': scenario['setup']['algorithm'],
 		}
 	except:
 		config = {
 			'seed': scenario['control']['seed'],
-			'time': scenario['setup']['runtime'],
+			'runtime': scenario['setup']['runtime'],
+			'budget': scenario['setup']['budget'],
 		}
 
 	if scenario['policy'] is not None:

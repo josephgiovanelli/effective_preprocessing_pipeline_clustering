@@ -42,6 +42,7 @@ base = OrderedDict([
     ('setup', {
         'policy': 'iterative',
         'runtime': 400,
+        'budget': 'iterations',
         'dataset': 'wine'
     }),
     ('control', {

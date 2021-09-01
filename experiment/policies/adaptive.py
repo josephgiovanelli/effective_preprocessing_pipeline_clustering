@@ -83,10 +83,10 @@ class Adaptive(Policy):
         trials_algo = Trials()
         timeout = False
         start = time.time()
-        remaining = self.config['time']
+        remaining = self.config['runtime']
         while not timeout:
             ellapsed = time.time() - start
-            remaining = self.config['time'] - ellapsed
+            remaining = self.config['runtime'] - ellapsed
             timeout = remaining < 0
             print('## Data Pipeline')
             step_start = time.time()
@@ -104,8 +104,8 @@ class Adaptive(Policy):
                     fn=obj_pl, 
                     space=self.PIPELINE_SPACE,
                     algo=tpe.suggest, 
-                    max_evals=None,
-                    max_time=self.current_steptime['pipeline'],     
+                    max_evals= None if self.config['budget'] == 'time' else self.current_steptime['pipeline'],
+                    max_time= self.current_steptime['pipeline'] if self.config['budget'] == 'time' else None,     
                     trials=trials_pipelines,
                     show_progressbar=False,
                     verbose=0
@@ -135,8 +135,8 @@ class Adaptive(Policy):
                 fmin(fn=obj_algo, 
                     space=ALGORITHM_SPACE.get_domain_space(self.config['algorithm']), 
                     algo=tpe.suggest, 
-                    max_evals=None,
-                    max_time=self.current_steptime['algorithm'],
+                    max_evals=None if self.config['budget'] == 'time' else self.config['step_algorithm'] ,
+                    max_time=self.config['step_algorithm'] if self.config['budget'] == 'time' else None,
                     trials=trials_algo,
                     show_progressbar=False,
                     verbose=0

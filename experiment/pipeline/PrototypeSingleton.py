@@ -1,5 +1,5 @@
-from imblearn.under_sampling import NearMiss, CondensedNearestNeighbour
-from imblearn.over_sampling import SMOTE
+#from imblearn.under_sampling import NearMiss, CondensedNearestNeighbour
+#from imblearn.over_sampling import SMOTE
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import SelectKBest
 from sklearn.impute import SimpleImputer
@@ -19,13 +19,13 @@ class PrototypeSingleton:
 
    POOL = {
        "impute": [None, SimpleImputer(), IterativeImputer()],
-       "encode": [None, OneHotEncoder()],
+       "encode": [OneHotEncoder()],
        #"encode": [None, OneHotEncoder(), OrdinalEncoder()],
-       "rebalance": [None, NearMiss(), SMOTE()],
        #"rebalance": [None, NearMiss(), CondensedNearestNeighbour(), SMOTE()],
        "normalize": [None, StandardScaler(), PowerTransformer(), MinMaxScaler(), RobustScaler()],
        "discretize": [None, KBinsDiscretizer(), Binarizer()],
-       "features": [None, PCA(), SelectKBest(), FeatureUnion([("pca", PCA()), ("selectkbest", SelectKBest())])]
+       #"features": [None, PCA(), SelectKBest(), FeatureUnion([("pca", PCA()), ("selectkbest", SelectKBest())])]
+       "features": [None, PCA()]
    }
 
    PROTOTYPE = {}

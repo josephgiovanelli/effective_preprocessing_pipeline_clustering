@@ -6,7 +6,7 @@ import json
 class Policy(object):
     def __init__(self, config):
         self.PIPELINE_SPACE = PrototypeSingleton.getInstance().getDomainSpace()
-        if config['time'] == 400:
+        if config['runtime'] == 400 and config['budget'] == 'time' and config['policy'] == 'split':
             self.compute_baseline = True
         else:
             self.compute_baseline = False
@@ -17,8 +17,8 @@ class Policy(object):
             'history_index': {},
             'history': [],
             'max_history_score': 0.,
-            'max_history_score_std': 0.,
             'max_history_step': 'baseline',
+            'max_history_score_ami': 0.,
             'best_config': {},
         }
 
@@ -29,7 +29,6 @@ class Policy(object):
             y,
             self.config['seed'])
         self.context['baseline_score'] = baseline_score
-        self.context['baseline_score_std'] = baseline_score_std
 
     def run(self, X, y):
         if self.compute_baseline:
@@ -39,5 +38,5 @@ class Policy(object):
         print('{} STEP RESULT {}'.format('#' * 20, '#' * 20))
         print('BEST PIPELINE:\n {}'.format(json.dumps(best_config['pipeline'], indent=4, sort_keys=True),))
         print('BEST ALGO CONFIG:\n {}'.format(json.dumps(best_config['algorithm'], indent=4, sort_keys=True)))
-        print('BEST SCORE: {} ({})'.format(best_config['score'], best_config['score_std']))
+        print('BEST SCORE: {}'.format(best_config['score']))
         print('#' * 50)

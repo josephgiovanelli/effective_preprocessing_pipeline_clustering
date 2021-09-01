@@ -99,13 +99,8 @@ def build_pipeline(features_rebalance_order, discretize_rebalance_order):
 def pseudo_exhaustive_pipelines():
     pipelines = []
 
-    pipelines.append("impute encode normalize features rebalance")
-    pipelines.append("impute encode normalize rebalance features")
-
-    pipeline = "impute encode "
-    pipelines.append(pipeline + "rebalance discretize features")
-    pipelines.append(pipeline + "discretize rebalance features")
-    pipelines.append(pipeline + "discretize features rebalance")
+    pipelines.append("impute encode normalize features")
+    pipelines.append("impute encode discretize features")
 
     return pipelines
 

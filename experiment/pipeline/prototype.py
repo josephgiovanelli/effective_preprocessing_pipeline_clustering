@@ -1,5 +1,5 @@
-from imblearn.under_sampling import NearMiss, CondensedNearestNeighbour
-from imblearn.over_sampling import SMOTE
+#from imblearn.under_sampling import NearMiss, CondensedNearestNeighbour
+#from imblearn.over_sampling import SMOTE
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import SelectKBest
@@ -9,7 +9,7 @@ from sklearn.pipeline import FeatureUnion
 from sklearn.preprocessing import RobustScaler, StandardScaler, MinMaxScaler, PowerTransformer, KBinsDiscretizer, \
     Binarizer, OneHotEncoder, OrdinalEncoder, FunctionTransformer
 
-from imblearn.pipeline import Pipeline
+from sklearn.pipeline import Pipeline
 
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import SelectKBest

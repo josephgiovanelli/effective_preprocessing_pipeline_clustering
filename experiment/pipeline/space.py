@@ -60,7 +60,7 @@ def params_Binarizer():
 
 def params_PCA():
     return {
-        'n_components':[1, 2, 3, 4],
+        'n_components':[2, 3, 4, 5],
     }
 
 def params_TruncatedSVD():

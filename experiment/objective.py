@@ -6,6 +6,7 @@ import sys
 
 from hyperopt import STATUS_OK, STATUS_FAIL
 import numpy as np
+from sklearn.metrics import silhouette_score
 from sklearn.model_selection import train_test_split, cross_validate
 from sklearn import metrics
 
@@ -34,7 +35,7 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         config['seed'], 
         algo_config[1]
     )
-  
+    #print(pipeline)
     history_index = context['history_index'].get(item_hash['config'])
     if history_index is not None:
         return context['history'][history_index]
@@ -54,13 +55,13 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         score = np.mean(scores['test_balanced_accuracy']) // 0.0001 / 10000
         std = np.std(scores['test_balanced_accuracy']) // 0.0001 / 10000
         """
-        result = pipeline.fit_predict(X, y)
-        score = metrics.adjusted_mutual_info_score(y, result) // 0.0001 / 10000
-        std = 0
+        result = pipeline.fit_predict(X, None)
+        score = silhouette_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result, metric='euclidean') // 0.0001 / 10000
+        ami = metrics.adjusted_mutual_info_score(y, result) // 0.0001 / 10000
         status = STATUS_OK
     except Exception as e:
         score = 0.
-        std = 0.
+        ami = 0.
         status = STATUS_FAIL
         print(e)
     stop = time.time()
@@ -73,22 +74,22 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         'loss': 1 - score, 
         'status': status, 
         'score': score,
-        'score_std': std,
+        'ami': ami,
         'iteration': iteration_number,
         'config_hash': item_hash,
         'max_history_score': context['max_history_score'],
-        'max_history_score_std': context['max_history_score_std'],
         'max_history_step': context['max_history_step'],
+        'max_history_score_ami': context['max_history_score_ami'],
         'step': step
     })
 
     if context['max_history_score'] < score:
         item['max_history_score'] = score
-        context['max_history_score'] = score
-        context['max_history_score_std'] = std
-        item['max_history_score_std'] = std
-        context['max_history_step'] = step
         item['max_history_step'] = step
+        item['max_history_score_ami'] = ami
+        context['max_history_score'] = score
+        context['max_history_step'] = step
+        context['max_history_score_ami'] = ami
         context['best_config'] = item
 
 
@@ -101,10 +102,10 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
 
     print('Best score: {} ({}) [{}] | Score: {} ({}) [{}]'.format(
         item['max_history_score'],
-        item['max_history_score_std'],
+        item['max_history_score_ami'],
         item['max_history_step'][0].upper(),
         item['score'],
-        item['score_std'],
+        item['ami'],
         item['step'][0].upper(),
         )
     )

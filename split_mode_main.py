@@ -39,15 +39,15 @@ def main(args):
     scenario = cli.apply_scenario_customization(scenario, args.customize)
     config = scenarios.to_config(scenario)
     if args.mode == "preprocessing_algorithm":
-        config['time'] /= args.num_pipelines
+        config['runtime'] /= args.num_pipelines
     else:
         if args.num_pipelines == 0:
-            config['time'] = 400
+            config['runtime'] = 400
         else:
-            config['time'] = 240
+            config['runtime'] = 240
             config['step_pipeline'] = 40
 
-    print("config time: " + str(config['time']))
+    print("config time: " + str(config['runtime']))
     print('SCENARIO:\n {}'.format(json.dumps(scenario, indent=4, sort_keys=True)))
 
     PrototypeSingleton.getInstance().setPipeline(args.pipeline)

@@ -29,8 +29,8 @@ class Split(Policy):
                 fn=obj_pl, 
                 space=self.PIPELINE_SPACE,
                 algo=tpe.suggest, 
-                max_evals=None,
-                max_time=self.config['step_pipeline'],     
+                max_evals=None if self.config['budget'] == 'time' else self.config['step_pipeline'],
+                max_time=self.config['step_pipeline'] if self.config['budget'] == 'time' else None,     
                 trials=trials_pipelines,
                 show_progressbar=False,
                 verbose=0
@@ -39,7 +39,7 @@ class Split(Policy):
             current_pipeline_configuration = best_config['pipeline']
             super(Split, self).display_step_results(best_config)
             
-        if self.config['time'] - self.config['step_pipeline'] > 0:
+        if self.config['runtime'] - self.config['step_pipeline'] > 0:
             print('## Algorithm')
             obj_algo = functools.partial(objective_algo, 
                     current_pipeline_config=current_pipeline_configuration,
@@ -51,8 +51,8 @@ class Split(Policy):
             fmin(fn=obj_algo, 
                 space=ALGORITHM_SPACE.get_domain_space(self.config['algorithm']), 
                 algo=tpe.suggest, 
-                max_evals=None,
-                max_time=self.config['time'] - self.config['step_pipeline'],
+                max_evals=None if self.config['budget'] == 'time' else (self.config['runtime'] - self.config['step_pipeline']),
+                max_time=(self.config['runtime'] - self.config['step_pipeline']) if self.config['budget'] == 'time' else None,
                 trials=trials_algo,
                 show_progressbar=False,
                 verbose=0

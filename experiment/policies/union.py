@@ -27,8 +27,8 @@ class Union(Policy):
             fn=obj_pl, 
             space=space, 
             algo=tpe.suggest, 
-            max_evals=None,
-            max_time=self.config['time'],     
+            max_evals=None if self.config['budget'] == 'time' else self.config['runtime'],
+            max_time=self.config['runtime'] if self.config['budget'] == 'time' else None,     
             trials=trials,
             show_progressbar=False,
             verbose=0

@@ -11,7 +11,7 @@ class Iterative(Policy):
 
     def run(self, X, y):
         super(Iterative, self).run(X, y)
-        ranges = [i for i in range(0, self.config['time'] /
+        ranges = [i for i in range(0, self.config['runtime'] /
             (self.config['step_pipeline']+self.config['step_algorithm']))]
         current_pipeline_configuration = {}
         current_algo_configuration = {}
@@ -33,8 +33,8 @@ class Iterative(Policy):
                 fn=obj_pl, 
                 space=self.PIPELINE_SPACE,
                 algo=tpe.suggest, 
-                max_evals=None,
-                max_time=self.config['step_pipeline'],     
+                max_evals=None if self.config['budget'] == 'time' else self.config['step_pipeline'],
+                max_time=self.config['step_pipeline'] if self.config['budget'] == 'time' else None,     
                 trials=trials_pipelines,
                 show_progressbar=False,
                 verbose=0
@@ -56,8 +56,8 @@ class Iterative(Policy):
             fmin(fn=obj_algo, 
                 space=ALGORITHM_SPACE.get_domain_space(self.config['algorithm']), 
                 algo=tpe.suggest, 
-                max_evals=None,
-                max_time=self.config['step_algorithm'],
+                max_evals=None if self.config['budget'] == 'time' else self.config['step_algorithm'] ,
+                max_time=self.config['step_algorithm'] if self.config['budget'] == 'time' else None,
                 trials=trials_algo,
                 show_progressbar=False,
                 verbose=0
