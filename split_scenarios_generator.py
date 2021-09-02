@@ -46,7 +46,8 @@ base = OrderedDict([
         'runtime': 400,
         'budget': 'time',
         'algorithm': 'RandomForest',
-        'dataset': 'wine'
+        'dataset': 'statlog',
+        'dataset_kind': 'uci'
     }),
     ('control', {
         'seed': 42

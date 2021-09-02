@@ -17,7 +17,8 @@ SCENARIO_PATH = './scenarios/'
 SCENARIO_PATH = create_directory(SCENARIO_PATH, "union_mode")
 
 policies = ['union']
-
+metrics = ['SIL', 'CH', 'DBI']
+datasets = ['avila', 'isolet', 'pendigits', 'postures', 'statlog']
 
 policies_config = {
     'iterative': {
@@ -38,12 +39,14 @@ policies_config = {
 }
 
 base = OrderedDict([
-    ('title', 'Random Forest on Wine with Iterative policy'),
+    ('title', 'AutoML on statlog with Union policy'),
     ('setup', {
-        'policy': 'iterative',
-        'runtime': 400,
+        'policy': 'union',
+        'runtime': 150,
         'budget': 'iterations',
-        'dataset': 'wine'
+        'dataset': 'statlog',
+        'dataset_kind': 'uci',
+        'metric': 'SIL'
     }),
     ('control', {
         'seed': 42
@@ -74,19 +77,18 @@ def get_filtered_datasets():
     df = df['did']
     return df.values.flatten().tolist()
 
-for id in get_filtered_datasets():
-    print('# DATASET: {}'.format(id))
-    for policy in policies:
+for dataset in datasets:
+    print('# DATASET: {}'.format(dataset))
+    for metric in metrics:
         scenario = copy.deepcopy(base)
-        scenario['setup']['dataset'] = id
-        scenario['setup']['policy'] = policy
-        scenario['policy'] = copy.deepcopy(policies_config[policy])
-        scenario['title'] = 'AutoML on dataset n {} with {} policy'.format(
-            id,
-            policy.title()
+        scenario['setup']['dataset'] = dataset
+        scenario['setup']['metric'] = metric
+        scenario['title'] = 'AutoML on {} with {} policy'.format(
+            dataset,
+            scenario['setup']['policy'].title()
         )
         runtime = scenario['setup']['runtime']
 
-        path = os.path.join(SCENARIO_PATH, '{}.yaml'.format(id))
+        path = os.path.join(SCENARIO_PATH, '{}_{}.yaml'.format(dataset, metric.lower()))
         __write_scenario(path, scenario)
 

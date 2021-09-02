@@ -6,7 +6,7 @@ import sys
 
 from hyperopt import STATUS_OK, STATUS_FAIL
 import numpy as np
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 from sklearn.model_selection import train_test_split, cross_validate
 from sklearn import metrics
 
@@ -60,7 +60,12 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         std = np.std(scores['test_balanced_accuracy']) // 0.0001 / 10000
         """
         result = pipeline.fit_predict(X, None)
-        score = silhouette_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result, metric='euclidean') // 0.0001 / 10000
+        if config['metric'] == 'SIL':
+            score = silhouette_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result, metric='euclidean')
+        elif config['metric'] == 'CH':
+            score = calinski_harabasz_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result)
+        elif config['metric'] == 'DBI':
+            score = davies_bouldin_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result)
         ami = metrics.adjusted_mutual_info_score(y, result) // 0.0001 / 10000
         status = STATUS_OK
     except Exception as e:

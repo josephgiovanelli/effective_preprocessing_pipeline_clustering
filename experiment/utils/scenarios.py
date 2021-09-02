@@ -22,12 +22,20 @@ def to_config(scenario):
 			'runtime': scenario['setup']['runtime'],
 			'budget': scenario['setup']['budget'],
 			'algorithm': scenario['setup']['algorithm'],
+			'policy': scenario['setup']['policy'],
+			'dataset': scenario['setup']['dataset'],
+			'dataset_kind': scenario['setup']['dataset_kind'],
+			'metric': scenario['setup']['metric'],
 		}
 	except:
 		config = {
 			'seed': scenario['control']['seed'],
 			'runtime': scenario['setup']['runtime'],
 			'budget': scenario['setup']['budget'],
+			'policy': scenario['setup']['policy'],
+			'dataset': scenario['setup']['dataset'],
+			'dataset_kind': scenario['setup']['dataset_kind'],
+			'metric': scenario['setup']['metric'],
 		}
 
 	if scenario['policy'] is not None:

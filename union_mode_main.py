@@ -15,13 +15,18 @@ import pandas as pd
 import os
 
 
-def load_dataset(id):
-    dataset = openml.datasets.get_dataset(id)
-    X, y, categorical_indicator, _ = dataset.get_data(
-        dataset_format='array',
-        target=dataset.default_target_attribute
-    )
-    print(dataset.name)
+def load_dataset(id, kind):
+    if kind == 'openml':
+        dataset = openml.datasets.get_dataset(id)
+        X, y, categorical_indicator, _ = dataset.get_data(
+            dataset_format='array',
+            target=dataset.default_target_attribute
+        )
+        print(dataset.name)
+    else:    
+        X, y = datasets.get_dataset(id)
+        categorical_indicator = [False for _ in range(X.shape[1])]
+        print(id)
     print(X, y)
     num_features = [i for i, x in enumerate(categorical_indicator) if x == False]
     cat_features = [i for i, x in enumerate(categorical_indicator) if x == True]
@@ -40,7 +45,7 @@ def main(args):
 
     PrototypeSingleton.getInstance().setPipeline(args.pipeline)
 
-    X, y = load_dataset(scenario['setup']['dataset'])
+    X, y = load_dataset(config['dataset'], config['dataset_kind'])
 
     X_train, X_test, y_train, y_test = train_test_split(
         X,
@@ -50,7 +55,7 @@ def main(args):
         random_state=scenario['control']['seed']
     )
 
-    policy = policies.initiate(scenario['setup']['policy'], config)
+    policy = policies.initiate(config['policy'], config)
     policy.run(X, y)
 
     serializer.serialize_results(scenario, policy, args.result_path, args.pipeline)

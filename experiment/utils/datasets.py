@@ -1,21 +1,22 @@
 from sklearn.datasets import load_breast_cancer, load_iris, load_wine, load_digits, fetch_covtype
+import pandas as pd
+import numpy as np
+import os
 
-def load(name):
+def get_dataset(name):
     loader = {
         'breast': breast_cancer,
         'iris': iris,
         'wine': wine,
         'digits': digits,
-        'covtype': covtype,
+        'covtype': covtype
         #'echr_article_1': echr.binary.get_dataset(article='1', flavors=[echr.Flavor.desc]).load
     }
     if name in loader:
         return loader[name]()
     else:
-        print('Invalid dataset. Possible choices: {}'.format(
-            ', '.join(loader.keys())
-        ))
-        exit(1)  # TODO: Throw exception
+        return load_dataset(name)
+
 
 def breast_cancer():
     data = load_breast_cancer()
@@ -38,3 +39,12 @@ def digits():
 def covtype():
     data = fetch_covtype
     return data.data, data.target
+
+def breast_cancer():
+    data = load_breast_cancer()
+    return data.data, data.target
+
+def load_dataset(name):
+    data = pd.read_csv(os.path.join('datasets', name +'.csv'), header=None)
+    data = data.to_numpy()
+    return data[:, :-1], data[:, -1]
