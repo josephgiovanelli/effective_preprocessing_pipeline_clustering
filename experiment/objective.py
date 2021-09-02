@@ -29,11 +29,15 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         'step': step
     }
 
+    if algorithm == None:
+        algorithm = algo_config[0]
+        algo_config = algo_config[1]
+
     pipeline, operators = pipeline_conf_to_full_pipeline(
         pipeline_config, 
-        ALGORITHM_SPACE.algorithms.get(algo_config[0]) if algorithm == None else ALGORITHM_SPACE.algorithms.get(algorithm), 
+        ALGORITHM_SPACE.algorithms.get(algorithm), 
         config['seed'], 
-        algo_config[1]
+        algo_config
     )
     #print(pipeline)
     history_index = context['history_index'].get(item_hash['config'])

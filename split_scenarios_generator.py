@@ -44,6 +44,7 @@ base = OrderedDict([
     ('setup', {
         'policy': 'iterative',
         'runtime': 400,
+        'budget': 'time',
         'algorithm': 'RandomForest',
         'dataset': 'wine'
     }),
