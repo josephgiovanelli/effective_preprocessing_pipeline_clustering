@@ -139,7 +139,7 @@ with tqdm(total=total_runtime) as pbar:
                 with open(os.path.join(RESULT_PATH, '{}_stderr.txt'.format(base_scenario + "_" + str(i))),
                             "a") as log_err:
                     try:
-                        process = subprocess.Popen(cmd, shell=True, stdout=log_out, stderr=log_err)
+                        process = subprocess.call(cmd, shell=True, stdout=log_out, stderr=log_err)
                     except:
                         kill(process.pid)
                         print("\n\n" + base_scenario + " didn't finished\n\n")
