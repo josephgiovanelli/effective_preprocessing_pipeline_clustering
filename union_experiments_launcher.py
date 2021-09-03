@@ -5,6 +5,7 @@ import yaml
 import subprocess
 import datetime
 import argparse
+import time
 
 from six import iteritems
 from prettytable import PrettyTable
@@ -139,7 +140,9 @@ with tqdm(total=total_runtime) as pbar:
                 with open(os.path.join(RESULT_PATH, '{}_stderr.txt'.format(base_scenario + "_" + str(i))),
                             "a") as log_err:
                     try:
+                        start_time = time.time()
                         process = subprocess.call(cmd, shell=True, stdout=log_out, stderr=log_err)
+                        print("--- %s seconds ---" % (time.time() - start_time))
                     except:
                         kill(process.pid)
                         print("\n\n" + base_scenario + " didn't finished\n\n")
