@@ -46,27 +46,14 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
 
     start = time.time()
     try:
-        """
-        scores = cross_validate(pipeline, 
-                X,
-                y,
-                scoring = ["balanced_accuracy"],
-                cv=10,
-                n_jobs=-1,
-                return_estimator=False,
-                return_train_score=False,
-                verbose=0)
-        score = np.mean(scores['test_balanced_accuracy']) // 0.0001 / 10000
-        std = np.std(scores['test_balanced_accuracy']) // 0.0001 / 10000
-        """
         result = pipeline.fit_predict(X, None)
         if config['metric'] == 'SIL':
-            score = silhouette_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result, metric='euclidean')
+            score = silhouette_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result)
         elif config['metric'] == 'CH':
             score = calinski_harabasz_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result)
         elif config['metric'] == 'DBI':
-            score = davies_bouldin_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result)
-        ami = metrics.adjusted_mutual_info_score(y, result) // 0.0001 / 10000
+            score = -1 * davies_bouldin_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result)
+        ami = metrics.adjusted_mutual_info_score(y, result)
         status = STATUS_OK
     except Exception as e:
         score = 0.
