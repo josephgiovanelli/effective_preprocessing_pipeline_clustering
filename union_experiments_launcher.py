@@ -134,7 +134,7 @@ with tqdm(total=total_runtime) as pbar:
                 os.path.join(SCENARIO_PATH, info['path']),
                 GLOBAL_SEED,
                 pipeline,
-                "./results/")
+                RESULT_PATH)
             with open(os.path.join(RESULT_PATH, '{}_stdout.txt'.format(base_scenario + "_" + str(i))),
                         "a") as log_out:
                 with open(os.path.join(RESULT_PATH, '{}_stderr.txt'.format(base_scenario + "_" + str(i))),
