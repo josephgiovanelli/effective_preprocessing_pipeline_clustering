@@ -16,9 +16,9 @@ class Policy(object):
             'history_hash': [],
             'history_index': {},
             'history': [],
-            'max_history_score': 0.,
+            'max_history_score': 0. if config['metric'] != 'DBI' else float('-inf'),
             'max_history_step': 'baseline',
-            'max_history_score_ami': 0.,
+            'max_history_score_ami': 0. if config['metric'] != 'DBI' else float('-inf'),
             'best_config': {},
         }
 
