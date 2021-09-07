@@ -42,7 +42,7 @@ base = OrderedDict([
     ('title', 'AutoML on statlog with Union policy'),
     ('setup', {
         'policy': 'union',
-        'runtime': 60,
+        'runtime': 30,
         'budget': 'iterations',
         'dataset': 'statlog',
         'dataset_kind': 'uci',

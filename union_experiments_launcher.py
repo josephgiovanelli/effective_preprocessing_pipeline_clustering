@@ -157,12 +157,12 @@ with tqdm(total=total_runtime) as pbar:
                     accuracy = data['context']['best_config']['score'] // 0.0001 / 100
                     results.append(accuracy)
             except:
-                accuracy = 0
+                accuracy = float('-inf')
                 results.append(accuracy)
             print(results)
 
         try:
-            max_i = 0
+            max_i = float('-inf')
             for i in range(1, len(pipelines)):
                 if results[i] > results[max_i]:
                     max_i = i
