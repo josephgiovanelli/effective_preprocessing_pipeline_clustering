@@ -11,13 +11,16 @@ metrics = ['SIL', 'CH', 'DBI']
 datasets = ['avila', 'isolet', 'pendigits', 'postures', 'statlog']
 
 
-def load_results(input_path):
+def load_results(input_path, only_best):
     results = pd.DataFrame(columns=['dataset', 'metric', 'pipeline', 'algorithm', 'best_config', 'num_iterations', 'best_iteration', 'score', 'ami'])
     for dataset in datasets:
         for metric in metrics:
             for index in [0, 1]:
                 try:
-                    with open(os.path.join(input_path, dataset + '_' + metric + '_' + str(index) + '.json')) as json_file:
+                    success = True
+                    best_suffix = 'best_pipeline_' if only_best else ''
+                    file_name =  dataset + '_' + metric + '_' + best_suffix + str(index) + '.json'
+                    with open(os.path.join(input_path, file_name)) as json_file:
                         data = json.load(json_file)
                         score = data['context']['best_config']['score']
                         ami = data['context']['best_config']['ami']
@@ -28,6 +31,7 @@ def load_results(input_path):
                         num_iterations = data['context']['iteration'] + 1
                         best_iteration = data['context']['best_config']['iteration'] + 1
                 except:
+                    success = False
                     score = 0
                     ami = 0
                     best_config = ''
@@ -36,19 +40,21 @@ def load_results(input_path):
                     prototype = ''
                     num_iterations = 0
                     best_iteration = 0
-                results = results.append(pd.DataFrame({
-                    'dataset': [dataset], 
-                    'metric': [metric], 
-                    'pipeline': [prototype], 
-                    'algorithm': [algorithm], 
-                    'best_config': [best_config], 
-                    'num_iterations': [num_iterations], 
-                    'best_iteration': [best_iteration], 
-                    'score': [score], 
-                    'ami': [ami]
-                }), ignore_index=True)
+
+                if not(only_best) or success:
+                    results = results.append(pd.DataFrame({
+                        'dataset': [dataset], 
+                        'metric': [metric], 
+                        'pipeline': [prototype], 
+                        'algorithm': [algorithm], 
+                        'best_config': [best_config], 
+                        'num_iterations': [num_iterations], 
+                        'best_iteration': [best_iteration], 
+                        'score': [score], 
+                        'ami': [ami]
+                    }), ignore_index=True)
 
     return results
 
-def save_results(results, output_path):
-    results.to_csv(os.path.join(output_path, 'union_results.csv'), index=False)
+def save_results(results, output_path, only_best):
+    results.to_csv(os.path.join(output_path, 'union_results' + ('_only_best' if only_best else '') + '.csv'), index=False)
