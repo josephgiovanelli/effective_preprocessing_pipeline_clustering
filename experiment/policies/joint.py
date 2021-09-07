@@ -17,7 +17,7 @@ class Joint(Policy):
         algorithm = self.config['algorithm']
         space = {
             'pipeline': self.PIPELINE_SPACE,
-            'algorithm': ALGORITHM_SPACE.get_domain_space(algorithm),
+            'algorithm': ALGORITHM_SPACE.get_domain_space(algorithm, self.max_k),
         }
         obj_pl = functools.partial(objective_joint,
                 algorithm=self.config['algorithm'],

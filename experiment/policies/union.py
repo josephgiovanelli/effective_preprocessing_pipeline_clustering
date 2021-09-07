@@ -16,7 +16,7 @@ class Union(Policy):
         trials = Trials()
         space = {
             'pipeline': self.PIPELINE_SPACE,
-            'algorithm': ALGORITHM_SPACE.get_domain_space("union"),
+            'algorithm': ALGORITHM_SPACE.get_domain_space("union", self.max_k),
         }
         obj_pl = functools.partial(objective_union,
                 X=X,

@@ -16,11 +16,15 @@ class Policy(object):
             'history_hash': [],
             'history_index': {},
             'history': [],
-            'max_history_score': 0. if config['metric'] != 'DBI' else float('-inf'),
+            'max_history_score': float('-inf'),
             'max_history_step': 'baseline',
-            'max_history_score_ami': 0. if config['metric'] != 'DBI' else float('-inf'),
+            'max_history_score_ami': float('-inf'),
             'best_config': {},
         }
+        self.max_k = 1043 if self.config['dataset'] == "avila" else (
+            780 if self.config['dataset'] == "isolet" else (
+                1100 if self.config['dataset'] == "pendigits" else (
+                    781 if self.config['dataset'] == "postures" else 644)))
 
     def __compute_baseline(self, X, y):
         baseline_score, baseline_score_std = get_baseline_score(

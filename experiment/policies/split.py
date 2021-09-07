@@ -49,7 +49,7 @@ class Split(Policy):
                     context=self.context,
                     config=self.config)
             fmin(fn=obj_algo, 
-                space=ALGORITHM_SPACE.get_domain_space(self.config['algorithm']), 
+                space=ALGORITHM_SPACE.get_domain_space(self.config['algorithm'], self.max_k), 
                 algo=tpe.suggest, 
                 max_evals=None if self.config['budget'] == 'time' else (self.config['runtime'] - self.config['step_pipeline']),
                 max_time=(self.config['runtime'] - self.config['step_pipeline']) if self.config['budget'] == 'time' else None,

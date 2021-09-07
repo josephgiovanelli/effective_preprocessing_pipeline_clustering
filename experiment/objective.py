@@ -56,8 +56,8 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         ami = metrics.adjusted_mutual_info_score(y, result)
         status = STATUS_OK
     except Exception as e:
-        score = 0. if config['metric'] != 'DBI' else float('-inf')
-        ami = 0. if config['metric'] != 'DBI' else float('-inf')
+        score = float('-inf')
+        ami = float('-inf')
         status = STATUS_FAIL
         print(e)
     stop = time.time()

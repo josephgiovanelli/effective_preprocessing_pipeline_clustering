@@ -58,8 +58,8 @@ parameter_grid = {
 }
 
 
-def get_domain_space(algorithm_name):
+def get_domain_space(algorithm_name, max_k=200):
     if algorithm_name in parameter_grid.keys():
-        return generate_domain_space(parameter_grid.get(algorithm_name))
+        return generate_domain_space(parameter_grid.get(algorithm_name, max_k))
     else:
-        return generate_union_domain_space(parameter_grid)
+        return generate_union_domain_space(parameter_grid, max_k)

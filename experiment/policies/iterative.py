@@ -54,7 +54,7 @@ class Iterative(Policy):
                     context=self.context,
                     config=self.config)
             fmin(fn=obj_algo, 
-                space=ALGORITHM_SPACE.get_domain_space(self.config['algorithm']), 
+                space=ALGORITHM_SPACE.get_domain_space(self.config['algorithm'], self.max_k), 
                 algo=tpe.suggest, 
                 max_evals=None if self.config['budget'] == 'time' else self.config['step_algorithm'] ,
                 max_time=self.config['step_algorithm'] if self.config['budget'] == 'time' else None,
