@@ -162,7 +162,7 @@ with tqdm(total=total_runtime) as pbar:
             print(results)
 
         try:
-            max_i = float('-inf')
+            max_i = 0
             for i in range(1, len(pipelines)):
                 if results[i] > results[max_i]:
                     max_i = i
