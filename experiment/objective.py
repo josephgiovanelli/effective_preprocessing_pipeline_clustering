@@ -46,7 +46,9 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
 
     start = time.time()
     try:
-        result = pipeline.fit_predict(X, None)
+        #result = pipeline.fit_predict(X, None)
+        trained_pipeline = pipeline.fit(X, y)
+        result = trained_pipeline.predict(X)
         if config['metric'] == 'SIL':
             score = silhouette_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result)
         elif config['metric'] == 'CH':
