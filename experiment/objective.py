@@ -47,19 +47,52 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
     start = time.time()
     try:
         #result = pipeline.fit_predict(X, None)
-        trained_pipeline = pipeline.fit(X, y)
-        result = trained_pipeline.predict(X)
-        if config['metric'] == 'SIL':
-            score = silhouette_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result)
-        elif config['metric'] == 'CH':
-            score = calinski_harabasz_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result)
-        elif config['metric'] == 'DBI':
-            score = -1 * davies_bouldin_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result)
-        ami = metrics.adjusted_mutual_info_score(y, result)
+        
+        #trained_pipeline = pipeline.fit(X, y)
+        #result = trained_pipeline.predict(X)
+        #if config['metric'] == 'SIL':
+        #    score = silhouette_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result)
+        #elif config['metric'] == 'CH':
+        #    score = calinski_harabasz_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result)
+        #elif config['metric'] == 'DBI':
+        #    score = -1 * davies_bouldin_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result)
+        #ami = metrics.adjusted_mutual_info_score(y, result)
+        scores = cross_validate(pipeline, 
+                        X,
+                        y,
+                        scoring=["precision_weighted", "recall_weighted", "f1_weighted", "accuracy", "balanced_accuracy", "adjusted_mutual_info_score"],
+                        cv=10,
+                        n_jobs=-1,
+                        return_estimator=False,
+                        return_train_score=True,
+                        verbose=0)
+        #print(scores)
+        train_precision_weighted = np.mean(scores['train_precision_weighted']) // 0.0001 / 10000
+        test_precision_weighted = np.mean(scores['test_precision_weighted']) // 0.0001 / 10000
+        train_recall_weighted = np.mean(scores['train_recall_weighted']) // 0.0001 / 10000
+        test_recall_weighted = np.mean(scores['test_recall_weighted']) // 0.0001 / 10000
+        train_f1_weighted = np.mean(scores['train_f1_weighted']) // 0.0001 / 10000
+        test_f1_weighted = np.mean(scores['test_f1_weighted']) // 0.0001 / 10000
+        train_accuracy = np.mean(scores['train_accuracy']) // 0.0001 / 10000
+        test_accuracy = np.mean(scores['test_accuracy']) // 0.0001 / 10000
+        train_adjusted_mutual_info_score = np.mean(scores['train_adjusted_mutual_info_score']) // 0.0001 / 10000
+        test_adjusted_mutual_info_score = np.mean(scores['test_adjusted_mutual_info_score']) // 0.0001 / 10000
+        train_balanced_accuracy = np.mean(scores['train_balanced_accuracy']) // 0.0001 / 10000
+        score = np.mean(scores['test_balanced_accuracy']) // 0.0001 / 10000
         status = STATUS_OK
     except Exception as e:
+        train_precision_weighted = float('-inf')
+        test_precision_weighted = float('-inf')
+        train_recall_weighted = float('-inf')
+        test_recall_weighted = float('-inf')
+        train_f1_weighted = float('-inf')
+        test_f1_weighted = float('-inf')
+        train_accuracy = float('-inf')
+        test_accuracy = float('-inf')
+        train_adjusted_mutual_info_score = float('-inf')
+        test_adjusted_mutual_info_score = float('-inf')
+        train_balanced_accuracy = float('-inf')
         score = float('-inf')
-        ami = float('-inf')
         status = STATUS_FAIL
         print(e)
     stop = time.time()
@@ -71,23 +104,63 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         'duration': stop - start,
         'loss': 1 - score, 
         'status': status, 
+        'train_precision_weighted': train_precision_weighted, 
+        'test_precision_weighted': test_precision_weighted, 
+        'train_recall_weighted': train_recall_weighted, 
+        'test_recall_weighted': test_recall_weighted, 
+        'train_f1_weighted': train_f1_weighted, 
+        'test_f1_weighted': test_f1_weighted, 
+        'train_accuracy': train_accuracy, 
+        'test_accuracy': test_accuracy, 
+        'train_adjusted_mutual_info_score': train_adjusted_mutual_info_score, 
+        'test_adjusted_mutual_info_score': test_adjusted_mutual_info_score, 
+        'train_balanced_accuracy': train_balanced_accuracy, 
         'score': score,
-        'ami': ami,
         'iteration': iteration_number,
         'config_hash': item_hash,
+        'max_history_train_precision_weighted' : context['max_history_train_precision_weighted'],
+        'max_history_test_precision_weighted' : context['max_history_test_precision_weighted'],
+        'max_history_train_recall_weighted' : context['max_history_train_recall_weighted'],
+        'max_history_test_recall_weighted' : context['max_history_test_recall_weighted'],
+        'max_history_train_f1_weighted' : context['max_history_train_f1_weighted'],
+        'max_history_test_f1_weighted' : context['max_history_test_f1_weighted'],
+        'max_history_train_accuracy' : context['max_history_train_accuracy'],
+        'max_history_test_accuracy' : context['max_history_test_accuracy'],
+        'max_history_train_adjusted_mutual_info_score' : context['max_history_train_adjusted_mutual_info_score'],
+        'max_history_test_adjusted_mutual_info_score' : context['max_history_test_adjusted_mutual_info_score'],
+        'max_history_train_balanced_accuracy' : context['max_history_train_balanced_accuracy'],
         'max_history_score': context['max_history_score'],
         'max_history_step': context['max_history_step'],
-        'max_history_score_ami': context['max_history_score_ami'],
         'step': step
     })
 
     if context['max_history_score'] < score:
+        item['max_history_train_precision_weighted'] = train_precision_weighted
+        item['max_history_test_precision_weighted'] = test_precision_weighted
+        item['max_history_train_recall_weighted'] = train_recall_weighted
+        item['max_history_test_recall_weighted'] = test_recall_weighted
+        item['max_history_train_f1_weighted'] = train_f1_weighted
+        item['max_history_test_f1_weighted'] = test_f1_weighted
+        item['max_history_train_accuracy'] = train_accuracy
+        item['max_history_test_accuracy'] = test_accuracy
+        item['max_history_train_adjusted_mutual_info_score'] = train_adjusted_mutual_info_score
+        item['max_history_test_adjusted_mutual_info_score'] = test_adjusted_mutual_info_score
+        item['max_history_train_balanced_accuracy'] = train_balanced_accuracy
         item['max_history_score'] = score
         item['max_history_step'] = step
-        item['max_history_score_ami'] = ami
+        context['max_history_train_precision_weighted'] = train_precision_weighted
+        context['max_history_test_precision_weighted'] = test_precision_weighted
+        context['max_history_train_recall_weighted'] = train_recall_weighted
+        context['max_history_test_recall_weighted'] = test_recall_weighted
+        context['max_history_train_f1_weighted'] = train_f1_weighted
+        context['max_history_test_f1_weighted'] = test_f1_weighted
+        context['max_history_train_accuracy'] = train_accuracy
+        context['max_history_test_accuracy'] = test_accuracy
+        context['max_history_train_adjusted_mutual_info_score'] = train_adjusted_mutual_info_score
+        context['max_history_test_adjusted_mutual_info_score'] = test_adjusted_mutual_info_score
+        context['max_history_train_balanced_accuracy'] = train_balanced_accuracy
         context['max_history_score'] = score
         context['max_history_step'] = step
-        context['max_history_score_ami'] = ami
         context['best_config'] = item
 
 
@@ -100,10 +173,10 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
 
     print('Best score: {} ({}) [{}] | Score: {} ({}) [{}]'.format(
         item['max_history_score'],
-        item['max_history_score_ami'],
+        item['max_history_test_adjusted_mutual_info_score'],
         item['max_history_step'][0].upper(),
         item['score'],
-        item['ami'],
+        item['test_adjusted_mutual_info_score'],
         item['step'][0].upper(),
         )
     )

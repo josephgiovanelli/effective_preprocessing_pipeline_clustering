@@ -17,7 +17,7 @@ SCENARIO_PATH = './scenarios/'
 SCENARIO_PATH = create_directory(SCENARIO_PATH, "union_mode")
 
 policies = ['union']
-metrics = ['SIL', 'CH', 'DBI']
+metrics = ['SIL']
 datasets = ['avila', 'isolet', 'pendigits', 'postures', 'statlog']
 
 policies_config = {
