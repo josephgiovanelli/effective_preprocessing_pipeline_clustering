@@ -18,7 +18,7 @@ SCENARIO_PATH = create_directory(SCENARIO_PATH, "union_mode")
 
 policies = ['union']
 metrics = ['SIL', 'CH', 'DBI']
-datasets = ['avila', 'isolet', 'pendigits', 'postures', 'statlog']
+datasets = ['avila', 'isolet', 'pendigits', 'postures', 'statlog', 'synthetic_data']
 
 policies_config = {
     'iterative': {
