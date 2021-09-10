@@ -81,22 +81,24 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         score = np.mean(scores['test_balanced_accuracy']) // 0.0001 / 10000
         status = STATUS_OK
     except Exception as e:
-        train_precision_weighted = float('-inf')
-        test_precision_weighted = float('-inf')
-        train_recall_weighted = float('-inf')
-        test_recall_weighted = float('-inf')
-        train_f1_weighted = float('-inf')
-        test_f1_weighted = float('-inf')
-        train_accuracy = float('-inf')
-        test_accuracy = float('-inf')
-        train_adjusted_mutual_info_score = float('-inf')
-        test_adjusted_mutual_info_score = float('-inf')
-        train_balanced_accuracy = float('-inf')
-        score = float('-inf')
+        train_precision_weighted = 0
+        test_precision_weighted = 0
+        train_recall_weighted = 0
+        test_recall_weighted = 0
+        train_f1_weighted = 0
+        test_f1_weighted = 0
+        train_accuracy = 0
+        test_accuracy = 0
+        train_adjusted_mutual_info_score = 0
+        test_adjusted_mutual_info_score = 0
+        train_balanced_accuracy = 0
+        score = 0
         status = STATUS_FAIL
         print(e)
     stop = time.time()
 
+    if score == float('-inf') or score == np.nan:
+        score = 0
     iteration_number = len(context['history'])
     item.update({
         'start_time': start,
