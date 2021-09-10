@@ -18,14 +18,14 @@ class PrototypeSingleton:
    __instance = None
 
    POOL = {
-       "impute": [None, SimpleImputer(), IterativeImputer()],
-       "encode": [OneHotEncoder()],
+       "impute": [SimpleImputer()],
+       #"encode": [OneHotEncoder()],
        #"encode": [None, OneHotEncoder(), OrdinalEncoder()],
        #"rebalance": [None, NearMiss(), CondensedNearestNeighbour(), SMOTE()],
-       "normalize": [None, StandardScaler(), PowerTransformer(), MinMaxScaler(), RobustScaler()],
-       "discretize": [None, KBinsDiscretizer(), Binarizer()],
+       #"normalize": [None, StandardScaler(), PowerTransformer(), MinMaxScaler(), RobustScaler()],
+       #"discretize": [None, KBinsDiscretizer(), Binarizer()],
        #"features": [None, PCA(), SelectKBest(), FeatureUnion([("pca", PCA()), ("selectkbest", SelectKBest())])]
-       "features": [None, PCA()]
+       #"features": [None, PCA()]
    }
 
    PROTOTYPE = {}

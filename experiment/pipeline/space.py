@@ -1,7 +1,7 @@
 
 def params_SimpleImputer():
     return {
-        'strategy': ['most_frequent', 'constant']
+        'strategy': ['constant']
     }
 
 def params_IterativeImputer():
