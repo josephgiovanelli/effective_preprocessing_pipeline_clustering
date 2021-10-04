@@ -17,6 +17,7 @@ from sklearn.pipeline import FeatureUnion
 
 from experiment.pipeline.PrototypeSingleton import PrototypeSingleton, MyOutlierDetector
 
+from fsfc.generic import GenericSPEC
 
 def get_baseline():
     baseline = {}

@@ -83,3 +83,8 @@ def params_MyOutlierDetector():
     return {
         'n_neighbors':[2, 4, 8, 16, 32]
     }
+
+def params_GenericSPEC():
+    return {
+        'k':[1, 2, 3, 4, 5, 6]
+    }

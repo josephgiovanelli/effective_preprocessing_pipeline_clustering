@@ -12,6 +12,7 @@ from sklearn.neighbors import LocalOutlierFactor
 from .utils import generate_domain_space
 
 from experiment.pipeline.outlier_detectors import MyOutlierDetector
+from fsfc.generic import GenericSPEC
 import pandas as pd
 import numpy as np
 
@@ -20,15 +21,15 @@ class PrototypeSingleton:
    __instance = None
 
    POOL = {
-       "impute": [None, SimpleImputer(), IterativeImputer()],
-       "encode": [OneHotEncoder()],
+       #"impute": [None, SimpleImputer(), IterativeImputer()],
+       #"encode": [OneHotEncoder()],
        #"encode": [None, OneHotEncoder(), OrdinalEncoder()],
        #"rebalance": [None, NearMiss(), CondensedNearestNeighbour(), SMOTE()],
        "normalize": [None, StandardScaler(), PowerTransformer(), MinMaxScaler(), RobustScaler()],
-       "discretize": [None, KBinsDiscretizer(), Binarizer()],
+       #"discretize": [None, KBinsDiscretizer(), Binarizer()],
        "outlier": [None, MyOutlierDetector()],
        #"features": [None, PCA(), SelectKBest(), FeatureUnion([("pca", PCA()), ("selectkbest", SelectKBest())])]
-       "features": [None, PCA()]
+       "features": [None, GenericSPEC(k=3)]
    }
 
    PROTOTYPE = {}
