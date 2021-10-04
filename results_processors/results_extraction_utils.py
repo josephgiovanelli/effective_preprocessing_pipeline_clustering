@@ -8,7 +8,7 @@ from os.path import isfile, join
 from matplotlib import gridspec
 
 metrics = ['SIL', 'CH', 'DBI']
-datasets = ['avila', 'isolet', 'pendigits', 'postures', 'statlog']
+datasets = ['synthetic_data']
 
 
 def load_results(input_path, only_best):

@@ -7,9 +7,11 @@ from sklearn.impute._iterative import IterativeImputer
 from sklearn.pipeline import FeatureUnion
 from sklearn.preprocessing import RobustScaler, StandardScaler, MinMaxScaler, PowerTransformer, KBinsDiscretizer, \
     Binarizer, OneHotEncoder, OrdinalEncoder
+from sklearn.neighbors import LocalOutlierFactor
 
 from .utils import generate_domain_space
 
+from experiment.pipeline.outlier_detectors import MyOutlierDetector
 import pandas as pd
 import numpy as np
 
@@ -24,6 +26,7 @@ class PrototypeSingleton:
        #"rebalance": [None, NearMiss(), CondensedNearestNeighbour(), SMOTE()],
        "normalize": [None, StandardScaler(), PowerTransformer(), MinMaxScaler(), RobustScaler()],
        "discretize": [None, KBinsDiscretizer(), Binarizer()],
+       "outlier": [None, MyOutlierDetector()],
        #"features": [None, PCA(), SelectKBest(), FeatureUnion([("pca", PCA()), ("selectkbest", SelectKBest())])]
        "features": [None, PCA()]
    }

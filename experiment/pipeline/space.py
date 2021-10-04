@@ -78,3 +78,8 @@ def params_FeatureUnion():
         'pca__n_components':[1, 2, 3, 4],
         'selectkbest__k':[1, 2, 3, 4]
     }
+
+def params_MyOutlierDetector():
+    return {
+        'n_neighbors':[2, 4, 8, 16, 32]
+    }
