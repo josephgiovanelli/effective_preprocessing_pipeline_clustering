@@ -46,13 +46,21 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
 
     start = time.time()
     try:
-        result = pipeline.fit_predict(X, None)
+        result = pipeline.fit_predict(X, y)
+        if len(pipeline.steps) > 1:
+            if pipeline.steps[-2][0] == 'outlier':
+                Xt, y = pipeline[:-1].fit_resample(X, y)
+            else:
+                Xt = pipeline[:-1].fit_transform(X, None)
+        else:
+            Xt = X.copy()
+        print(result)
         if config['metric'] == 'SIL':
-            score = silhouette_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result)
+            score = silhouette_score(Xt, result)
         elif config['metric'] == 'CH':
-            score = calinski_harabasz_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result)
+            score = calinski_harabasz_score(Xt, result)
         elif config['metric'] == 'DBI':
-            score = -1 * davies_bouldin_score(pipeline[0:len(pipeline.steps) - 1].fit_transform(X, None), result)
+            score = -1 * davies_bouldin_score(Xt, result)
         ami = metrics.adjusted_mutual_info_score(y, result)
         status = STATUS_OK
     except Exception as e:

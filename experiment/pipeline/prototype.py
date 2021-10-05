@@ -9,13 +9,14 @@ from sklearn.pipeline import FeatureUnion
 from sklearn.preprocessing import RobustScaler, StandardScaler, MinMaxScaler, PowerTransformer, KBinsDiscretizer, \
     Binarizer, OneHotEncoder, OrdinalEncoder, FunctionTransformer
 
-from sklearn.pipeline import Pipeline
+from imblearn.pipeline import Pipeline
 
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import SelectKBest
 from sklearn.pipeline import FeatureUnion
 
-from experiment.pipeline.PrototypeSingleton import PrototypeSingleton, MyOutlierDetector
+from experiment.pipeline.PrototypeSingleton import PrototypeSingleton
+from experiment.pipeline.outlier_detectors import MyOutlierDetector
 
 from fsfc.generic import GenericSPEC
 
@@ -81,6 +82,12 @@ def pipeline_conf_to_full_pipeline(args, algorithm, seed, algo_config):
                             ('cat', Pipeline(steps=[('identity', FunctionTransformer())]),
                              categorical_features)])
                     PrototypeSingleton.getInstance().applyDiscretization()
+                elif transformation_param == 'features':
+                    operator = globals()[operator_param](**params)
+                    X = PrototypeSingleton.getInstance().getX()
+                    operator.fit(X)
+                    indeces = operator.get_support()
+                    PrototypeSingleton.getInstance().applyFeaturesEngineering(indeces)
                 else:
                     operator = globals()[operator_param](**params)
                 operators.append((part, operator))

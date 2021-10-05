@@ -12,7 +12,8 @@ class MyOutlierDetector(BaseSampler):
 
     def __init__(self, *, n_neighbors = 2, accept_sparse=True, kw_args=None, validate=True):
         super().__init__()
-        self.estimator = LocalOutlierFactor(n_neighbors)
+        self.n_neighbors = n_neighbors
+        self.estimator = LocalOutlierFactor(self.n_neighbors)
         self.accept_sparse = accept_sparse
         self.kw_args = kw_args
         self.validate = validate

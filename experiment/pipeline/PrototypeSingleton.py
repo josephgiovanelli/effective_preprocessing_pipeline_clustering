@@ -103,6 +103,22 @@ class PrototypeSingleton:
        self.current_numerical_features = list(range(0, len_numerical_features))
        self.current_categorical_features = list(range(len_numerical_features, new_features))
 
+   def applyFeaturesEngineering(self, indeces):
+        #print(indeces)
+        #self.current_numerical_features = [i for i in self.current_numerical_features if indeces[i] == True]
+        #self.current_categorical_features = [i for i in self.current_categorical_features if indeces[i] == True]
+        new_i = 0
+        new_numerical_features, new_categorical_features = [], []
+        for i in range(len(indeces)):
+            if indeces[i] == True:
+                if i in self.current_numerical_features:
+                    new_numerical_features += [new_i]
+                else: #if i in self.current_categorical_features:
+                    new_categorical_features += [new_i]
+                new_i += 1
+        self.current_numerical_features = new_numerical_features
+        self.current_categorical_features = new_categorical_features
+
    def getFeatures(self):
        return self.current_numerical_features, self.current_categorical_features
 
@@ -114,3 +130,6 @@ class PrototypeSingleton:
 
    def getParts(self):
        return self.parts
+
+   def getX(self):
+       return self.X
