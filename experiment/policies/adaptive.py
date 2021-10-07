@@ -139,7 +139,8 @@ class Adaptive(Policy):
                     max_time=self.config['step_algorithm'] if self.config['budget'] == 'time' else None,
                     trials=trials_algo,
                     show_progressbar=False,
-                    verbose=0
+                    verbose=0,
+                    rstate=self.config['seed']
                 )
             except Exception as e:
                 pass

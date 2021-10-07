@@ -33,7 +33,8 @@ class Joint(Policy):
             max_time=self.config['runtime'] if self.config['budget'] == 'time' else None,     
             trials=trials,
             show_progressbar=False,
-            verbose=0
+            verbose=0,
+            rstate=self.config['seed']
         )
 
         best_config = self.context['best_config']

@@ -55,7 +55,8 @@ class Split(Policy):
                 max_time=(self.config['runtime'] - self.config['step_pipeline']) if self.config['budget'] == 'time' else None,
                 trials=trials_algo,
                 show_progressbar=False,
-                verbose=0
+                verbose=0,
+                rstate=self.config['seed']
             )
 
         best_config = self.context['best_config']
