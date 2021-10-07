@@ -7,6 +7,7 @@ import functools
 
 from hyperopt import tpe, fmin, Trials
 
+import numpy as np
 
 class Split(Policy):
 
@@ -56,7 +57,7 @@ class Split(Policy):
                 trials=trials_algo,
                 show_progressbar=False,
                 verbose=0,
-                rstate=self.config['seed']
+                rstate=np.random.RandomState(self.config['seed'])
             )
 
         best_config = self.context['best_config']

@@ -7,6 +7,8 @@ import functools
 from hyperopt import tpe, fmin, Trials
 import hyperopt.pyll.stochastic
 
+import numpy as np
+
 class Joint(Policy):
 
     def run(self, X, y):
@@ -34,7 +36,7 @@ class Joint(Policy):
             trials=trials,
             show_progressbar=False,
             verbose=0,
-            rstate=self.config['seed']
+            rstate=np.random.RandomState(self.config['seed'])
         )
 
         best_config = self.context['best_config']

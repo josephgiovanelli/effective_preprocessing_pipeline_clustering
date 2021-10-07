@@ -6,6 +6,7 @@ import functools
 
 from hyperopt import tpe, fmin, Trials
 
+import numpy as np
 
 class Iterative(Policy):
 
@@ -61,7 +62,7 @@ class Iterative(Policy):
                 trials=trials_algo,
                 show_progressbar=False,
                 verbose=0,
-                rstate=self.config['seed']
+                rstate=np.random.RandomState(self.config['seed'])
             )
             best_config = self.context['best_config']
             current_pipeline_configuration = best_config['pipeline']

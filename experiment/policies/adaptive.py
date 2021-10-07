@@ -8,6 +8,7 @@ import json
 
 from hyperopt import tpe, fmin, Trials
 
+import numpy as np
 
 class Adaptive(Policy):
 
@@ -140,7 +141,7 @@ class Adaptive(Policy):
                     trials=trials_algo,
                     show_progressbar=False,
                     verbose=0,
-                    rstate=self.config['seed']
+                    rstate=np.random.RandomState(self.config['seed'])
                 )
             except Exception as e:
                 pass
