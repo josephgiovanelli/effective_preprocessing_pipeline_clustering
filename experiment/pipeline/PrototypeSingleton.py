@@ -25,7 +25,7 @@ class PrototypeSingleton:
        #"encode": [OneHotEncoder()],
        #"encode": [None, OneHotEncoder(), OrdinalEncoder()],
        #"rebalance": [None, NearMiss(), CondensedNearestNeighbour(), SMOTE()],
-       "normalize": [None, StandardScaler(), PowerTransformer(), MinMaxScaler(), RobustScaler()],
+       "normalize": [StandardScaler(), MinMaxScaler()],
        #"discretize": [None, KBinsDiscretizer(), Binarizer()],
        "outlier": [None, MyOutlierDetector()],
        #"features": [None, PCA(), SelectKBest(), FeatureUnion([("pca", PCA()), ("selectkbest", SelectKBest())])]

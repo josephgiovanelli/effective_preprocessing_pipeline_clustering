@@ -10,6 +10,8 @@ algorithms = {
     'MiniBatchKMeans': MiniBatchKMeans,
     'KMedoids': KMedoids,
     'GaussianMixture': GaussianMixture,
+
+
     #'MeanShift': MeanShift,
     #'AgglomerativeClustering': AgglomerativeClustering,
     #'SpectralClustering': SpectralClustering,
@@ -50,6 +52,8 @@ parameter_grid = {
     'MiniBatchKMeans': grid_mini_batch_k_means,
     'KMedoids': grid_k_medoids,
     'GaussianMixture': grid_gaussian_mixture,
+
+    
     #'MeanShift': grid_mean_shift,
     #'AgglomerativeClustering': grid_agglomerative_clustering,
     #'SpectralClustering': grid_spectral_clustering,
