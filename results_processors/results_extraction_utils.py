@@ -58,3 +58,25 @@ def load_results(input_path, only_best):
 
 def save_results(results, output_path, only_best):
     results.to_csv(os.path.join(output_path, 'union_results' + ('_only_best' if only_best else '') + '.csv'), index=False)
+
+def load_just_one_result(input_path, dataset, metric):
+    results = pd.DataFrame(columns=['iteration', 'pipeline', 'algorithm', 'score', 'ami', 'max_history_score', 'max_history_score_ami'])
+    file_name =  dataset + '_' + metric.lower() + '_best_pipeline_0.json'
+    with open(os.path.join(input_path, file_name)) as json_file:
+        data = json.load(json_file)
+        history = data['context']['history']
+        for elem in history:
+            results = results.append(pd.DataFrame({
+                'iteration': [elem['iteration']], 
+                'pipeline': [elem['pipeline']], 
+                'algorithm': [elem['algorithm']], 
+                'score': [elem['score']], 
+                'ami': [elem['ami']],
+                'max_history_score': [elem['max_history_score']], 
+                'max_history_score_ami': [elem['max_history_score_ami']]
+            }), ignore_index=True)
+
+    return results
+
+def save_just_one_result(results, output_path, dataset, metric):
+    results.to_csv(os.path.join(output_path, dataset + '_' + metric + '_results.csv'), index=False)
