@@ -77,7 +77,7 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
     try:
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
-        colors = np.array(['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'grey', 'olive', 'cyan'])
+        colors = np.array(['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'grey', 'olive', 'cyan', 'indigo', 'black'])
         Xt = pd.DataFrame(Xt)
         y_pred = pd.DataFrame(result)
         y = pd.DataFrame(y)
@@ -92,7 +92,7 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         ax.set_xlabel('X Label')
         ax.set_ylabel('Y Label')
         ax.set_zlabel('Z Label')
-        fig.savefig(os.path.join("plots", item_hash['config'] + ".svg"))
+        fig.savefig(os.path.join("plots", item_hash['config'] + ".png"))
         plt.close('all')
         Xt.to_csv(os.path.join("plots", item_hash['config'] + "._Xt.csv"), index=False)
         y_pred.to_csv(os.path.join("plots", item_hash['config'] + "._y_pred.csv"), index=False)
