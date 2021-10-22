@@ -95,9 +95,9 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         ax.set_zlabel('Z Label')
         fig.savefig(os.path.join("plots", str(iteration_number) + ".png"))
         plt.close('all')
-        Xt.to_csv(os.path.join("plots", str(iteration_number) + "_Xt.csv"), index=False)
-        y_pred.to_csv(os.path.join("plots", str(iteration_number) + "_y_pred.csv"), index=False)
-        y.to_csv(os.path.join("plots", str(iteration_number) + "_y.csv"), index=False)
+        Xt.to_csv(os.path.join("plots", str(iteration_number) + "_Xt.csv"), index=False, header=False)
+        y_pred.to_csv(os.path.join("plots", str(iteration_number) + "_y_pred.csv"), index=False, header=False)
+        y.to_csv(os.path.join("plots", str(iteration_number) + "_y.csv"), index=False, header=False)
     except:
         f= open(os.path.join("plots", str(iteration_number) + ".txt"), "a+")
         f.write("An error occured.")
