@@ -59,7 +59,7 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
                 Xt = pipeline[:-1].fit_transform(X, None)
         else:
             Xt = X.copy()
-        print(result)
+        #print(result)
         if config['metric'] == 'SIL':
             score = silhouette_score(Xt, result)
         elif config['metric'] == 'CH':
@@ -74,6 +74,7 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         status = STATUS_FAIL
         print(e)
 
+    iteration_number = len(context['history'])
     try:
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
@@ -92,19 +93,18 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         ax.set_xlabel('X Label')
         ax.set_ylabel('Y Label')
         ax.set_zlabel('Z Label')
-        fig.savefig(os.path.join("plots", item_hash['config'] + ".png"))
+        fig.savefig(os.path.join("plots", iteration_number + ".png"))
         plt.close('all')
-        Xt.to_csv(os.path.join("plots", item_hash['config'] + "._Xt.csv"), index=False)
-        y_pred.to_csv(os.path.join("plots", item_hash['config'] + "._y_pred.csv"), index=False)
-        y.to_csv(os.path.join("plots", item_hash['config'] + "._y.csv"), index=False)
+        Xt.to_csv(os.path.join("plots", iteration_number + "_Xt.csv"), index=False)
+        y_pred.to_csv(os.path.join("plots", iteration_number + "_y_pred.csv"), index=False)
+        y.to_csv(os.path.join("plots", iteration_number + "_y.csv"), index=False)
     except:
-        f= open(os.path.join("plots", item_hash['config'] + ".txt"), "a+")
+        f= open(os.path.join("plots", iteration_number + ".txt"), "a+")
         f.write("An error occured.")
         f.close()
 
     stop = time.time()
 
-    iteration_number = len(context['history'])
     item.update({
         'start_time': start,
         'stop_time': stop,
@@ -130,7 +130,6 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         context['max_history_score_ami'] = ami
         context['best_config'] = item
 
-
     # Update hash index
     context['history_hash'].append(item_hash['config'])
     context['history_index'][item_hash['config']] = iteration_number
@@ -138,7 +137,8 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
 
     context['history'].append(item)
 
-    print('Best score: {} ({}) [{}] | Score: {} ({}) [{}]'.format(
+    print('{}. Best score: {} ({}) [{}] | Score: {} ({}) [{}]'.format(
+        iteration_number,
         item['max_history_score'],
         item['max_history_score_ami'],
         item['max_history_step'][0].upper(),
@@ -147,6 +147,13 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         item['step'][0].upper(),
         )
     )
+
+    with open(os.path.join("plots", iteration_number + ".json"), 'w') as outfile:
+        json.dump(item, outfile, indent=4)
+
+    with open(os.path.join("plots", "context.json"), 'w') as outfile:
+        json.dump(context, outfile, indent=4)
+
     return item
 
 def objective_pipeline(pipeline_config, current_algo_config, algorithm, X, y, context, config):

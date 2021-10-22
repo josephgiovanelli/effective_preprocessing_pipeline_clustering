@@ -27,7 +27,8 @@ def load_dataset(id, kind):
         X, y = datasets.get_dataset(id)
         categorical_indicator = [False for _ in range(X.shape[1])]
         print(id)
-    print(X, y)
+    print(X)
+    print(y)
     num_features = [i for i, x in enumerate(categorical_indicator) if x == False]
     cat_features = [i for i, x in enumerate(categorical_indicator) if x == True]
     print("numeriche: " + str(len(num_features)) + " categoriche: " + str(len(cat_features)))
