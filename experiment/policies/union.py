@@ -1,13 +1,15 @@
+import functools
+import hyperopt.pyll.stochastic
+import numpy as np
+
 from experiment.policies.policy import Policy
 from experiment.algorithm import space as ALGORITHM_SPACE
 from experiment.objective import objective_union
-
-import functools
-
+from functools import partial
 from hyperopt import tpe, fmin, Trials
-import hyperopt.pyll.stochastic
 
-import numpy as np
+from experiment.utils.exhaustive_search import suggest
+
 
 class Union(Policy):
 
@@ -25,12 +27,13 @@ class Union(Policy):
                 y=y,
                 context=self.context,
                 config=self.config)
+
         fmin(
             fn=obj_pl, 
             space=space, 
-            algo=tpe.suggest, 
-            max_evals=None if self.config['budget'] == 'time' else self.config['runtime'],
-            max_time=self.config['runtime'] if self.config['budget'] == 'time' else None,     
+            algo=partial(suggest, nbMaxSucessiveFailures=1000) if self.config['runtime'] == 'inf' else tpe.suggest, 
+            max_evals=np.inf if self.config['runtime'] == 'inf' else (None if self.config['budget'] == 'time' else self.config['runtime']),
+            max_time=None if self.config['runtime'] == 'inf' else (self.config['runtime'] if self.config['budget'] == 'time' else None),     
             trials=trials,
             show_progressbar=False,
             verbose=0,
