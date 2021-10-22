@@ -7,10 +7,9 @@ from experiment.algorithm.utils import generate_domain_space, generate_union_dom
 
 algorithms = {
     'KMeans': KMeans,
-    'MiniBatchKMeans': MiniBatchKMeans,
-    'KMedoids': KMedoids,
-    'GaussianMixture': GaussianMixture,
-
+    #'MiniBatchKMeans': MiniBatchKMeans,
+    #'KMedoids': KMedoids,
+    #'GaussianMixture': GaussianMixture,
 
     #'MeanShift': MeanShift,
     #'AgglomerativeClustering': AgglomerativeClustering,
@@ -49,11 +48,10 @@ grid_agglomerative_clustering = {
 
 parameter_grid = {
     'KMeans': grid_k_means,
-    'MiniBatchKMeans': grid_mini_batch_k_means,
-    'KMedoids': grid_k_medoids,
-    'GaussianMixture': grid_gaussian_mixture,
-
-    
+    #'MiniBatchKMeans': grid_mini_batch_k_means,
+    #'KMedoids': grid_k_medoids,
+    #'GaussianMixture': grid_gaussian_mixture,
+        
     #'MeanShift': grid_mean_shift,
     #'AgglomerativeClustering': grid_agglomerative_clustering,
     #'SpectralClustering': grid_spectral_clustering,

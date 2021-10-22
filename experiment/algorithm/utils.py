@@ -15,7 +15,8 @@ def generate_union_domain_space(prototype, max_k):
         for k, v in prototype[algorithm].items():
             if k == "n_clusters" or k == "n_components" or k == "bandwidth":
                 #v = list(range(2, max_k))
-                v = list(range(2, 20))
+                #v = list(range(2, 20))
+                v = list(range(2, 13))
                 #print(k, v)
             algorithm_config[k] = hp.choice('{}_{}'.format(algorithm, k), v)
         algorithms_space.append((algorithm, algorithm_config))
