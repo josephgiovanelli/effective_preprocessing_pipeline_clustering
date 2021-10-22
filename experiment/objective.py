@@ -148,7 +148,7 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         )
     )
 
-    with open(os.path.join("plots", iteration_number + ".json"), 'w') as outfile:
+    with open(os.path.join("plots", str(iteration_number) + ".json"), 'w') as outfile:
         json.dump(item, outfile, indent=4)
 
     with open(os.path.join("plots", "context.json"), 'w') as outfile:
