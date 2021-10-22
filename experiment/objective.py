@@ -1,11 +1,16 @@
 import hashlib
 import json
 import time
-from multiprocessing import Process, Pipe
 import sys
+import os
 
-from hyperopt import STATUS_OK, STATUS_FAIL
+
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from multiprocessing import Process, Pipe
+from hyperopt import STATUS_OK, STATUS_FAIL
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 from sklearn.model_selection import train_test_split, cross_validate
 from sklearn import metrics
@@ -68,6 +73,35 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         ami = float('-inf')
         status = STATUS_FAIL
         print(e)
+
+    try:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        colors = np.array(['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'grey', 'olive', 'cyan'])
+        Xt = pd.DataFrame(Xt)
+        y_pred = pd.DataFrame(result)
+        y = pd.DataFrame(y)
+        xs = Xt.iloc[:, 0]
+        ys = np.zeros(Xt.shape[0]) if Xt.shape[1] < 2 else Xt.iloc[:, 1]
+        zs = np.zeros(Xt.shape[0]) if Xt.shape[1] < 3 else Xt.iloc[:, 2]
+        ax.scatter(xs, ys,  zs, c=[colors[int(i)] for i in result])
+        min, max = Xt.min().min(), Xt.max().max()
+        ax.set_xlim([min, max])
+        ax.set_ylim([min, max])
+        ax.set_zlim([min, max])
+        ax.set_xlabel('X Label')
+        ax.set_ylabel('Y Label')
+        ax.set_zlabel('Z Label')
+        fig.savefig(os.path.join("plots", item_hash['config'] + ".svg"))
+        plt.close('all')
+        Xt.to_csv(os.path.join("plots", item_hash['config'] + "._Xt.csv"), index=False)
+        y_pred.to_csv(os.path.join("plots", item_hash['config'] + "._y_pred.csv"), index=False)
+        y.to_csv(os.path.join("plots", item_hash['config'] + "._y.csv"), index=False)
+    except:
+        f= open(os.path.join("plots", item_hash['config'] + ".txt"), "a+")
+        f.write("An error occured.")
+        f.close()
+
     stop = time.time()
 
     iteration_number = len(context['history'])
