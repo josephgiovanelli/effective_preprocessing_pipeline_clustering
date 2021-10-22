@@ -62,7 +62,7 @@ for path, scenario in iteritems(scenarios):
             scenario['status'] = 'Invalid YAML'
         if details is not None:
             try:
-                runtime = details['setup']['runtime'] * 5
+                runtime = 1 if details['setup']['runtime'] == 'inf' else details['setup']['runtime']
                 scenario['status'] = 'Ok'
                 scenario['runtime'] = runtime
                 if scenario['results'] is None:
@@ -135,17 +135,15 @@ with tqdm(total=total_runtime) as pbar:
                 GLOBAL_SEED,
                 pipeline,
                 RESULT_PATH)
-            with open(os.path.join(RESULT_PATH, '{}_stdout.txt'.format(base_scenario + "_" + str(i))),
-                        "a") as log_out:
-                with open(os.path.join(RESULT_PATH, '{}_stderr.txt'.format(base_scenario + "_" + str(i))),
-                            "a") as log_err:
-                    try:
-                        start_time = time.time()
-                        process = subprocess.call(cmd, shell=True, stdout=log_out, stderr=log_err)
-                        print("--- %s seconds ---" % (time.time() - start_time))
-                    except:
-                        kill(process.pid)
-                        print("\n\n" + base_scenario + " didn't finished\n\n")
+            with open(os.path.join(RESULT_PATH, '{}_stdout.txt'.format(base_scenario + "_" + str(i))), "a") as log_out:
+                with open(os.path.join(RESULT_PATH, '{}_stderr.txt'.format(base_scenario + "_" + str(i))), "a") as log_err:
+                    #try:
+                    start_time = time.time()
+                    process = subprocess.call(cmd, shell=True, stdout=log_out, stderr=log_err)
+                    print("--- %s seconds ---" % (time.time() - start_time))
+                    #except:
+                    #    kill(process.pid)
+                    #    print("\n\n" + base_scenario + " didn't finished\n\n")
 
             try:
                 os.rename(os.path.join(RESULT_PATH, '{}.json'.format(base_scenario)),
