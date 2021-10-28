@@ -17,6 +17,7 @@ from sklearn import metrics
 
 from experiment.algorithm import space as ALGORITHM_SPACE
 from experiment.pipeline.prototype import pipeline_conf_to_full_pipeline, get_baseline
+from experiment.utils.metrics import my_silhouette_samples
 
 
 def objective(pipeline_config, algo_config, algorithm, X, y, context, config, step):
@@ -62,6 +63,7 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         #print(result)
         if config['metric'] == 'SIL':
             score = silhouette_score(Xt, result)
+            sil_samples, intra_clust_dists, inter_clust_dists = my_silhouette_samples(Xt, result)
         elif config['metric'] == 'CH':
             score = calinski_harabasz_score(Xt, result)
         elif config['metric'] == 'DBI':
@@ -80,6 +82,7 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         os.makedirs(plots_path)
 
     iteration_number = len(context['history'])
+    file_name = config['dataset'] + "_" + str(iteration_number)
     try:
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
@@ -87,9 +90,10 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         Xt = pd.DataFrame(Xt)
         y_pred = pd.DataFrame(result)
         y = pd.DataFrame(y)
+        min, max = Xt.min().min(), Xt.max().max()
         xs = Xt.iloc[:, 0]
-        ys = np.zeros(Xt.shape[0]) if Xt.shape[1] < 2 else Xt.iloc[:, 1]
-        zs = np.zeros(Xt.shape[0]) if Xt.shape[1] < 3 else Xt.iloc[:, 2]
+        ys = [min] * Xt.shape[0] if Xt.shape[1] < 2 else Xt.iloc[:, 1]
+        zs = [min] * Xt.shape[0] if Xt.shape[1] < 3 else Xt.iloc[:, 2]
         ax.scatter(xs, ys,  zs, c=[colors[int(i)] for i in result])
         min, max = Xt.min().min(), Xt.max().max()
         ax.set_xlim([min, max])
@@ -98,13 +102,52 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         ax.set_xlabel('X Label')
         ax.set_ylabel('Y Label')
         ax.set_zlabel('Z Label')
-        fig.savefig(os.path.join(plots_path, str(iteration_number) + ".png"))
+        fig.savefig(os.path.join(plots_path, file_name + "_scatter.png"))
+        
+        if config['metric'] == 'SIL':
+            fig, ax = plt.subplots(1, 3)
+            fig.set_size_inches(18, 7)
+            n_clusters = y_pred.iloc[:, 0].unique().size
+            my_silhouette_values = pd.DataFrame({
+                'silhouette': sil_samples, 
+                'inter_dists': inter_clust_dists, 
+                'intra_dists': intra_clust_dists, 
+                'y_pred': result,})
+            for j in range(len(ax)):
+                y_lower = 10
+                ax[j].set_xlim([-0.1, 1 if j == 0 else my_silhouette_values.max().max()])
+                ax[j].set_yticks([])
+                ax[j].set_ylim([0, Xt.shape[0] + (n_clusters + 1) * 10])
+                ax[j].set_title(my_silhouette_values.columns[j])
+                ax[j].set_xlabel("values")
+                for i in range(n_clusters):
+                    ith_cluster_silhouette_values = my_silhouette_values[my_silhouette_values['y_pred'] == i]
+                    ith_cluster_silhouette_values = ith_cluster_silhouette_values.sort_values(by=['silhouette'])
+                    size_cluster_i = ith_cluster_silhouette_values.shape[0]
+                    y_upper = y_lower + size_cluster_i
+                        
+                    ax[j].fill_betweenx(
+                        np.arange(y_lower, y_upper),
+                        0,
+                        ith_cluster_silhouette_values.iloc[:, j],
+                        facecolor=colors[i],
+                        edgecolor=colors[i],
+                        alpha=0.7,
+                    )
+
+                    if j == 0:
+                        ax[j].axvline(x=score, color="red", linestyle="--")  
+                        ax[j].text(-0.05, y_lower + 0.5 * size_cluster_i, str(i)) 
+                        ax[j].set_ylabel("Cluster label")
+                    y_lower = y_upper + 10  
+            plt.tight_layout()
+            fig.savefig(os.path.join(plots_path, file_name + "_silhouette.png"))
         plt.close('all')
-        Xt.to_csv(os.path.join(plots_path, str(iteration_number) + "_Xt.csv"), index=False, header=False)
-        y_pred.to_csv(os.path.join(plots_path, str(iteration_number) + "_y_pred.csv"), index=False, header=False)
-        y.to_csv(os.path.join(plots_path, str(iteration_number) + "_y.csv"), index=False, header=False)
+        Xt.to_csv(os.path.join(plots_path, file_name + "_Xt.csv"), index=False, header=False)
+        y_pred.to_csv(os.path.join(plots_path, file_name + "_y_pred.csv"), index=False, header=False)
+        y.to_csv(os.path.join(plots_path, file_name + "_y.csv"), index=False, header=False)
     except:
-        f= open(os.path.join(plots_path, str(iteration_number) + ".txt"), "a+")
+        f= open(os.path.join(plots_path, file_name + ".txt"), "a+")
         f.write("An error occured.")
         f.close()
 
@@ -152,11 +195,7 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         item['step'][0].upper(),
         )
     )
-
-    with open(os.path.join(plots_path, str(iteration_number) + ".json"), 'w') as outfile:
-        json.dump(item, outfile, indent=4)
-
-    with open(os.path.join(plots_path, "context.json"), 'w') as outfile:
+    with open(os.path.join(plots_path, config['dataset'] + "_context.json"), 'w') as outfile:
         json.dump(context, outfile, indent=4)
 
     return item
