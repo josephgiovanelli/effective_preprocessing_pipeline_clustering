@@ -76,13 +76,13 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         status = STATUS_FAIL
         print(e)
 
-    plots_path = os.path.join("plots", config['dataset'])
+    plots_path = os.path.join("plots", config['dataset'] + '_' + config['metric'].lower())
 
     if not os.path.exists(plots_path):
         os.makedirs(plots_path)
 
     iteration_number = len(context['history'])
-    file_name = config['dataset'] + "_" + str(iteration_number)
+    file_name = config['dataset'] + '_' + config['metric'].lower() + "_" + str(iteration_number)
     try:
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
