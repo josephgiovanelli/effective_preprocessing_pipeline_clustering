@@ -18,7 +18,7 @@ SCENARIO_PATH = create_directory(SCENARIO_PATH, "union_mode")
 
 policies = ['union']
 metrics = ['SIL', 'CH', 'DBI']
-datasets = ['synthetic_data']
+datasets = ['wine', 'seeds', 'parkinsons', 'iris', 'breast']
 
 policies_config = {
     'iterative': {
@@ -42,7 +42,7 @@ base = OrderedDict([
     ('title', 'AutoML on statlog with Union policy'),
     ('setup', {
         'policy': 'union',
-        'runtime': 60,
+        'runtime': 'inf',
         'budget': 'iterations',
         'dataset': 'statlog',
         'dataset_kind': 'uci',
