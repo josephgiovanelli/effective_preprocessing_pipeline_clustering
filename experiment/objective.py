@@ -74,6 +74,11 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         status = STATUS_FAIL
         print(e)
 
+    plots_path = os.path.join("plots", config['dataset'])
+
+    if not os.path.exists(plots_path):
+        os.makedirs(plots_path)
+
     iteration_number = len(context['history'])
     try:
         fig = plt.figure()
@@ -93,13 +98,13 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         ax.set_xlabel('X Label')
         ax.set_ylabel('Y Label')
         ax.set_zlabel('Z Label')
-        fig.savefig(os.path.join("plots", str(iteration_number) + ".png"))
+        fig.savefig(os.path.join(plots_path, str(iteration_number) + ".png"))
         plt.close('all')
-        Xt.to_csv(os.path.join("plots", str(iteration_number) + "_Xt.csv"), index=False, header=False)
-        y_pred.to_csv(os.path.join("plots", str(iteration_number) + "_y_pred.csv"), index=False, header=False)
-        y.to_csv(os.path.join("plots", str(iteration_number) + "_y.csv"), index=False, header=False)
+        Xt.to_csv(os.path.join(plots_path, str(iteration_number) + "_Xt.csv"), index=False, header=False)
+        y_pred.to_csv(os.path.join(plots_path, str(iteration_number) + "_y_pred.csv"), index=False, header=False)
+        y.to_csv(os.path.join(plots_path, str(iteration_number) + "_y.csv"), index=False, header=False)
     except:
-        f= open(os.path.join("plots", str(iteration_number) + ".txt"), "a+")
+        f= open(os.path.join(plots_path, str(iteration_number) + ".txt"), "a+")
         f.write("An error occured.")
         f.close()
 
@@ -148,10 +153,10 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         )
     )
 
-    with open(os.path.join("plots", str(iteration_number) + ".json"), 'w') as outfile:
+    with open(os.path.join(plots_path, str(iteration_number) + ".json"), 'w') as outfile:
         json.dump(item, outfile, indent=4)
 
-    with open(os.path.join("plots", "context.json"), 'w') as outfile:
+    with open(os.path.join(plots_path, "context.json"), 'w') as outfile:
         json.dump(context, outfile, indent=4)
 
     return item
