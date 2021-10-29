@@ -18,7 +18,7 @@ SCENARIO_PATH = create_directory(SCENARIO_PATH, "union_mode")
 
 policies = ['union']
 metrics = ['SIL', 'CH', 'DBI']
-datasets = ['wine', 'seeds', 'parkinsons', 'iris', 'breast']
+datasets = ['wine', 'seeds', 'parkinsons', 'iris', 'breast', 'synthetic_data']
 
 policies_config = {
     'iterative': {

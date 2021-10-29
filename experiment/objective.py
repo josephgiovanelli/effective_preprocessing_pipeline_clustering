@@ -90,10 +90,11 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         Xt = pd.DataFrame(Xt)
         y_pred = pd.DataFrame(result)
         y = pd.DataFrame(y)
-        min, max = Xt.min().min(), Xt.max().max()
+        n_selected_features = Xt.shape[1]
+        min, max = Xt[:n_selected_features].min().min(), Xt[:n_selected_features].max().max()
         xs = Xt.iloc[:, 0]
-        ys = [min] * Xt.shape[0] if Xt.shape[1] < 2 else Xt.iloc[:, 1]
-        zs = [min] * Xt.shape[0] if Xt.shape[1] < 3 else Xt.iloc[:, 2]
+        ys = [min] * Xt.shape[0] if n_selected_features < 2 else Xt.iloc[:, 1]
+        zs = [min] * Xt.shape[0] if n_selected_features < 3 else Xt.iloc[:, 2]
         ax.scatter(xs, ys,  zs, c=[colors[int(i)] for i in result])
         min, max = Xt.min().min(), Xt.max().max()
         ax.set_xlim([min, max])
@@ -115,7 +116,7 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
                 'y_pred': result,})
             for j in range(len(ax)):
                 y_lower = 10
-                ax[j].set_xlim([-0.1, 1 if j == 0 else my_silhouette_values.max().max()])
+                ax[j].set_xlim([0, my_silhouette_values[['inter_dists', 'intra_dists']].max().max()])
                 ax[j].set_yticks([])
                 ax[j].set_ylim([0, Xt.shape[0] + (n_clusters + 1) * 10])
                 ax[j].set_title(my_silhouette_values.columns[j])
@@ -136,9 +137,10 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
                     )
 
                     if j == 0:
+                        ax[j].set_xlim([my_silhouette_values['silhouette'].min() - 0.1, 1])
                         ax[j].axvline(x=score, color="red", linestyle="--")  
-                        ax[j].text(-0.05, y_lower + 0.5 * size_cluster_i, str(i)) 
-                        ax[j].set_ylabel("Cluster label")
+                        ax[j].text(my_silhouette_values['silhouette'].min() - 0.05, y_lower + 0.5 * size_cluster_i, str(i)) 
+                        ax[j].set_ylabel("Cluster labels")
                     y_lower = y_upper + 10  
             plt.tight_layout()
             fig.savefig(os.path.join(plots_path, file_name + "_silhouette.png"))
