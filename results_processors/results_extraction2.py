@@ -10,7 +10,7 @@ from utils import create_directory
 
 
 def main():
-    input_path = os.path.join('results', 'silhouette_study')
+    input_path = os.path.join('results', 'grid_search')
     output_path = os.path.join('results')
     results = pd.DataFrame()
     for dataset in ['iris', 'wine', 'breast', 'seeds', 'parkinsons', 'synthetic_data']:
