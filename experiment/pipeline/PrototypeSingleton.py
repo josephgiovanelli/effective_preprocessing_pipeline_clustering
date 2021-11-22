@@ -1,3 +1,5 @@
+import os
+
 #from imblearn.under_sampling import NearMiss, CondensedNearestNeighbour
 #from imblearn.over_sampling import SMOTE
 from sklearn.decomposition import PCA
@@ -32,6 +34,7 @@ class PrototypeSingleton:
        "features": [None, GenericSPEC(k=3)]
    }
 
+   features_names = []
    PROTOTYPE = {}
    DOMAIN_SPACE = {}
    parts = []
@@ -56,6 +59,20 @@ class PrototypeSingleton:
          raise Exception("This class is a singleton!")
       else:
          PrototypeSingleton.__instance = self
+
+    
+   def setDatasetFeaturesName(self, dataset_features_names):
+       self.features_names = dataset_features_names
+    
+   def getFeaturesFromMask(self, mask=[]):
+       if mask == []:
+           return self.features_names
+       else:
+           indices = [i for i, x in enumerate(mask) if x]
+           names = [self.features_names[i] for i in indices]
+           while len(names) < 3:
+               names.append('None')
+           return names
 
    def setPipeline(self, params):
        for param in params:

@@ -22,11 +22,14 @@ def load_dataset(id, kind):
             dataset_format='array',
             target=dataset.default_target_attribute
         )
-        print(dataset.name)
+        dataset_name = dataset.name
+        dataset_features_names = [str(elem) for elem in list(dataset.features.values())]
+        dataset_features_names = dataset_features_names[:-1]
     else:    
-        X, y = datasets.get_dataset(id)
+        X, y, dataset_features_names = datasets.get_dataset(id)
         categorical_indicator = [False for _ in range(X.shape[1])]
-        print(id)
+        dataset_name = id
+    print(dataset_name)
     print(X)
     print(y)
     num_features = [i for i, x in enumerate(categorical_indicator) if x == False]
@@ -34,6 +37,7 @@ def load_dataset(id, kind):
     print("numeriche: " + str(len(num_features)) + " categoriche: " + str(len(cat_features)))
     PrototypeSingleton.getInstance().setFeatures(num_features, cat_features)
     PrototypeSingleton.getInstance().set_X_y(X, y)
+    PrototypeSingleton.getInstance().setDatasetFeaturesName(dataset_features_names)
     return X, y
 
 def main(args):

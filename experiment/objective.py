@@ -18,6 +18,7 @@ from sklearn import metrics
 from experiment.algorithm import space as ALGORITHM_SPACE
 from experiment.pipeline.prototype import pipeline_conf_to_full_pipeline, get_baseline
 from experiment.utils.metrics import my_silhouette_samples
+from experiment.pipeline.PrototypeSingleton import PrototypeSingleton
 
 
 def objective(pipeline_config, algo_config, algorithm, X, y, context, config, step):
@@ -52,15 +53,26 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
 
     start = time.time()
     try:
-        result = pipeline.fit_predict(X, y)
+        Xt, yt = X.copy(), y.copy()
+        Xt_to_export, yt_to_export = {}, {}
+        labels = PrototypeSingleton.getInstance().getFeaturesFromMask()
+        Xt_to_export['original'] = pd.DataFrame(Xt.copy(), columns=labels)
+        yt_to_export['original'] = pd.DataFrame(yt.copy(), columns=['target'])
         if len(pipeline.steps) > 1:
-            if pipeline.steps[-2][0] == 'outlier':
-                Xt, y = pipeline[:-1].fit_resample(X, y)
-            else:
-                Xt = pipeline[:-1].fit_transform(X, None)
-        else:
-            Xt = X.copy()
-        #print(result)
+            for step, operator in pipeline[:-1].named_steps.items():
+                if step == 'outlier':
+                    Xt, yt = operator.fit_resample(Xt, yt)
+                    yt_to_export[step] = pd.DataFrame(yt.copy(), columns=['target'])
+                else:
+                    Xt = operator.fit_transform(Xt, None)
+                    if step == 'features':
+                        mask = pipeline['features'].get_support()
+                        labels = PrototypeSingleton.getInstance().getFeaturesFromMask(mask)
+                Xt_to_export[step] = pd.DataFrame(Xt.copy(), columns=[l for l in labels if l != 'None'])
+
+
+        result = pipeline.fit_predict(X, y)
+        yt_to_export['pred'] = pd.DataFrame(result.copy(), columns=['target'])
         if config['metric'] == 'SIL':
             score = silhouette_score(Xt, result)
             sil_samples, intra_clust_dists, inter_clust_dists = my_silhouette_samples(Xt, result)
@@ -68,7 +80,7 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
             score = calinski_harabasz_score(Xt, result)
         elif config['metric'] == 'DBI':
             score = -1 * davies_bouldin_score(Xt, result)
-        ami = metrics.adjusted_mutual_info_score(y, result)
+        ami = metrics.adjusted_mutual_info_score(yt, result)
         status = STATUS_OK
     except Exception as e:
         score = float('-inf')
@@ -87,22 +99,23 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         colors = np.array(['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'grey', 'olive', 'cyan', 'indigo', 'black'])
-        Xt = pd.DataFrame(Xt)
-        y_pred = pd.DataFrame(result)
-        y = pd.DataFrame(y)
-        n_selected_features = Xt.shape[1]
-        min, max = Xt[:n_selected_features].min().min(), Xt[:n_selected_features].max().max()
+        Xt = pd.DataFrame(Xt, columns=[l for l in labels if l != 'None'])
+        y_pred = pd.DataFrame(result, columns=['target'])
+        n_selected_features = Xt.shape[1] if Xt.shape[1] < 3 else 3
+        Xt = Xt.iloc[:, :n_selected_features]
+        min, max = Xt.min().min(), Xt.max().max()
+        #print(n_selected_features)
+        #print(Xt[:n_selected_features].min(), Xt[:n_selected_features].max())
         xs = Xt.iloc[:, 0]
         ys = [min] * Xt.shape[0] if n_selected_features < 2 else Xt.iloc[:, 1]
         zs = [min] * Xt.shape[0] if n_selected_features < 3 else Xt.iloc[:, 2]
         ax.scatter(xs, ys,  zs, c=[colors[int(i)] for i in result])
-        min, max = Xt.min().min(), Xt.max().max()
         ax.set_xlim([min, max])
         ax.set_ylim([min, max])
         ax.set_zlim([min, max])
-        ax.set_xlabel('X Label')
-        ax.set_ylabel('Y Label')
-        ax.set_zlabel('Z Label')
+        ax.set_xlabel(labels[0])
+        ax.set_ylabel(labels[1])
+        ax.set_zlabel(labels[2])
         fig.savefig(os.path.join(plots_path, file_name + "_scatter.png"))
         
         if config['metric'] == 'SIL':
@@ -145,12 +158,13 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
             plt.tight_layout()
             fig.savefig(os.path.join(plots_path, file_name + "_silhouette.png"))
         plt.close('all')
-        Xt.to_csv(os.path.join(plots_path, file_name + "_Xt.csv"), index=False, header=False)
-        y_pred.to_csv(os.path.join(plots_path, file_name + "_y_pred.csv"), index=False, header=False)
-        y.to_csv(os.path.join(plots_path, file_name + "_y.csv"), index=False, header=False)
-    except:
+        for step, xt_df in Xt_to_export.items():
+            xt_df.to_csv(os.path.join(plots_path, file_name + "_X_" + step + ".csv"), index=False)
+        for step, yt_df in yt_to_export.items():
+            yt_df.to_csv(os.path.join(plots_path, file_name + "_y_" + step + ".csv"), index=False)
+    except Exception as e:
         f= open(os.path.join(plots_path, file_name + ".txt"), "a+")
-        f.write("An error occured.")
+        f.write(str(e))
         f.close()
 
     stop = time.time()
