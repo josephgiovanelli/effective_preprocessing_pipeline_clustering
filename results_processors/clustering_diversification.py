@@ -59,14 +59,7 @@ def main():
             winner = df.loc[df['iteration'] == winning_conf]
             solutions = solutions.append(winner)
             df = df.drop(winner.index)
-
-        for index, row in solutions.iterrows():
-            for transformation in ['normalize', 'features', 'outlier']:
-                solutions.loc[solutions['iteration'] == row['iteration'], transformation] = meta_features.loc[
-                    ((meta_features['dataset'] == dataset) &
-                    (meta_features['score_type'] == score_type) &
-                    (meta_features['iteration'] == row['iteration'])), transformation] != 'None'
-        
+                    
         solutions.to_csv(os.path.join(output_path, 'diversification_output.csv'), index=False)
     else:
         solutions = pd.read_csv(os.path.join(output_path, 'diversification_output.csv'))
@@ -81,7 +74,7 @@ def main():
             is_there[transformation] = solutions.loc[(
                 (solutions['dataset'] == dataset) & 
                 (solutions['score_type'] == score_type) & 
-                (solutions['iteration'] == row['iteration'])), transformation].values[0]
+                (solutions['iteration'] == row['iteration'])), transformation].values[0] != 'None'
         last_transformation = 'outlier' if is_there['outlier'] else ('normalize' if is_there['normalize'] else ('features' if is_there['features'] else 'original'))
         Xt = pd.read_csv(os.path.join(clustering_input_path, '_'.join([dataset, score_type, str(int(row['iteration'])), 'X', last_transformation]) + '.csv'))
         yt = pd.read_csv(os.path.join(clustering_input_path, '_'.join([dataset, score_type, str(int(row['iteration'])), 'y', 'pred']) + '.csv'))
