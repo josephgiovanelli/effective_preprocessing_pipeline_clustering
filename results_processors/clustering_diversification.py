@@ -1,4 +1,5 @@
 import os
+import sys
 import statistics
 import yaml
 import warnings
@@ -11,6 +12,10 @@ from sklearn.manifold import TSNE
 from matplotlib import cm
 from scipy.spatial import distance
 from utils import create_directory
+script_dir = os.path.dirname( __file__ )
+mymodule_dir = os.path.join( script_dir, '..' )
+sys.path.append( mymodule_dir )
+from experiment.pipeline.outlier_detectors import MyOutlierDetector
 
 def get_last_transformation(df, dataset, score_type, iteration):
     pipeline, is_there = {}, {}
@@ -105,6 +110,9 @@ def save_figure(solutions, conf):
         old_X = Xt.copy()
         if Xt.shape[1] > 3:
             Xt = pd.DataFrame(TSNE(n_components=3, random_state=42).fit_transform(Xt.to_numpy(), yt.to_numpy()), columns=['TSNE_0', 'TSNE_1', 'TSNE_2'])
+            if conf['outlier']:
+                Xt, yt = MyOutlierDetector(n_neighbors=32).fit_resample(Xt.to_numpy(), yt.iloc[:, 0].to_numpy())
+                Xt, yt = pd.DataFrame(Xt, columns=['TSNE_0', 'TSNE_1', 'TSNE_2']), pd.DataFrame(yt, columns=['target'])
         n_selected_features = Xt.shape[1]
         Xt = Xt.iloc[:, :n_selected_features]
         min, max = Xt.min().min(), Xt.max().max()
@@ -129,7 +137,7 @@ def save_figure(solutions, conf):
         title += '\nScore=' + str(round(current_solution.loc[:, 'score'].values[0], 2))
         ax.set_title(title, fontdict={'fontsize': 15, 'fontweight': 'medium'})
     plt.tight_layout(h_pad=8.)
-    fig.savefig(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + '.pdf'))
+    fig.savefig(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + ('_outlier' if conf['outlier'] else '') + '.pdf'))
 
 def main():
     path = os.path.join('results')
@@ -170,6 +178,8 @@ def main():
             solutions.to_csv(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + '.csv'), index=False)
         
         print('    Plotting')
-        save_figure(solutions, conf)
+        for outlier_removal in [True, False]:
+            conf['outlier'] = outlier_removal
+            save_figure(solutions, conf)
 
 main()
