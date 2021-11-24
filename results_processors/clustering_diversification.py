@@ -1,20 +1,15 @@
-import itertools
 import os
 import statistics
-
+import yaml
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 import numpy as np
-
 import matplotlib.pyplot as plt
-
 import pandas as pd
-
 from sklearn import metrics
 from sklearn.manifold import TSNE
-
 from matplotlib import cm
-
 from scipy.spatial import distance
-
 from utils import create_directory
 
 def get_last_transformation(df, dataset, score_type, iteration):
@@ -86,16 +81,17 @@ def diversificate(meta_features, conf):
                         dist = distance.cosine(current_features, other_features)
                     distances.append(dist)
             current_mean_distance = statistics.mean(distances)
-            current_mmr = (1 - conf['my_lambda']) * current_score + conf['my_lambda'] * current_mean_distance
+            current_mmr = (1 - conf['lambda']) * current_score + conf['lambda'] * current_mean_distance
             mmr = mmr.append({'iteration': current_conf, 'mmr': current_mmr}, ignore_index=True)
         mmr = mmr.sort_values(by=['mmr'], ascending=False)
         winning_conf = mmr.iloc[0]['iteration']
         winner = working_df.loc[working_df['iteration'] == winning_conf]
         solutions = solutions.append(winner)
         working_df = working_df.drop(winner.index)
+    return solutions
 
 def save_figure(solutions, conf):
-    fig = plt.figure(figsize=(16, 9)) 
+    fig = plt.figure(figsize=(32, 18)) 
     i = 0  
     for _, row in solutions.iterrows():
         i += 1
@@ -106,9 +102,10 @@ def save_figure(solutions, conf):
         
         ax = fig.add_subplot(3, 3, i, projection='3d')
         colors = np.array(['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'grey', 'olive', 'cyan', 'indigo', 'black'])
+        old_X = Xt.copy()
         if Xt.shape[1] > 3:
-            Xt = pd.DataFrame(TSNE(n_components=3).fit_transform(Xt.to_numpy()), columns=['TSNE_0', 'TSNE_1', 'TSNE_2'])
-        n_selected_features = Xt.shape[1] if Xt.shape[1] < 3 else 3
+            Xt = pd.DataFrame(TSNE(n_components=3, random_state=42).fit_transform(Xt.to_numpy(), yt.to_numpy()), columns=['TSNE_0', 'TSNE_1', 'TSNE_2'])
+        n_selected_features = Xt.shape[1]
         Xt = Xt.iloc[:, :n_selected_features]
         min, max = Xt.min().min(), Xt.max().max()
         xs = Xt.iloc[:, 0]
@@ -121,49 +118,58 @@ def save_figure(solutions, conf):
         ax.set_xlabel(list(Xt.columns)[0])
         ax.set_ylabel('None' if n_selected_features < 2 else list(Xt.columns)[1])
         ax.set_zlabel('None' if n_selected_features < 3 else list(Xt.columns)[2])
-        title = ' '.join([operator.split('_')[1] for operator in pipeline.values() if operator != 'None'])
+        title = '\n'.join([operator for operator in pipeline.values() ])
         current_solution = solutions.loc[(
             (solutions['dataset'] == conf['dataset']) & 
             (solutions['score_type'] == conf['score_type']) & 
             (solutions['iteration'] == int(row['iteration']))), :]
-        k_features = ' ' if pipeline['features'] == 'None' else ' k=' + str(current_solution.loc[:, 'features__k'].values[0]) + ' '
-        n_clusters = 'n=' + str(int(current_solution.loc[:, 'algorithm__n_clusters'].values[0]))
+        k_features = '\nk= ' + str(old_X.shape[1])
+        n_clusters = '  n=' + str(int(current_solution.loc[:, 'algorithm__n_clusters'].values[0]))
         title += k_features + n_clusters
-        ax.title.set_text(title)
-    plt.tight_layout(pad=3.)
+        title += '\nScore=' + str(round(current_solution.loc[:, 'score'].values[0], 2))
+        ax.set_title(title, fontdict={'fontsize': 15, 'fontweight': 'medium'})
+    plt.tight_layout(h_pad=8.)
     fig.savefig(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + '.pdf'))
 
 def main():
-    conf = {
-        'dataset': 'breast',
-        'score_type': 'sil',
-        'num_results': 6,
-        'my_lambda': 0.5,
-        'diversifaction_method': 'features_set_n_clusters',
-        'distance_metric': 'euclidean'
-    }
-
-    working_folder = conf['dataset'] + '_' + conf['score_type']
     path = os.path.join('results')
-    diversification_path = os.path.join(path, 'clustering_diversification', working_folder)
+    diversification_path = os.path.join(path, 'clustering_diversification')
     grid_search_path = os.path.join(path, 'grid_search', 'output')
-    conf['diversification_input_path'] = os.path.join(diversification_path, 'input')
-    conf['diversification_output_path'] = os.path.join(diversification_path, 'output')
-    conf['output_file_name'] = 'diversification_output_' + '0_' + str(int(conf['my_lambda']*10)) + '_' + conf['diversifaction_method']
-    if conf['diversifaction_method'] != 'clustering':
-        conf['output_file_name'] += '_' + conf['distance_metric']
+    conf_path = os.path.join(diversification_path, 'conf.yaml')
 
-    meta_features = pd.read_csv(os.path.join(grid_search_path, 'grid_search_results.csv'))
-    meta_features = meta_features[(meta_features['dataset'] == conf['dataset']) & (meta_features['score_type'] == conf['score_type'])]
-    if conf['diversifaction_method'] == 'clustering':
-        meta_features = meta_features[meta_features['outlier'] == 'None']
+    with open(conf_path, 'r') as stream:
+        try:
+            confs = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
     
-    try:
-        solutions = pd.read_csv(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + '.csv'))
-    except:
-        solutions = diversificate(meta_features, conf)
-        solutions.to_csv(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + '.csv'), index=False)
-    
-    save_figure(solutions, conf)
+    for i in range(len(confs)):
+        conf = confs[i]
+        print(f'''{i+1}th conf out of {len(confs)}: {conf}''')
+        working_folder = conf['dataset'] + '_' + conf['score_type']
+        conf['diversification_path'] = os.path.join(diversification_path, working_folder)
+        conf['diversification_input_path'] = os.path.join(conf['diversification_path'], 'input')
+        conf['diversification_output_path'] = os.path.join(conf['diversification_path'], 'output')
+        conf['output_file_name'] = 'diversification_output_' + '0_' + str(int(conf['lambda']*10)) + '_' + conf['diversifaction_method']
+        if conf['diversifaction_method'] != 'clustering':
+            conf['output_file_name'] += '_' + conf['distance_metric']
+
+        meta_features = pd.read_csv(os.path.join(grid_search_path, 'grid_search_results.csv'))
+        meta_features = meta_features[(meta_features['dataset'] == conf['dataset']) & (meta_features['score_type'] == conf['score_type'])]
+        if conf['diversifaction_method'] == 'clustering':
+            meta_features = meta_features[meta_features['outlier'] == 'None']
+        
+        try:
+            solutions = pd.read_csv(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + '.csv'))
+            print('    A previous diversification result was found')
+        except:
+            print('    A previous diversification result was not found')
+            print('    Diversification process starts')
+            solutions = diversificate(meta_features, conf)
+            print('    Diversification process ends')
+            solutions.to_csv(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + '.csv'), index=False)
+        
+        print('    Plotting')
+        save_figure(solutions, conf)
 
 main()
