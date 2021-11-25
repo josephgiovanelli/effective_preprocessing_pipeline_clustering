@@ -105,7 +105,10 @@ def save_figure(solutions, conf):
         Xt = pd.read_csv(os.path.join(conf['diversification_input_path'], '_'.join([conf['dataset'], conf['score_type'], str(int(row['iteration'])), 'X', last_transformation]) + '.csv'))
         yt = pd.read_csv(os.path.join(conf['diversification_input_path'], '_'.join([conf['dataset'], conf['score_type'], str(int(row['iteration'])), 'y', 'pred']) + '.csv'))
         
-        ax = fig.add_subplot(3, 3, i, projection='3d')
+        if Xt.shape[1] < 3:
+            ax = fig.add_subplot(3, 3, i)
+        else:
+            ax = fig.add_subplot(3, 3, i, projection='3d')
         colors = np.array(['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'grey', 'olive', 'cyan', 'indigo', 'black'])
         old_X = Xt.copy()
         if Xt.shape[1] > 3:
@@ -117,24 +120,29 @@ def save_figure(solutions, conf):
         Xt = Xt.iloc[:, :n_selected_features]
         min, max = Xt.min().min(), Xt.max().max()
         xs = Xt.iloc[:, 0]
-        ys = [min] * Xt.shape[0] if n_selected_features < 2 else Xt.iloc[:, 1]
-        zs = [min] * Xt.shape[0] if n_selected_features < 3 else Xt.iloc[:, 2]
-        ax.scatter(xs, ys,  zs, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
+        ys = [(max+min)/2] * Xt.shape[0] if n_selected_features < 2 else Xt.iloc[:, 1]
+        zs = [(max+min)/2] * Xt.shape[0] if n_selected_features < 3 else Xt.iloc[:, 2]
+        if Xt.shape[1] < 3:
+            ax.scatter(xs, ys, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
+        else:
+            ax.scatter(xs, ys, zs, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
         ax.set_xlim([min, max])
         ax.set_ylim([min, max])
-        ax.set_zlim([min, max])
         ax.set_xlabel(list(Xt.columns)[0])
         ax.set_ylabel('None' if n_selected_features < 2 else list(Xt.columns)[1])
-        ax.set_zlabel('None' if n_selected_features < 3 else list(Xt.columns)[2])
+        if Xt.shape[1] >= 3:
+            ax.set_zlim([min, max])
+            ax.set_zlabel('None' if n_selected_features < 3 else list(Xt.columns)[2])
         title = '\n'.join([operator for operator in pipeline.values() ])
         current_solution = solutions.loc[(
             (solutions['dataset'] == conf['dataset']) & 
             (solutions['score_type'] == conf['score_type']) & 
             (solutions['iteration'] == int(row['iteration']))), :]
         k_features = '\nk= ' + str(old_X.shape[1])
-        n_clusters = '  n=' + str(int(current_solution.loc[:, 'algorithm__n_clusters'].values[0]))
+        n_clusters = '    n=' + str(int(current_solution.loc[:, 'algorithm__n_clusters'].values[0]))
         title += k_features + n_clusters
-        title += '\nScore=' + str(round(current_solution.loc[:, 'score'].values[0], 2))
+        title += '\nscore=' + str(round(current_solution.loc[:, 'score'].values[0], 2))
+        title += '    ami=' + str(round(current_solution.loc[:, 'ami'].values[0], 2))
         ax.set_title(title, fontdict={'fontsize': 15, 'fontweight': 'medium'})
     plt.tight_layout(h_pad=8.)
     fig.savefig(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + ('_outlier' if conf['outlier'] else '') + '.pdf'))
