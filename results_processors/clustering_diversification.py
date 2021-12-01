@@ -16,6 +16,7 @@ script_dir = os.path.dirname( __file__ )
 mymodule_dir = os.path.join( script_dir, '..' )
 sys.path.append( mymodule_dir )
 from experiment.pipeline.outlier_detectors import MyOutlierDetector
+from experiment.utils import datasets
 
 def get_last_transformation(df, dataset, score_type, iteration):
     pipeline, is_there = {}, {}
@@ -119,6 +120,7 @@ def save_figure(solutions, conf):
         n_selected_features = Xt.shape[1]
         Xt = Xt.iloc[:, :n_selected_features]
         min, max = Xt.min().min(), Xt.max().max()
+        range = (max-min)/10
         xs = Xt.iloc[:, 0]
         ys = [(max+min)/2] * Xt.shape[0] if n_selected_features < 2 else Xt.iloc[:, 1]
         zs = [(max+min)/2] * Xt.shape[0] if n_selected_features < 3 else Xt.iloc[:, 2]
@@ -126,13 +128,13 @@ def save_figure(solutions, conf):
             ax.scatter(xs, ys, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
         else:
             ax.scatter(xs, ys, zs, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
-        ax.set_xlim([min, max])
-        ax.set_ylim([min, max])
-        ax.set_xlabel(list(Xt.columns)[0])
-        ax.set_ylabel('None' if n_selected_features < 2 else list(Xt.columns)[1])
+        ax.set_xlim([min - range, max + range])
+        ax.set_ylim([min - range, max + range])
+        ax.set_xlabel(list(Xt.columns)[0], fontsize=16)
+        ax.set_ylabel('None' if n_selected_features < 2 else list(Xt.columns)[1], fontsize=16)
         if Xt.shape[1] >= 3:
             ax.set_zlim([min, max])
-            ax.set_zlabel('None' if n_selected_features < 3 else list(Xt.columns)[2])
+            ax.set_zlabel('None' if n_selected_features < 3 else list(Xt.columns)[2], fontsize=16)
         title = '\n'.join([operator for operator in pipeline.values() ])
         current_solution = solutions.loc[(
             (solutions['dataset'] == conf['dataset']) & 
@@ -143,8 +145,11 @@ def save_figure(solutions, conf):
         title += k_features + n_clusters
         title += '\nscore=' + str(round(current_solution.loc[:, 'score'].values[0], 2))
         title += '    ami=' + str(round(current_solution.loc[:, 'ami'].values[0], 2))
-        ax.set_title(title, fontdict={'fontsize': 15, 'fontweight': 'medium'})
-    plt.tight_layout(h_pad=8.)
+        ax.set_title(title, fontdict={'fontsize': 20, 'fontweight': 'medium'})
+    plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+    title = f'''dataset: {conf['dataset']}, score_type: {conf['score_type']}, num_results: {conf['num_results']}, lambda: {conf['lambda']}, diversifaction_method: {conf['diversifaction_method']}'''
+    title += '' if 'distance_metric' not in conf else f''', distance_metric: {conf['distance_metric']}'''
+    fig.suptitle(title, fontsize=30)
     fig.savefig(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + ('_outlier' if conf['outlier'] else '') + '.pdf'))
 
 def main():
@@ -163,9 +168,10 @@ def main():
         conf = confs[i]
         print(f'''{i+1}th conf out of {len(confs)}: {conf}''')
         working_folder = conf['dataset'] + '_' + conf['score_type']
+        _, _, features = datasets.get_dataset(conf['dataset'])
         conf['diversification_path'] = os.path.join(diversification_path, working_folder)
         conf['diversification_input_path'] = os.path.join(conf['diversification_path'], 'input')
-        conf['diversification_output_path'] = os.path.join(conf['diversification_path'], 'output')
+        conf['diversification_output_path'] = create_directory(conf['diversification_path'], 'output')
         conf['output_file_name'] = 'diversification_output_' + '0_' + str(int(conf['lambda']*10)) + '_' + conf['diversifaction_method']
         if conf['diversifaction_method'] != 'clustering':
             conf['output_file_name'] += '_' + conf['distance_metric']
@@ -174,6 +180,12 @@ def main():
         meta_features = meta_features[(meta_features['dataset'] == conf['dataset']) & (meta_features['score_type'] == conf['score_type'])]
         if conf['diversifaction_method'] == 'clustering':
             meta_features = meta_features[meta_features['outlier'] == 'None']
+        meta_features = meta_features[(meta_features['normalize__with_mean'] == 'None') | (meta_features['normalize__with_mean'] == 'True')]
+        meta_features = meta_features[(meta_features['normalize__with_std'] == 'None') | (meta_features['normalize__with_std'] == 'True')]
+        meta_features1 = meta_features[meta_features['features__k'] == 'None']
+        meta_features2 = meta_features[meta_features['features__k'] != 'None']
+        meta_features2 = meta_features2[meta_features2['features__k'].astype(np.int32) < len(features)]
+        meta_features = pd.concat([meta_features1, meta_features2], ignore_index=True)
         
         try:
             solutions = pd.read_csv(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + '.csv'))
