@@ -56,7 +56,7 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         Xt, yt = X.copy(), y.copy()
         Xt_to_export, yt_to_export = {}, {}
         labels = PrototypeSingleton.getInstance().getFeaturesFromMask()
-        Xt_to_export['original'] = pd.DataFrame(Xt.copy(), columns=labels)
+        Xt_to_export['original'] = pd.DataFrame(Xt.copy(), columns=[l for l in labels if l != 'None'])
         yt_to_export['original'] = pd.DataFrame(yt.copy(), columns=['target'])
         if len(pipeline.steps) > 1:
             for step, operator in pipeline[:-1].named_steps.items():
