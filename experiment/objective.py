@@ -87,87 +87,24 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         ami = float('-inf')
         status = STATUS_FAIL
         print(e)
+    stop = time.time()
 
-    plots_path = os.path.join("plots", config['dataset'] + '_' + config['metric'].lower())
+    details_path = os.path.join(config['result_path'], 'details', config['dataset'] + '_' + config['metric'].lower())
 
-    if not os.path.exists(plots_path):
-        os.makedirs(plots_path)
+    if not os.path.exists(details_path):
+        os.makedirs(details_path)
 
     iteration_number = len(context['history'])
     file_name = config['dataset'] + '_' + config['metric'].lower() + "_" + str(iteration_number)
     try:
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        colors = np.array(['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'grey', 'olive', 'cyan', 'indigo', 'black'])
-        Xt = pd.DataFrame(Xt, columns=[l for l in labels if l != 'None'])
-        y_pred = pd.DataFrame(result, columns=['target'])
-        n_selected_features = Xt.shape[1] if Xt.shape[1] < 3 else 3
-        Xt = Xt.iloc[:, :n_selected_features]
-        min, max = Xt.min().min(), Xt.max().max()
-        #print(n_selected_features)
-        #print(Xt[:n_selected_features].min(), Xt[:n_selected_features].max())
-        xs = Xt.iloc[:, 0]
-        ys = [min] * Xt.shape[0] if n_selected_features < 2 else Xt.iloc[:, 1]
-        zs = [min] * Xt.shape[0] if n_selected_features < 3 else Xt.iloc[:, 2]
-        ax.scatter(xs, ys,  zs, c=[colors[int(i)] for i in result])
-        ax.set_xlim([min, max])
-        ax.set_ylim([min, max])
-        ax.set_zlim([min, max])
-        ax.set_xlabel(labels[0])
-        ax.set_ylabel(labels[1])
-        ax.set_zlabel(labels[2])
-        fig.savefig(os.path.join(plots_path, file_name + "_scatter.png"))
-        
-        if config['metric'] == 'SIL':
-            fig, ax = plt.subplots(1, 3)
-            fig.set_size_inches(18, 7)
-            n_clusters = y_pred.iloc[:, 0].unique().size
-            my_silhouette_values = pd.DataFrame({
-                'silhouette': sil_samples, 
-                'inter_dists': inter_clust_dists, 
-                'intra_dists': intra_clust_dists, 
-                'y_pred': result,})
-            for j in range(len(ax)):
-                y_lower = 10
-                ax[j].set_xlim([0, my_silhouette_values[['inter_dists', 'intra_dists']].max().max()])
-                ax[j].set_yticks([])
-                ax[j].set_ylim([0, Xt.shape[0] + (n_clusters + 1) * 10])
-                ax[j].set_title(my_silhouette_values.columns[j])
-                ax[j].set_xlabel("values")
-                for i in range(n_clusters):
-                    ith_cluster_silhouette_values = my_silhouette_values[my_silhouette_values['y_pred'] == i]
-                    ith_cluster_silhouette_values = ith_cluster_silhouette_values.sort_values(by=['silhouette'])
-                    size_cluster_i = ith_cluster_silhouette_values.shape[0]
-                    y_upper = y_lower + size_cluster_i
-                        
-                    ax[j].fill_betweenx(
-                        np.arange(y_lower, y_upper),
-                        0,
-                        ith_cluster_silhouette_values.iloc[:, j],
-                        facecolor=colors[i],
-                        edgecolor=colors[i],
-                        alpha=0.7,
-                    )
-
-                    if j == 0:
-                        ax[j].set_xlim([my_silhouette_values['silhouette'].min() - 0.1, 1])
-                        ax[j].axvline(x=score, color="red", linestyle="--")  
-                        ax[j].text(my_silhouette_values['silhouette'].min() - 0.05, y_lower + 0.5 * size_cluster_i, str(i)) 
-                        ax[j].set_ylabel("Cluster labels")
-                    y_lower = y_upper + 10  
-            plt.tight_layout()
-            fig.savefig(os.path.join(plots_path, file_name + "_silhouette.png"))
-        plt.close('all')
         for step, xt_df in Xt_to_export.items():
-            xt_df.to_csv(os.path.join(plots_path, file_name + "_X_" + step + ".csv"), index=False)
+            xt_df.to_csv(os.path.join(details_path, file_name + "_X_" + step + ".csv"), index=False)
         for step, yt_df in yt_to_export.items():
-            yt_df.to_csv(os.path.join(plots_path, file_name + "_y_" + step + ".csv"), index=False)
+            yt_df.to_csv(os.path.join(details_path, file_name + "_y_" + step + ".csv"), index=False)
     except Exception as e:
-        f= open(os.path.join(plots_path, file_name + ".txt"), "a+")
+        f= open(os.path.join(details_path, file_name + ".txt"), "a+")
         f.write(str(e))
         f.close()
-
-    stop = time.time()
 
     item.update({
         'start_time': start,
@@ -211,7 +148,7 @@ def objective(pipeline_config, algo_config, algorithm, X, y, context, config, st
         item['step'][0].upper(),
         )
     )
-    with open(os.path.join(plots_path, config['dataset'] + "_context.json"), 'w') as outfile:
+    with open(os.path.join(details_path, config['dataset'] + "_context.json"), 'w') as outfile:
         json.dump(context, outfile, indent=4)
 
     return item

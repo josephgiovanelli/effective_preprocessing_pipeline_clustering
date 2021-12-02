@@ -27,7 +27,7 @@ def create_directory(result_path, directory):
 
 def load_result(input_path, dataset, metric):
     results = pd.DataFrame()
-    file_name =  dataset + '_' + metric.lower() + '_best_pipeline_0.json'
+    file_name =  dataset + '_' + metric.lower() + '.json'
     with open(os.path.join(input_path, file_name)) as json_file:
         data = json.load(json_file)
         history = data['context']['history']

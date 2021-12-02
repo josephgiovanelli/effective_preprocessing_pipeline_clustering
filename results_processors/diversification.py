@@ -49,20 +49,20 @@ def diversificate_mmr(meta_features, conf, original_features):
         mmr = pd.DataFrame()
         for current_conf in confs:
             current_score = float(working_df[working_df['iteration'] == current_conf]['score'])
-            if conf['diversifaction_method'] == 'clustering':
-                current_y_pred = pd.read_csv(os.path.join(conf['diversification_input_path'], '_'.join([conf['dataset'], conf['score_type'], str(current_conf), 'y', 'pred']) + '.csv'))
+            if conf['diversifaction_distance'] == 'clustering':
+                current_y_pred = pd.read_csv(os.path.join(conf['input_path'], '_'.join([conf['dataset'], conf['score_type'], str(current_conf), 'y', 'pred']) + '.csv'))
                 others = solutions['iteration'].to_list()
                 distances = []
                 for other in others:
-                    other_y_pred = pd.read_csv(os.path.join(conf['diversification_input_path'], '_'.join([conf['dataset'], conf['score_type'], str(int(other)), 'y', 'pred']) + '.csv'))
+                    other_y_pred = pd.read_csv(os.path.join(conf['input_path'], '_'.join([conf['dataset'], conf['score_type'], str(int(other)), 'y', 'pred']) + '.csv'))
                     ami = metrics.adjusted_mutual_info_score( current_y_pred.to_numpy().reshape(-1), other_y_pred.to_numpy().reshape(-1))
                     distances.append(1 - ami)
             else:
                 _, current_last_transformation = get_last_transformation(meta_features, conf['dataset'], conf['score_type'], current_conf)
-                current_X = pd.read_csv(os.path.join(conf['diversification_input_path'], '_'.join([conf['dataset'], conf['score_type'], str(current_conf), 'X', current_last_transformation]) + '.csv'))
+                current_X = pd.read_csv(os.path.join(conf['input_path'], '_'.join([conf['dataset'], conf['score_type'], str(current_conf), 'X', current_last_transformation]) + '.csv'))
                 current_features = list(current_X.columns)
                 current_features = get_one_hot_encoding(current_features, original_features)
-                if conf['diversifaction_method'] == 'features_set_n_clusters':
+                if conf['diversifaction_distance'] == 'features_set_n_clusters':
                     current_features.append(meta_features.loc[(
                         (meta_features['dataset'] == conf['dataset']) & 
                         (meta_features['score_type'] == conf['score_type']) & 
@@ -71,10 +71,10 @@ def diversificate_mmr(meta_features, conf, original_features):
                 distances = []
                 for other in others:
                     _, other_last_transformation = get_last_transformation(meta_features, conf['dataset'], conf['score_type'], int(other))
-                    other_X = pd.read_csv(os.path.join(conf['diversification_input_path'], '_'.join([conf['dataset'], conf['score_type'], str(int(other)), 'X', other_last_transformation]) + '.csv'))
+                    other_X = pd.read_csv(os.path.join(conf['input_path'], '_'.join([conf['dataset'], conf['score_type'], str(int(other)), 'X', other_last_transformation]) + '.csv'))
                     other_features = list(other_X.columns)
                     other_features = get_one_hot_encoding(other_features, original_features)
-                    if conf['diversifaction_method'] == 'features_set_n_clusters':
+                    if conf['diversifaction_distance'] == 'features_set_n_clusters':
                         other_features.append(meta_features.loc[(
                             (meta_features['dataset'] == conf['dataset']) & 
                             (meta_features['score_type'] == conf['score_type']) & 
@@ -103,7 +103,7 @@ def diversificate_exhaustive(meta_features, conf, original_features):
     for c in cc:
         solutions = working_df.loc[c, :].copy()
         dashboard_score = evaluate_dashboard(solutions, conf, original_features)
-        if dashboard_score > best_dashboard['dashboard_score']:
+        if dashboard_score > best_dashboard['score']:
             best_dashboard['solutions'] = solutions.copy()
             best_dashboard['score'] = dashboard_score
         exhaustive_search = exhaustive_search.append({
@@ -116,7 +116,7 @@ def diversificate_exhaustive(meta_features, conf, original_features):
             'dashboard_score': dashboard_score,
         }, ignore_index=True)
     exhaustive_search.sort_values(by=['mmr'], ascending=False)
-    exhaustive_search.to_csv(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + '_all' + '.csv'), index=False)
+    exhaustive_search.to_csv(os.path.join(conf['output_path'], conf['output_file_name'] + '_all' + '.csv'), index=False)
     return best_dashboard
 
 def evaluate_dashboard(solutions, conf, original_features):
@@ -126,18 +126,18 @@ def evaluate_dashboard(solutions, conf, original_features):
         second_iteration = int(df.loc[1, 'iteration'])
         div_vectors = []
         for iteration in [first_iteration, second_iteration]:
-            if conf['diversifaction_method'] == 'clustering':
-                y_pred = pd.read_csv(os.path.join(conf['diversification_input_path'], '_'.join([conf['dataset'], conf['score_type'], str(iteration), 'y', 'pred']) + '.csv'))
+            if conf['diversifaction_distance'] == 'clustering':
+                y_pred = pd.read_csv(os.path.join(conf['input_path'], '_'.join([conf['dataset'], conf['score_type'], str(iteration), 'y', 'pred']) + '.csv'))
                 div_vectors.append(y_pred)
             else:
                 _, last_transformation = get_last_transformation(df, conf['dataset'], conf['score_type'], iteration)
-                X = pd.read_csv(os.path.join(conf['diversification_input_path'], '_'.join([conf['dataset'], conf['score_type'], str(iteration), 'X', last_transformation]) + '.csv'))
+                X = pd.read_csv(os.path.join(conf['input_path'], '_'.join([conf['dataset'], conf['score_type'], str(iteration), 'X', last_transformation]) + '.csv'))
                 features = list(X.columns)
                 features = get_one_hot_encoding(features, original_features)
-                if conf['diversifaction_method'] == 'features_set_n_clusters':
+                if conf['diversifaction_distance'] == 'features_set_n_clusters':
                     features.append(df.loc[df['iteration'] == iteration, 'algorithm__n_clusters'])
                 div_vectors.append(features)
-        if conf['diversifaction_method'] == 'clustering':
+        if conf['diversifaction_distance'] == 'clustering':
             return metrics.adjusted_mutual_info_score(div_vectors[0].to_numpy().reshape(-1), div_vectors[1].to_numpy().reshape(-1))
         else:
             if conf['distance_metric'] == 'euclidean':
@@ -157,8 +157,8 @@ def save_figure(solutions, conf):
         i += 1
         pipeline, last_transformation = get_last_transformation(solutions.copy(), conf['dataset'], conf['score_type'], int(row['iteration']))
         
-        Xt = pd.read_csv(os.path.join(conf['diversification_input_path'], '_'.join([conf['dataset'], conf['score_type'], str(int(row['iteration'])), 'X', last_transformation]) + '.csv'))
-        yt = pd.read_csv(os.path.join(conf['diversification_input_path'], '_'.join([conf['dataset'], conf['score_type'], str(int(row['iteration'])), 'y', 'pred']) + '.csv'))
+        Xt = pd.read_csv(os.path.join(conf['input_path'], '_'.join([conf['dataset'], conf['score_type'], str(int(row['iteration'])), 'X', last_transformation]) + '.csv'))
+        yt = pd.read_csv(os.path.join(conf['input_path'], '_'.join([conf['dataset'], conf['score_type'], str(int(row['iteration'])), 'y', 'pred']) + '.csv'))
         
         if Xt.shape[1] < 3:
             ax = fig.add_subplot(3, 3, i)
@@ -201,74 +201,77 @@ def save_figure(solutions, conf):
         title += '    ami=' + str(round(current_solution.loc[:, 'ami'].values[0], 2))
         ax.set_title(title, fontdict={'fontsize': 20, 'fontweight': 'medium'})
     plt.tight_layout(rect=[0, 0.05, 1, 0.95])
-    title = f'''dataset: {conf['dataset']}, score_type: {conf['score_type']}, num_results: {conf['num_results']}, lambda: {conf['lambda']}, diversifaction_method: {conf['diversifaction_method']}'''
+    title = f'''dataset: {conf['dataset']}, score_type: {conf['score_type']}, num_results: {conf['num_results']}, lambda: {conf['lambda']}, diversifaction_distance: {conf['diversifaction_distance']}'''
     title += '' if 'distance_metric' not in conf else f''', distance_metric: {conf['distance_metric']}'''
     fig.suptitle(title, fontsize=30)
-    fig.savefig(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + ('_outlier' if conf['outlier'] else '') + '.pdf'))
+    fig.savefig(os.path.join(conf['output_path'], conf['output_file_name'] + ('_outlier' if conf['outlier'] else '') + '.pdf'))
 
 def main():
     path = os.path.join('results')
-    diversification_path = os.path.join(path, 'clustering_diversification')
-    grid_search_path = os.path.join(path, 'grid_search', 'output')
-    conf_path = os.path.join(diversification_path, 'conf.yaml')
+    diversification_path = create_directory(path, 'diversification')
 
-    with open(conf_path, 'r') as stream:
+    with open(os.path.join(diversification_path, 'conf.yaml'), 'r') as stream:
         try:
             confs = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
             print(exc)
     
+
     for i in range(len(confs)):
         conf = confs[i]
         print(f'''{i+1}th conf out of {len(confs)}: {conf}''')
-        working_folder = conf['dataset'] + '_' + conf['score_type']
-        _, _, original_features = datasets.get_dataset(conf['dataset'])
-        conf['diversification_path'] = os.path.join(diversification_path, working_folder)
-        conf['diversification_input_path'] = os.path.join(conf['diversification_path'], 'input')
-        conf['diversification_output_path'] = create_directory(conf['diversification_path'], 'output')
-        conf['output_file_name'] = 'mmr_' + '0_' + str(int(conf['lambda']*10)) + '_' + conf['diversifaction_method']
 
-        meta_features = pd.read_csv(os.path.join(grid_search_path, 'grid_search_results.csv'))
+        working_folder = conf['dataset'] + '_' + conf['score_type']
+        conf['diversification_path'] = os.path.join(diversification_path, 'opt_' + conf['optimization_method'])
+        conf['output_path'] = create_directory(conf['diversification_path'], working_folder)
+        conf['output_file_name'] = 'mmr_' + '0_' + str(int(conf['lambda']*10)) + '_' + conf['diversifaction_distance']
+        optimization_path = os.path.join(path, 'optimization', conf['optimization_method'])
+        conf['input_path'] = os.path.join(optimization_path, 'details', working_folder)
+
+        
+        meta_features = pd.read_csv(os.path.join(optimization_path, 'summary', 'summary.csv'))
         meta_features = meta_features[(meta_features['dataset'] == conf['dataset']) & (meta_features['score_type'] == conf['score_type'])]
-        if conf['diversifaction_method'] == 'clustering':
+        if conf['diversifaction_distance'] == 'clustering':
             meta_features = meta_features[meta_features['outlier'] == 'None']
         meta_features = meta_features[(meta_features['normalize__with_mean'] == 'None') | (meta_features['normalize__with_mean'] == 'True')]
         meta_features = meta_features[(meta_features['normalize__with_std'] == 'None') | (meta_features['normalize__with_std'] == 'True')]
+
         meta_features1 = meta_features[meta_features['features__k'] == 'None']
         meta_features2 = meta_features[meta_features['features__k'] != 'None']
+        _, _, original_features = datasets.get_dataset(conf['dataset'])
         meta_features2 = meta_features2[meta_features2['features__k'].astype(np.int32) < len(original_features)]
         meta_features = pd.concat([meta_features1, meta_features2], ignore_index=True)
-        meta_features = meta_features[meta_features['score'] >= 0.4]
+
+        #meta_features = meta_features[meta_features['score'] >= 0.4]
         meta_features = meta_features[~((meta_features['normalize'] != 'None') & (meta_features['features__k'] == '1'))]
         
-        for diversification_approach in ['mmr', 'best']:
-            print(f'    {diversification_approach}')
-            conf['output_file_name'] = diversification_approach + '_0_' + str(int(conf['lambda']*10)) + '_' + conf['diversifaction_method']
-            if conf['diversifaction_method'] != 'clustering':
-                conf['output_file_name'] += '_' + conf['distance_metric']
-            try:
-                dashboard = {}
-                dashboard['solutions'] = pd.read_csv(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + '.csv'))
-                print('        A previous diversification result was found')
-                print('        Calculating score')
-                dashboard['score'] = evaluate_dashboard(dashboard['solutions'], conf, original_features)
-            except:
-                print('        A previous diversification result was not found')
-                print('        Diversification process starts')
-                if diversification_approach == 'mmr':
-                    dashboard = diversificate_mmr(meta_features, conf, original_features)
-                else:
-                    dashboard = diversificate_exhaustive(meta_features, conf, original_features)
-                print('        Diversification process ends')
-                dashboard['solutions'].to_csv(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + '.csv'), index=False)
-            dashboard_score = dashboard['score']
-            print(f'        Dashboard score: {dashboard_score}')
+        
+        conf['output_file_name'] = conf['diversification_method'] + '_0_' + str(int(conf['lambda']*10)) + '_' + conf['diversifaction_distance']
+        if conf['diversifaction_distance'] != 'clustering':
+            conf['output_file_name'] += '_' + conf['distance_metric']
+        try:
+            dashboard = {}
+            dashboard['solutions'] = pd.read_csv(os.path.join(conf['output_path'], conf['output_file_name'] + '.csv'))
+            print('        A previous diversification result was found')
+            print('        Calculating score')
+            dashboard['score'] = evaluate_dashboard(dashboard['solutions'], conf, original_features)
+        except:
+            print('        A previous diversification result was not found')
+            print('        Diversification process starts')
+            if conf['diversification_method'] == 'mmr':
+                dashboard = diversificate_mmr(meta_features, conf, original_features)
+            else:
+                dashboard = diversificate_exhaustive(meta_features, conf, original_features)
+            print('        Diversification process ends')
+            dashboard['solutions'].to_csv(os.path.join(conf['output_path'], conf['output_file_name'] + '.csv'), index=False)
+        dashboard_score = dashboard['score']
+        print(f'        Dashboard score: {dashboard_score}')
 
-            print('        Plotting')
-            for outlier_removal in [True, False]:
-                conf['outlier'] = outlier_removal
-                plot_path = os.path.join(conf['diversification_output_path'], conf['output_file_name'] + ('_outlier' if conf['outlier'] else '') + '.pdf')
-                if not os.path.exists(plot_path):
-                    save_figure(dashboard['solutions'], conf)     
+        print('        Plotting')
+        for outlier_removal in [True, False]:
+            conf['outlier'] = outlier_removal
+            plot_path = os.path.join(conf['output_path'], conf['output_file_name'] + ('_outlier' if conf['outlier'] else '') + '.pdf')
+            if not os.path.exists(plot_path):
+                save_figure(dashboard['solutions'], conf)     
         
 main()

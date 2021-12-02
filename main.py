@@ -1,18 +1,15 @@
-from sklearn.impute import SimpleImputer
-
-from experiment.pipeline.PrototypeSingleton import PrototypeSingleton
-from experiment.utils import scenarios, serializer, cli, datasets
-from experiment import policies
-
 import json
-
 import openml
-
-from sklearn.model_selection import train_test_split
+import os
 
 import numpy as np
 import pandas as pd
-import os
+
+from sklearn.impute import SimpleImputer
+from experiment.pipeline.PrototypeSingleton import PrototypeSingleton
+from experiment.utils import scenarios, serializer, cli, datasets
+from experiment import policies
+from sklearn.model_selection import train_test_split
 
 
 def load_dataset(id, kind):
@@ -23,47 +20,42 @@ def load_dataset(id, kind):
             target=dataset.default_target_attribute
         )
         dataset_name = dataset.name
-        dataset_features_names = [str(elem) for elem in list(dataset.features.values())]
+        dataset_features_names = [str(elem)
+                                  for elem in list(dataset.features.values())]
         dataset_features_names = dataset_features_names[:-1]
-    else:    
+    else:
         X, y, dataset_features_names = datasets.get_dataset(id)
         categorical_indicator = [False for _ in range(X.shape[1])]
         dataset_name = id
-    print(dataset_name)
-    print(X)
-    print(y)
     num_features = [i for i, x in enumerate(categorical_indicator) if x == False]
     cat_features = [i for i, x in enumerate(categorical_indicator) if x == True]
-    print("numeriche: " + str(len(num_features)) + " categoriche: " + str(len(cat_features)))
     PrototypeSingleton.getInstance().setFeatures(num_features, cat_features)
     PrototypeSingleton.getInstance().set_X_y(X, y)
     PrototypeSingleton.getInstance().setDatasetFeaturesName(dataset_features_names)
+    print(f'Dataset name: {dataset_name}')
+    print(f'First five configurations of X:\n{X[:5, :]}')
+    print(f'First five configurations of y:\n{y[:5]}')
+    print(f'Numerical features: {len(num_features)}, Categorical features: {len(cat_features)}')
     return X, y
+
 
 def main(args):
     scenario = scenarios.load(args.scenario)
     scenario = cli.apply_scenario_customization(scenario, args.customize)
     config = scenarios.to_config(scenario)
-
-    print("config time: " + str(config['runtime']))
-    print('SCENARIO:\n {}'.format(json.dumps(scenario, indent=4, sort_keys=True)))
+    print(f'SCENARIO:\n {json.dumps(scenario, indent=4, sort_keys=True)}')
 
     PrototypeSingleton.getInstance().setPipeline(args.pipeline)
 
     X, y = load_dataset(config['dataset'], config['dataset_kind'])
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        test_size=0.4,
-        stratify=y,
-        random_state=scenario['control']['seed']
-    )
-
+    config['result_path'] = args.result_path
     policy = policies.initiate(config['policy'], config)
     policy.run(X, y)
 
-    serializer.serialize_results(scenario, policy, args.result_path, args.pipeline)
+    serializer.serialize_results(scenario, policy, os.path.join(
+        args.result_path, config['dataset'] + '_' + config['metric'].lower() + '.json'), args.pipeline)
+
 
 if __name__ == "__main__":
     args = cli.parse_args()

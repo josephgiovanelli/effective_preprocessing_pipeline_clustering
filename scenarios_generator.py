@@ -5,16 +5,13 @@ import argparse
 
 import pandas as pd
 
-from commons import large_comparison_classification_tasks, extended_benchmark_suite, benchmark_suite, algorithms
 from collections import OrderedDict
 from results_processors.utils import create_directory
 
 
 parser = argparse.ArgumentParser(description="Automated Machine Learning Workflow creation and configuration")
 
-
 SCENARIO_PATH = './scenarios/'
-SCENARIO_PATH = create_directory(SCENARIO_PATH, "union_mode")
 
 policies = ['union']
 metrics = ['SIL', 'CH', 'DBI']
@@ -39,14 +36,14 @@ policies_config = {
 }
 
 base = OrderedDict([
-    ('title', 'AutoML on statlog with Union policy'),
+    ('title', ''),
     ('setup', {
         'policy': 'union',
         'runtime': 'inf',
         'budget': 'iterations',
-        'dataset': 'statlog',
+        'dataset': '',
         'dataset_kind': 'uci',
-        'metric': 'SIL'
+        'metric': ''
     }),
     ('control', {
         'seed': 42
@@ -68,15 +65,6 @@ def __write_scenario(path, scenario):
     except Exception as e:
         print(e)
 
-def get_filtered_datasets():
-    df = pd.read_csv("results_processors/meta_features/simple-meta-features.csv")
-    df = df.loc[df['did'].isin(list(dict.fromkeys(extended_benchmark_suite + [10, 20, 26] + [15, 29, 1053, 1590])))]
-    df = df.loc[df['NumberOfMissingValues'] / (df['NumberOfInstances'] * df['NumberOfFeatures']) < 0.1]
-    df = df.loc[df['NumberOfInstancesWithMissingValues'] / df['NumberOfInstances'] < 0.1]
-    df = df.loc[df['NumberOfInstances'] * df['NumberOfFeatures'] < 5000000]
-    df = df['did']
-    return df.values.flatten().tolist()
-
 for dataset in datasets:
     print('# DATASET: {}'.format(dataset))
     for metric in metrics:
@@ -87,7 +75,6 @@ for dataset in datasets:
             dataset,
             scenario['setup']['policy'].title()
         )
-        runtime = scenario['setup']['runtime']
 
         path = os.path.join(SCENARIO_PATH, '{}_{}.yaml'.format(dataset, metric.lower()))
         __write_scenario(path, scenario)
