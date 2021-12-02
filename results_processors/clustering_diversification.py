@@ -3,6 +3,7 @@ import sys
 import statistics
 import yaml
 import warnings
+import itertools
 warnings.simplefilter(action='ignore', category=FutureWarning)
 import numpy as np
 import matplotlib.pyplot as plt
@@ -35,16 +36,13 @@ def get_one_hot_encoding(current_features, original_features):
         features_to_return.append(1 if feature in current_features else 0)
     return features_to_return
 
-def diversificate(meta_features, conf):
+def diversificate_mmr(meta_features, conf, original_features):
     working_df = meta_features.copy()
     working_df = working_df.sort_values(by=['score'], ascending=False)
     first_solution = working_df.iloc[0]
     solutions = pd.DataFrame()
     solutions = solutions.append(first_solution)
     working_df = working_df.drop([first_solution.name])
-    if conf['diversifaction_method'] == 'features_set' or conf['diversifaction_method'] == 'features_set_n_clusters':
-        first_X = pd.read_csv(os.path.join(conf['diversification_input_path'], '_'.join([conf['dataset'], conf['score_type'], str(0), 'X', 'original']) + '.csv'))
-        original_features = list(first_X.columns)
 
     for i in range(conf['num_results']-1):
         confs = working_df['iteration'].to_list()
@@ -94,7 +92,63 @@ def diversificate(meta_features, conf):
         winner = working_df.loc[working_df['iteration'] == winning_conf]
         solutions = solutions.append(winner)
         working_df = working_df.drop(winner.index)
-    return solutions
+    dashboard_score = evaluate_dashboard(solutions.copy(), conf, original_features)
+    return {'solutions': solutions, 'score': dashboard_score}
+
+def diversificate_exhaustive(meta_features, conf, original_features):
+    working_df = meta_features.copy()
+    cc = list(itertools.combinations(list(working_df.index), conf['num_results']))
+    exhaustive_search = pd.DataFrame()
+    best_dashboard = {'solutions': pd.DataFrame(), 'score': 0.}
+    for c in cc:
+        solutions = working_df.loc[c, :].copy()
+        dashboard_score = evaluate_dashboard(solutions, conf, original_features)
+        if dashboard_score > best_dashboard['dashboard_score']:
+            best_dashboard['solutions'] = solutions.copy()
+            best_dashboard['score'] = dashboard_score
+        exhaustive_search = exhaustive_search.append({
+            'conf_0': int(solutions.loc[c[0], 'iteration']),
+            'conf_1': int(solutions.loc[c[1], 'iteration']),
+            'conf_2': int(solutions.loc[c[2], 'iteration']),
+            'conf_3': int(solutions.loc[c[3], 'iteration']),
+            'conf_4': int(solutions.loc[c[4], 'iteration']),
+            'conf_5': int(solutions.loc[c[5], 'iteration']),
+            'dashboard_score': dashboard_score,
+        }, ignore_index=True)
+    exhaustive_search.sort_values(by=['mmr'], ascending=False)
+    exhaustive_search.to_csv(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + '_all' + '.csv'), index=False)
+    return best_dashboard
+
+def evaluate_dashboard(solutions, conf, original_features):
+    def compute_pairwise_div(df, conf, original_features):
+        df = df.reset_index()
+        first_iteration = int(df.loc[0, 'iteration'])
+        second_iteration = int(df.loc[1, 'iteration'])
+        div_vectors = []
+        for iteration in [first_iteration, second_iteration]:
+            if conf['diversifaction_method'] == 'clustering':
+                y_pred = pd.read_csv(os.path.join(conf['diversification_input_path'], '_'.join([conf['dataset'], conf['score_type'], str(iteration), 'y', 'pred']) + '.csv'))
+                div_vectors.append(y_pred)
+            else:
+                _, last_transformation = get_last_transformation(df, conf['dataset'], conf['score_type'], iteration)
+                X = pd.read_csv(os.path.join(conf['diversification_input_path'], '_'.join([conf['dataset'], conf['score_type'], str(iteration), 'X', last_transformation]) + '.csv'))
+                features = list(X.columns)
+                features = get_one_hot_encoding(features, original_features)
+                if conf['diversifaction_method'] == 'features_set_n_clusters':
+                    features.append(df.loc[df['iteration'] == iteration, 'algorithm__n_clusters'])
+                div_vectors.append(features)
+        if conf['diversifaction_method'] == 'clustering':
+            return metrics.adjusted_mutual_info_score(div_vectors[0].to_numpy().reshape(-1), div_vectors[1].to_numpy().reshape(-1))
+        else:
+            if conf['distance_metric'] == 'euclidean':
+                return distance.euclidean(div_vectors[0], div_vectors[1])
+            else:
+                return distance.cosine(div_vectors[0], div_vectors[1])
+
+    sim = solutions['score'].sum()
+    cc = list(itertools.combinations(list(solutions.index), 2))
+    div = sum([compute_pairwise_div(solutions.loc[c, :].copy(), conf, original_features) for c in cc])
+    return ((conf['num_results'] - 1) * (1 - conf['lambda']) * sim) + (2 * conf['lambda'] * div)
 
 def save_figure(solutions, conf):
     fig = plt.figure(figsize=(32, 18)) 
@@ -168,13 +222,11 @@ def main():
         conf = confs[i]
         print(f'''{i+1}th conf out of {len(confs)}: {conf}''')
         working_folder = conf['dataset'] + '_' + conf['score_type']
-        _, _, features = datasets.get_dataset(conf['dataset'])
+        _, _, original_features = datasets.get_dataset(conf['dataset'])
         conf['diversification_path'] = os.path.join(diversification_path, working_folder)
         conf['diversification_input_path'] = os.path.join(conf['diversification_path'], 'input')
         conf['diversification_output_path'] = create_directory(conf['diversification_path'], 'output')
-        conf['output_file_name'] = 'diversification_output_' + '0_' + str(int(conf['lambda']*10)) + '_' + conf['diversifaction_method']
-        if conf['diversifaction_method'] != 'clustering':
-            conf['output_file_name'] += '_' + conf['distance_metric']
+        conf['output_file_name'] = 'mmr_' + '0_' + str(int(conf['lambda']*10)) + '_' + conf['diversifaction_method']
 
         meta_features = pd.read_csv(os.path.join(grid_search_path, 'grid_search_results.csv'))
         meta_features = meta_features[(meta_features['dataset'] == conf['dataset']) & (meta_features['score_type'] == conf['score_type'])]
@@ -184,22 +236,39 @@ def main():
         meta_features = meta_features[(meta_features['normalize__with_std'] == 'None') | (meta_features['normalize__with_std'] == 'True')]
         meta_features1 = meta_features[meta_features['features__k'] == 'None']
         meta_features2 = meta_features[meta_features['features__k'] != 'None']
-        meta_features2 = meta_features2[meta_features2['features__k'].astype(np.int32) < len(features)]
+        meta_features2 = meta_features2[meta_features2['features__k'].astype(np.int32) < len(original_features)]
         meta_features = pd.concat([meta_features1, meta_features2], ignore_index=True)
+        meta_features = meta_features[meta_features['score'] >= 0.4]
+        meta_features = meta_features[~((meta_features['normalize'] != 'None') & (meta_features['features__k'] == '1'))]
         
-        try:
-            solutions = pd.read_csv(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + '.csv'))
-            print('    A previous diversification result was found')
-        except:
-            print('    A previous diversification result was not found')
-            print('    Diversification process starts')
-            solutions = diversificate(meta_features, conf)
-            print('    Diversification process ends')
-            solutions.to_csv(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + '.csv'), index=False)
-        
-        print('    Plotting')
-        for outlier_removal in [True, False]:
-            conf['outlier'] = outlier_removal
-            save_figure(solutions, conf)
+        for diversification_approach in ['mmr', 'best']:
+            print(f'    {diversification_approach}')
+            conf['output_file_name'] = diversification_approach + '_0_' + str(int(conf['lambda']*10)) + '_' + conf['diversifaction_method']
+            if conf['diversifaction_method'] != 'clustering':
+                conf['output_file_name'] += '_' + conf['distance_metric']
+            try:
+                dashboard = {}
+                dashboard['solutions'] = pd.read_csv(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + '.csv'))
+                print('        A previous diversification result was found')
+                print('        Calculating score')
+                dashboard['score'] = evaluate_dashboard(dashboard['solutions'], conf, original_features)
+            except:
+                print('        A previous diversification result was not found')
+                print('        Diversification process starts')
+                if diversification_approach == 'mmr':
+                    dashboard = diversificate_mmr(meta_features, conf, original_features)
+                else:
+                    dashboard = diversificate_exhaustive(meta_features, conf, original_features)
+                print('        Diversification process ends')
+                dashboard['solutions'].to_csv(os.path.join(conf['diversification_output_path'], conf['output_file_name'] + '.csv'), index=False)
+            dashboard_score = dashboard['score']
+            print(f'        Dashboard score: {dashboard_score}')
 
+            print('        Plotting')
+            for outlier_removal in [True, False]:
+                conf['outlier'] = outlier_removal
+                plot_path = os.path.join(conf['diversification_output_path'], conf['output_file_name'] + ('_outlier' if conf['outlier'] else '') + '.pdf')
+                if not os.path.exists(plot_path):
+                    save_figure(dashboard['solutions'], conf)     
+        
 main()
