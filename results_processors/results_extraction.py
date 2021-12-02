@@ -12,7 +12,7 @@ from utils import create_directory
 def main():
     path = os.path.join('results', 'grid_search')
     input_path = os.path.join(path, 'input')
-    output_path = os.path.join(path, 'output')
+    output_path = create_directory(path, 'output')
     output_file_name = 'grid_search_results.csv'
     results = pd.DataFrame()
     for dataset in ['iris', 'wine', 'breast', 'seeds', 'parkinsons', 'synthetic_data']:
