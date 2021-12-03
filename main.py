@@ -45,9 +45,8 @@ def main(args):
     config = scenarios.to_config(scenario)
     print(f'SCENARIO:\n {json.dumps(scenario, indent=4, sort_keys=True)}')
 
-    PrototypeSingleton.getInstance().setPipeline(args.pipeline)
-
     X, y = load_dataset(config['dataset'], config['dataset_kind'])
+    PrototypeSingleton.getInstance().setPipeline(args.pipeline)
 
     config['result_path'] = args.result_path
     policy = policies.initiate(config['policy'], config)

@@ -6,10 +6,7 @@ import json
 class Policy(object):
     def __init__(self, config):
         self.PIPELINE_SPACE = PrototypeSingleton.getInstance().getDomainSpace()
-        if config['runtime'] == 400 and config['budget'] == 'time' and config['policy'] == 'split':
-            self.compute_baseline = True
-        else:
-            self.compute_baseline = False
+        self.compute_baseline = False
         self.config = config
         self.context = {
             'iteration': 0,

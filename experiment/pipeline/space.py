@@ -1,4 +1,6 @@
 
+num_features = 6
+
 def params_SimpleImputer():
     return {
         'strategy': ['most_frequent', 'constant']
@@ -35,8 +37,6 @@ def params_SMOTE():
 
 def params_StandardScaler():
     return {
-        'with_mean': [True, False],
-        'with_std': [True, False]
     }
 
 def params_RobustScaler():
@@ -81,10 +81,10 @@ def params_FeatureUnion():
 
 def params_MyOutlierDetector():
     return {
-        'n_neighbors':[2, 4, 8, 16, 32]
+        'n_neighbors':[32]
     }
 
 def params_GenericSPEC():
     return {
-        'k':[1, 2, 3, 4, 5, 6]
+        'k': list(range(1, num_features))
     }

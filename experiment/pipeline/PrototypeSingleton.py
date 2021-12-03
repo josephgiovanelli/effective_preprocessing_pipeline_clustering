@@ -14,6 +14,7 @@ from sklearn.neighbors import LocalOutlierFactor
 from .utils import generate_domain_space
 
 from experiment.pipeline.outlier_detectors import MyOutlierDetector
+from experiment.pipeline import space
 from fsfc.generic import GenericSPEC
 import pandas as pd
 import numpy as np
@@ -23,14 +24,8 @@ class PrototypeSingleton:
     __instance = None
 
     POOL = {
-        # "impute": [None, SimpleImputer(), IterativeImputer()],
-        # "encode": [OneHotEncoder()],
-        # "encode": [None, OneHotEncoder(), OrdinalEncoder()],
-        # "rebalance": [None, NearMiss(), CondensedNearestNeighbour(), SMOTE()],
-        "normalize": [None, StandardScaler(), MinMaxScaler()],
-        # "discretize": [None, KBinsDiscretizer(), Binarizer()],
+        "normalize": [None, StandardScaler()],
         "outlier": [None, MyOutlierDetector()],
-        # "features": [None, PCA(), SelectKBest(), FeatureUnion([("pca", PCA()), ("selectkbest", SelectKBest())])]
         "features": [None, GenericSPEC(k=3)]
     }
 
@@ -61,6 +56,7 @@ class PrototypeSingleton:
 
     def setDatasetFeaturesName(self, dataset_features_names):
         self.features_names = dataset_features_names
+        space.num_features = len(dataset_features_names)
 
     def getFeaturesFromMask(self, mask=[], add_Nones=False):
         if mask == []:
