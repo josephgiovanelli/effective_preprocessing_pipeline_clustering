@@ -135,7 +135,7 @@ def evaluate_dashboard(solutions, conf, original_features):
                 features = list(X.columns)
                 features = get_one_hot_encoding(features, original_features)
                 if conf['diversifaction_distance'] == 'features_set_n_clusters':
-                    features.append(df.loc[df['iteration'] == iteration, 'algorithm__n_clusters'])
+                    features.append(df.loc[df['iteration'] == iteration, 'algorithm__n_clusters'].values[0])
                 div_vectors.append(features)
         if conf['diversifaction_distance'] == 'clustering':
             return metrics.adjusted_mutual_info_score(div_vectors[0].to_numpy().reshape(-1), div_vectors[1].to_numpy().reshape(-1))
@@ -201,8 +201,9 @@ def save_figure(solutions, conf):
         title += '    ami=' + str(round(current_solution.loc[:, 'ami'].values[0], 2))
         ax.set_title(title, fontdict={'fontsize': 20, 'fontweight': 'medium'})
     plt.tight_layout(rect=[0, 0.05, 1, 0.95])
-    title = f'''dataset: {conf['dataset']}, score_type: {conf['score_type']}, num_results: {conf['num_results']}, lambda: {conf['lambda']}, diversifaction_distance: {conf['diversifaction_distance']}'''
+    title = f'''dataset: {conf['dataset']}, score_type: {conf['score_type']}, lambda: {conf['lambda']}, diversifaction_distance: {conf['diversifaction_distance']}'''
     title += '' if 'distance_metric' not in conf else f''', distance_metric: {conf['distance_metric']}'''
+    title += f''', dashboard_score: {round(conf['dashboard_score'], 2)}'''
     fig.suptitle(title, fontsize=30)
     fig.savefig(os.path.join(conf['output_path'], conf['output_file_name'] + ('_outlier' if conf['outlier'] else '') + '.pdf'))
 
@@ -227,23 +228,27 @@ def main():
         conf['output_file_name'] = 'mmr_' + '0_' + str(int(conf['lambda']*10)) + '_' + conf['diversifaction_distance']
         optimization_path = os.path.join(path, 'optimization', conf['optimization_method'])
         conf['input_path'] = os.path.join(optimization_path, 'details', working_folder)
-
         
         meta_features = pd.read_csv(os.path.join(optimization_path, 'summary', 'summary.csv'))
         meta_features = meta_features[(meta_features['dataset'] == conf['dataset']) & (meta_features['score_type'] == conf['score_type'])]
-        if conf['diversifaction_distance'] == 'clustering':
-            meta_features = meta_features[meta_features['outlier'] == 'None']
-        meta_features = meta_features[(meta_features['normalize__with_mean'] == 'None') | (meta_features['normalize__with_mean'] == 'True')]
-        meta_features = meta_features[(meta_features['normalize__with_std'] == 'None') | (meta_features['normalize__with_std'] == 'True')]
-
+        
         meta_features1 = meta_features[meta_features['features__k'] == 'None']
         meta_features2 = meta_features[meta_features['features__k'] != 'None']
         _, _, original_features = datasets.get_dataset(conf['dataset'])
         meta_features2 = meta_features2[meta_features2['features__k'].astype(np.int32) < len(original_features)]
         meta_features = pd.concat([meta_features1, meta_features2], ignore_index=True)
 
-        #meta_features = meta_features[meta_features['score'] >= 0.4]
+        meta_features = meta_features[(meta_features['normalize'] == 'normalize_StandardScaler') | (meta_features['normalize'] == 'None')]
+        meta_features = meta_features[(meta_features['normalize__with_mean'] == 'None') | (meta_features['normalize__with_mean'] == 'True')]
+        meta_features = meta_features[(meta_features['normalize__with_std'] == 'None') | (meta_features['normalize__with_std'] == 'True')]
         meta_features = meta_features[~((meta_features['normalize'] != 'None') & (meta_features['features__k'] == '1'))]
+
+        if conf['diversifaction_distance'] == 'clustering':
+            meta_features = meta_features[meta_features['outlier'] == 'None']
+        else:
+            meta_features = meta_features[(meta_features['outlier'] == 'None') | ((meta_features['outlier'] != 'None') & (meta_features['outlier__n_neighbors'] == '32'))]
+
+        meta_features = meta_features[meta_features['score'] >= 0.5]
         
         
         conf['output_file_name'] = conf['diversification_method'] + '_0_' + str(int(conf['lambda']*10)) + '_' + conf['diversifaction_distance']
@@ -265,7 +270,8 @@ def main():
             print('        Diversification process ends')
             dashboard['solutions'].to_csv(os.path.join(conf['output_path'], conf['output_file_name'] + '.csv'), index=False)
         dashboard_score = dashboard['score']
-        print(f'        Dashboard score: {dashboard_score}')
+        conf['dashboard_score'] = dashboard_score
+        print(f'        Dashboard score: {round(dashboard_score, 2)}')
 
         print('        Plotting')
         for outlier_removal in [True, False]:
