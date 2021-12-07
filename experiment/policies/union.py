@@ -1,5 +1,4 @@
 import functools
-import hyperopt.pyll.stochastic
 import numpy as np
 
 from experiment.policies.policy import Policy
@@ -15,12 +14,10 @@ class Union(Policy):
 
     def run(self, X, y):
         super(Union, self).run(X, y)
-        current_pipeline_configuration = {}
-        current_algo_configuration = {}
         trials = Trials()
         space = {
             'pipeline': self.PIPELINE_SPACE,
-            'algorithm': ALGORITHM_SPACE.get_domain_space("union", self.max_k),
+            'algorithm': ALGORITHM_SPACE.get_domain_space(self.max_k),
         }
         obj_pl = functools.partial(objective_union,
                 X=X,
@@ -31,9 +28,9 @@ class Union(Policy):
         fmin(
             fn=obj_pl, 
             space=space, 
-            algo=partial(suggest, nbMaxSucessiveFailures=1000) if self.config['runtime'] == 'inf' else tpe.suggest, 
-            max_evals=np.inf if self.config['runtime'] == 'inf' else (None if self.config['budget'] == 'time' else self.config['runtime']),
-            max_time=None if self.config['runtime'] == 'inf' else (self.config['runtime'] if self.config['budget'] == 'time' else None),     
+            algo=partial(suggest, nbMaxSucessiveFailures=1000) if self.config['budget'] == 'inf' else tpe.suggest, 
+            max_evals=np.inf if self.config['budget'] == 'inf' else (None if self.config['budget'] == 'time' else self.config['budget']),
+            max_time=None if self.config['budget'] == 'inf' else (self.config['budget'] if self.config['budget'] == 'time' else None),     
             trials=trials,
             show_progressbar=False,
             verbose=0,
@@ -42,4 +39,3 @@ class Union(Policy):
 
         best_config = self.context['best_config']
         super(Union, self).display_step_results(best_config)
-        current_pipeline_configuration = best_config['pipeline']

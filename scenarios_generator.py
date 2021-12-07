@@ -1,54 +1,33 @@
 import os
 import copy
-import re
-import argparse
-
-import pandas as pd
 
 from collections import OrderedDict
-from results_processors.utils import create_directory
+from utils import SCENARIO_PATH
 
-
-parser = argparse.ArgumentParser(description="Automated Machine Learning Workflow creation and configuration")
-
-SCENARIO_PATH = './scenarios/'
-
-policies = ['union']
-metrics = ['SIL', 'CH', 'DBI']
-datasets = ['wine', 'seeds', 'parkinsons', 'iris', 'breast', 'synthetic_data']
-
-policies_config = {
-    'iterative': {
-        'step_algorithm': 15,
-        'step_pipeline': 15,
-        'reset_trial': False
-    },
-    'split': {
-        'step_pipeline': 30
-    },
-    'adaptive': {
-        'initial_step_time': 15,
-        'reset_trial': False,
-        'reset_trials_after': 2
-    },
-    'joint': {},
-    'union': {}
-}
+#metrics = ['sil', 'ch', 'dbi']
+#datasets = ['wine', 'seeds', 'parkinsons', 'iris', 'breast', 'synthetic_data']
+datasets = ['iris']
+optimization_metrics = ['sil']
 
 base = OrderedDict([
-    ('title', ''),
-    ('setup', {
-        'policy': 'union',
-        'runtime': 'inf',
-        'budget': 'iterations',
-        'dataset': '',
+    ('general', {
         'dataset_kind': 'uci',
-        'metric': ''
+        'dataset': '',
+        'seed': 42,
     }),
-    ('control', {
-        'seed': 42
+    ('optimization', {
+        'metric': '',
+        'budget_kind': 'iterations',
+        'budget': 335,
+        #'budget': 'inf',
     }),
-    ('policy', {})
+    ('diversification', {
+        'num_results': 3,
+        'method': 'mmr',
+        'lambda': 0.5,
+        'criterion': 'features_set_n_clusters',
+        'metric': 'euclidean',
+    })
 ])
 
 def __write_scenario(path, scenario):
@@ -67,15 +46,11 @@ def __write_scenario(path, scenario):
 
 for dataset in datasets:
     print('# DATASET: {}'.format(dataset))
-    for metric in metrics:
+    for metric in optimization_metrics:
         scenario = copy.deepcopy(base)
-        scenario['setup']['dataset'] = dataset
-        scenario['setup']['metric'] = metric
-        scenario['title'] = 'AutoML on {} with {} policy'.format(
-            dataset,
-            scenario['setup']['policy'].title()
-        )
+        scenario['general']['dataset'] = dataset
+        scenario['optimization']['metric'] = metric
 
-        path = os.path.join(SCENARIO_PATH, '{}_{}.yaml'.format(dataset, metric.lower()))
+        path = os.path.join(SCENARIO_PATH, '{}_{}.yaml'.format(dataset, metric))
         __write_scenario(path, scenario)
 

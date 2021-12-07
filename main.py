@@ -23,25 +23,26 @@ def load_dataset(id, kind):
         dataset_features_names = [str(elem)
                                   for elem in list(dataset.features.values())]
         dataset_features_names = dataset_features_names[:-1]
-    else:
+    elif  kind == 'uci':
         X, y, dataset_features_names = datasets.get_dataset(id)
         categorical_indicator = [False for _ in range(X.shape[1])]
         dataset_name = id
+    else:
+        raise Exception(f'''missing dataset kind for dataset {id}''')
     num_features = [i for i, x in enumerate(categorical_indicator) if x == False]
     cat_features = [i for i, x in enumerate(categorical_indicator) if x == True]
     PrototypeSingleton.getInstance().setFeatures(num_features, cat_features)
     PrototypeSingleton.getInstance().set_X_y(X, y)
     PrototypeSingleton.getInstance().setDatasetFeaturesName(dataset_features_names)
     print(f'Dataset name: {dataset_name}')
-    print(f'First five configurations of X:\n{X[:5, :]}')
-    print(f'First five configurations of y:\n{y[:5]}')
     print(f'Numerical features: {len(num_features)}, Categorical features: {len(cat_features)}')
+    print(f'First five instances of X:\n{X[:5, :]}')
+    print(f'First five instances of y:\n{y[:5]}')
     return X, y
 
 
 def main(args):
     scenario = scenarios.load(args.scenario)
-    scenario = cli.apply_scenario_customization(scenario, args.customize)
     config = scenarios.to_config(scenario)
     print(f'SCENARIO:\n {json.dumps(scenario, indent=4, sort_keys=True)}')
 
@@ -49,11 +50,11 @@ def main(args):
     PrototypeSingleton.getInstance().setPipeline(args.pipeline)
 
     config['result_path'] = args.result_path
-    policy = policies.initiate(config['policy'], config)
+    policy = policies.initiate(config)
     policy.run(X, y)
 
     serializer.serialize_results(scenario, policy, os.path.join(
-        args.result_path, config['dataset'] + '_' + config['metric'].lower() + '.json'), args.pipeline)
+        args.result_path, config['dataset'] + '_' + config['metric'] + '.json'), args.pipeline)
 
 
 if __name__ == "__main__":

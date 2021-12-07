@@ -56,15 +56,22 @@ def pretty_print_grid(grid):
 
 def generate_domain_space(prototype):
     domain_space = {}
+    print('Search space:')
+    print()
     for operation, operators in prototype.items():
+        print(operation)
         operators_space = []
         for operator in operators:
+            print(f'''\t{operator}''')
             label = '{}_{}'.format(operation, type(operator).__name__ if operator is not None else 'NoneType')
             params = expand_params(operation, operator)
             operator_config = {}
+            to_print_operator_config = ''
             for k, v in params.items():
+                to_print_operator_config += '\t\t{}: {}\n'.format(k, v)
                 operator_config[k] = hp.choice('{}_{}'.format(label, k), v)
             operators_space.append((label, operator_config))
+            print(to_print_operator_config)
         domain_space[operation] = hp.choice(operation, operators_space)
     return domain_space
 

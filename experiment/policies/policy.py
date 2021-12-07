@@ -1,4 +1,3 @@
-from experiment.objective import get_baseline_score
 from experiment.pipeline.PrototypeSingleton import PrototypeSingleton
 
 import json
@@ -6,6 +5,7 @@ import json
 class Policy(object):
     def __init__(self, config):
         self.PIPELINE_SPACE = PrototypeSingleton.getInstance().getDomainSpace()
+        self.max_k = PrototypeSingleton.getInstance().getX().shape[0] / 2
         self.compute_baseline = False
         self.config = config
         self.context = {
@@ -13,31 +13,21 @@ class Policy(object):
             'history_hash': [],
             'history_index': {},
             'history': [],
-            'max_history_score': float('-inf'),
-            'max_history_step': 'baseline',
-            'max_history_score_ami': float('-inf'),
+            'max_history_internal_metric': float('-inf'),
+            'max_history_external_metric': float('-inf'),
             'best_config': {},
         }
-        self.max_k = 1043 if self.config['dataset'] == "avila" else (
-            780 if self.config['dataset'] == "isolet" else (
-                1100 if self.config['dataset'] == "pendigits" else (
-                    781 if self.config['dataset'] == "postures" else 644)))
 
     def __compute_baseline(self, X, y):
-        baseline_score, baseline_score_std = get_baseline_score(
-            self.config['algorithm'],
-            X,
-            y,
-            self.config['seed'])
-        self.context['baseline_score'] = baseline_score
+        raise Exception('No implementation for baseline score')
 
     def run(self, X, y):
         if self.compute_baseline:
             self.__compute_baseline(X, y)
 
     def display_step_results(self, best_config):
-        print('{} STEP RESULT {}'.format('#' * 20, '#' * 20))
+        print('#' * 50)
         print('BEST PIPELINE:\n {}'.format(json.dumps(best_config['pipeline'], indent=4, sort_keys=True),))
-        print('BEST ALGO CONFIG:\n {}'.format(json.dumps(best_config['algorithm'], indent=4, sort_keys=True)))
-        print('BEST SCORE: {}'.format(best_config['score']))
+        print('BEST ALGORITHM:\n {}'.format(json.dumps(best_config['algorithm'], indent=4, sort_keys=True)))
+        print('BEST INTERNAL: {}, EXTERNAL: '.format(round(best_config['internal_metric'], 4), round(best_config['external_metric'], 4)))
         print('#' * 50)

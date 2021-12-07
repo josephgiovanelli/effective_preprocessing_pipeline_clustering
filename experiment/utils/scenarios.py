@@ -16,28 +16,12 @@ def validate(scenario):
 	return True #  TODO
 
 def to_config(scenario):
-	try:
-		config = {
-			'seed': scenario['control']['seed'],
-			'runtime': scenario['setup']['runtime'],
-			'budget': scenario['setup']['budget'],
-			'algorithm': scenario['setup']['algorithm'],
-			'policy': scenario['setup']['policy'],
-			'dataset': scenario['setup']['dataset'],
-			'dataset_kind': scenario['setup']['dataset_kind'],
-			'metric': scenario['setup']['metric'],
-		}
-	except:
-		config = {
-			'seed': scenario['control']['seed'],
-			'runtime': scenario['setup']['runtime'],
-			'budget': scenario['setup']['budget'],
-			'policy': scenario['setup']['policy'],
-			'dataset': scenario['setup']['dataset'],
-			'dataset_kind': scenario['setup']['dataset_kind'],
-			'metric': scenario['setup']['metric'],
-		}
-
-	if scenario['policy'] is not None:
-		config.update(scenario['policy'])
+	config = {
+		'dataset_kind': scenario['general']['dataset_kind'],
+		'dataset': scenario['general']['dataset'],
+		'seed': scenario['general']['seed'],
+		'metric': scenario['optimization']['metric'],
+		'budget_kind': scenario['optimization']['budget_kind'],
+		'budget': scenario['optimization']['budget'],
+	}
 	return config

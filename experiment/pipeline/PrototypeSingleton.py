@@ -102,26 +102,6 @@ class PrototypeSingleton:
         self.current_categorical_features = list(
             range(len_numerical_features, len_categorical_features + len_numerical_features))
 
-    def applyDiscretization(self):
-        self.current_categorical_features.extend(
-            self.current_numerical_features)
-        self.current_numerical_features = []
-
-    def applyOneHotEncoding(self):
-        new_categorical_features = 0
-        for i in self.original_categorical_features:
-            new_categorical_features += len(np.unique(self.X[:, i]))
-        old_categorical_features = len(self.original_categorical_features)
-        old_features = len(self.original_categorical_features) + \
-            len(self.original_numerical_features)
-        new_features = old_features - old_categorical_features + new_categorical_features
-
-        len_numerical_features = len(self.current_numerical_features)
-        self.current_numerical_features = list(
-            range(0, len_numerical_features))
-        self.current_categorical_features = list(
-            range(len_numerical_features, new_features))
-
     def applyFeaturesEngineering(self, indeces):
         # print(indeces)
         #self.current_numerical_features = [i for i in self.current_numerical_features if indeces[i] == True]
