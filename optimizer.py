@@ -34,17 +34,24 @@ def load_dataset(id, kind):
     PrototypeSingleton.getInstance().setFeatures(num_features, cat_features)
     PrototypeSingleton.getInstance().set_X_y(X, y)
     PrototypeSingleton.getInstance().setDatasetFeaturesName(dataset_features_names)
-    print(f'Dataset name: {dataset_name}')
-    print(f'Numerical features: {len(num_features)}, Categorical features: {len(cat_features)}')
-    print(f'First five instances of X:\n{X[:5, :]}')
-    print(f'First five instances of y:\n{y[:5]}')
+    print('DATASET:')
+    print('#' * 50)
+    print(f'\tname:\t{dataset_name}')
+    print(f'\tshape:\t{X.shape}')
+    print(f'\tnumerical features:\t{len(num_features)}\n\tcategorical features:\t{len(cat_features)}')
+    print(f'\tfirst instance of X:\t{X[0, :]}')
+    print(f'\tfirst instance of y:\t{y[0]}')
+    print('#' * 50 + '\n')
     return X, y
 
 
 def main(args):
     scenario = scenarios.load(args.scenario)
-    config = scenarios.to_config(scenario)
-    print(f'SCENARIO:\n {json.dumps(scenario, indent=4, sort_keys=True)}')
+    config = scenarios.to_config(scenario, args.optimization_approach)
+    print('SCENARIO:')
+    print('#' * 50)
+    print(f'{json.dumps(scenario, indent=4, sort_keys=True)}')
+    print('#' * 50 + '\n')
 
     X, y = load_dataset(config['dataset'], config['dataset_kind'])
     PrototypeSingleton.getInstance().setPipeline(args.pipeline)

@@ -15,13 +15,13 @@ def load(path):
 def validate(scenario):
 	return True #  TODO
 
-def to_config(scenario):
+def to_config(scenario, optimization_method):
 	config = {
 		'dataset_kind': scenario['general']['dataset_kind'],
 		'dataset': scenario['general']['dataset'],
 		'seed': scenario['general']['seed'],
-		'metric': scenario['optimization']['metric'],
-		'budget_kind': scenario['optimization']['budget_kind'],
-		'budget': scenario['optimization']['budget'],
+		'metric': scenario['optimizations'][optimization_method]['metric'],
+		'budget_kind': scenario['optimizations'][optimization_method]['budget_kind'],
+		'budget': scenario['optimizations'][optimization_method]['budget'],
 	}
 	return config

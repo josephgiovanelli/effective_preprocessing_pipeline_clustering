@@ -1,6 +1,10 @@
 #!/bin/bash
 
-python scenarios_generator.py
-python experiments_launcher.py
+printf '\n\nOPTIMIZATION\n\n'
+python optimization_launcher.py
+
+printf '\n\nSUMMARIZATION\n\n'
 python results_processors/optimization_results_summarizer.py
+
+printf '\n\nDIVERSIFICATION\n\n'
 python results_processors/diversificator.py

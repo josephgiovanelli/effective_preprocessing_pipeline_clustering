@@ -1,9 +1,11 @@
+import datetime
 import os
 import sys
 import statistics
 import yaml
 import warnings
 import itertools
+import time
 warnings.simplefilter(action='ignore', category=FutureWarning)
 import numpy as np
 import matplotlib.pyplot as plt
@@ -118,16 +120,12 @@ def diversificate_exhaustive(meta_features, conf, original_features):
         if dashboard_score > best_dashboard['score']:
             best_dashboard['solutions'] = solutions.copy()
             best_dashboard['score'] = dashboard_score
-        exhaustive_search = exhaustive_search.append({
-            'conf_0': int(solutions.loc[c[0], 'iteration']),
-            'conf_1': int(solutions.loc[c[1], 'iteration']),
-            'conf_2': int(solutions.loc[c[2], 'iteration']),
-            'conf_3': int(solutions.loc[c[3], 'iteration']),
-            'conf_4': int(solutions.loc[c[4], 'iteration']),
-            'conf_5': int(solutions.loc[c[5], 'iteration']),
-            'dashboard_score': dashboard_score,
-        }, ignore_index=True)
-    exhaustive_search.sort_values(by=['mmr'], ascending=False)
+        dashboard = {}
+        for i in range(conf['diversification_num_results']):
+            dashboard['conf_' + str(i)] = int(solutions.loc[c[i], 'iteration'])
+        dashboard['dashboard_score'] = dashboard_score
+        exhaustive_search = exhaustive_search.append(dashboard, ignore_index=True)
+    exhaustive_search.sort_values(by=['dashboard_score'], ascending=False)
     exhaustive_search.to_csv(os.path.join(conf['output_path'], conf['output_file_name'] + '_all' + '.csv'), index=False)
     return best_dashboard
 
@@ -167,6 +165,7 @@ def evaluate_dashboard(solutions, conf, original_features):
     return ((conf['diversification_num_results'] - 1) * (1 - conf['diversification_lambda']) * sim) + (2 * conf['diversification_lambda'] * div)
 
 def save_figure(solutions, conf):
+    start_time = time.time()
     fig = plt.figure(figsize=(32, 18)) 
     i = 0  
     for _, row in solutions.iterrows():
@@ -217,34 +216,41 @@ def save_figure(solutions, conf):
         title += '    ext_metr=' + str(round(current_solution.loc[:, 'optimization_external_metric_value'].values[0], 2))
         ax.set_title(title, fontdict={'fontsize': 20, 'fontweight': 'medium'})
     plt.tight_layout(rect=[0., 0., 1., 0.85])
-    title = f'''DATASET {conf['dataset']}
+    diversification_duration = str(datetime.timedelta(seconds=conf['diversification_duration']))
+    end_time = time.time()
+    plotting_duration = int(end_time) - int(start_time)
+    plotting_duration = str(datetime.timedelta(seconds=plotting_duration))
+    title = f'''{conf['dataset']}
             OPTIMIZATION method: {conf['optimization_method']}, metric: {conf['optimization_internal_metric']} 
             DIVERSIFICATION method: {conf['diversification_method']}, lambda: {conf['diversification_lambda']}, criterion: {conf['diversification_criterion']}, metric: {conf['diversification_metric']}
-            DASHABOARD SCORE {round(conf['dashboard_score'], 2)}'''
+            DASHABOARD score: {round(conf['dashboard_score'], 2)}, div_time: {diversification_duration}, plot_time: {plotting_duration}'''
     fig.suptitle(title, fontsize=30)
     fig.savefig(os.path.join(conf['output_path'], conf['output_file_name'] + ('_outlier' if conf['outlier'] else '') + '.pdf'))
 
 def main():
-    scenarios, _, _ = get_scenario_info()
+    scenarios = get_scenario_info()
 
-    scenario_with_results = {k: v for k, v in iteritems(scenarios) if v['status'] == 'Ok' and v['results'] is not None}
-
+    scenario_with_results = {k: v for k, v in iteritems(scenarios) if v['results'] is not None}
+    paths = set([v['path'] for v in scenario_with_results.values()])
     confs = []
-    for scenario in scenario_with_results.keys():
+    for scenario in paths:
         with open(os.path.join(SCENARIO_PATH, scenario), 'r') as stream:
             try:
                 c = yaml.safe_load(stream)
-                conf = {
-                'dataset': c['general']['dataset'],
-                'optimization_method': 'exhaustive' if c['optimization']['budget'] == 'inf' else 'smbo',
-                'optimization_internal_metric': c['optimization']['metric'],
-                'diversification_num_results': c['diversification']['num_results'],
-                'diversification_method': c['diversification']['method'],
-                'diversification_lambda': c['diversification']['lambda'],
-                'diversification_criterion': c['diversification']['criterion'],
-                'diversification_metric': c['diversification']['metric'],
-                }
-                confs.append(conf)
+                for run in c['runs']:
+                    optimization_method = run.split('_')[0]
+                    diversification_method = run.split('_')[1]
+                    conf = {
+                    'dataset': c['general']['dataset'],
+                    'optimization_method': optimization_method,
+                    'optimization_internal_metric': c['optimizations'][optimization_method]['metric'],
+                    'diversification_num_results': c['diversifications'][diversification_method]['num_results'],
+                    'diversification_method': diversification_method,
+                    'diversification_lambda': c['diversifications'][diversification_method]['lambda'],
+                    'diversification_criterion': c['diversifications'][diversification_method]['criterion'],
+                    'diversification_metric': c['diversifications'][diversification_method]['metric'],
+                    }
+                    confs.append(conf)
             except yaml.YAMLError as exc:
                 print(exc)
 
@@ -294,6 +300,7 @@ def main():
         except:
             print('        A previous diversification result was not found')
             print('        Diversification process starts')
+            start_time = time.time()
             if conf['diversification_method'] == 'mmr':
                 dashboard = diversificate_mmr(meta_features, conf, original_features)
             elif conf['diversification_method'] == 'exhaustive':
@@ -301,6 +308,8 @@ def main():
             else:
                 raise Exception(f'''missing diversification method for 
                                 {conf}''')
+            end_time = time.time()
+            conf['diversification_duration'] = int(end_time) - int(start_time)
             print('        Diversification process ends')
             dashboard['solutions'].to_csv(os.path.join(conf['output_path'], conf['output_file_name'] + '.csv'), index=False)
         dashboard_score = dashboard['score']

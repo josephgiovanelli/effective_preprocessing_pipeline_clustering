@@ -58,17 +58,18 @@ parameter_grid = {
 
 def get_domain_space(max_k=200):
     algorithms_space = []
-    print('clustering')
+    print('\tclustering')
     for algorithm in parameter_grid.keys():
-        print(f'''\t{algorithm}''')
+        print(f'''\t\t{algorithm}''')
         algorithm_config = {}
         to_print_algorithm_config = ''
         for k, v in parameter_grid[algorithm].items():
             if k == "n_clusters" or k == "n_components" or k == "bandwidth":
                 #v = list(range(2, max_k))
                 v = list(range(2, 13))
-            to_print_algorithm_config += '\t\t{}: {}\n'.format(k, v)
+            to_print_algorithm_config += '\t\t\t{}: {}\n'.format(k, v)
             algorithm_config[k] = hp.choice('{}_{}'.format(algorithm, k), v)
         algorithms_space.append((algorithm, algorithm_config))
         print(to_print_algorithm_config)
+    print('#' * 50 + '\n')
     return hp.choice('algorithm', algorithms_space)

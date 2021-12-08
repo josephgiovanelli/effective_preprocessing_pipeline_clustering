@@ -119,7 +119,6 @@ dmypy.json
 ./scenarios/
 results/
 plots/
-scenarios/
 
 # vs-code
 .vscode

@@ -13,6 +13,9 @@ def parse_args():
     parser.add_argument("-r", "--result_path", nargs="?", type=str, required=True,
                         help="path where put the results")
 
+    parser.add_argument("-o", "--optimization_approach", nargs="?", type=str, required=True,
+                        help="The kind of optimization to execute")
+
     args = parser.parse_args()
 
     return args

@@ -24,7 +24,9 @@ class Union(Policy):
                 y=y,
                 context=self.context,
                 config=self.config)
-
+        
+        print('OPTIMIZATION:')
+        print('#' * 50)
         fmin(
             fn=obj_pl, 
             space=space, 
@@ -36,6 +38,7 @@ class Union(Policy):
             verbose=0,
             rstate=np.random.RandomState(self.config['seed'])
         )
+        print('#' * 50 + '\n')
 
         best_config = self.context['best_config']
         super(Union, self).display_step_results(best_config)

@@ -26,8 +26,15 @@ class Policy(object):
             self.__compute_baseline(X, y)
 
     def display_step_results(self, best_config):
+        print('BEST PIPELINE:')
         print('#' * 50)
-        print('BEST PIPELINE:\n {}'.format(json.dumps(best_config['pipeline'], indent=4, sort_keys=True),))
-        print('BEST ALGORITHM:\n {}'.format(json.dumps(best_config['algorithm'], indent=4, sort_keys=True)))
-        print('BEST INTERNAL: {}, EXTERNAL: '.format(round(best_config['internal_metric'], 4), round(best_config['external_metric'], 4)))
+        print(f'''{json.dumps(best_config['pipeline'], indent=4, sort_keys=True)}''')
+        print('#' * 50 + '\n')
+        print('BEST ALGORITHM:')
+        print('#' * 50)
+        print(f'''{json.dumps(best_config['algorithm'], indent=4, sort_keys=True)}''')
+        print('#' * 50 + '\n')
+        print('BEST METRICS:')
+        print('#' * 50)
+        print('\tINTERNAL:\t{}\n\tEXTERNAL:\t{}'.format(round(best_config['internal_metric'], 3), round(best_config['external_metric'], 3)))
         print('#' * 50)
