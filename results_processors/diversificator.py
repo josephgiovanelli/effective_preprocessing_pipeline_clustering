@@ -112,6 +112,8 @@ def diversificate_mmr(meta_features, conf, original_features):
 def diversificate_exhaustive(meta_features, conf, original_features):
     working_df = meta_features.copy()
     cc = list(itertools.combinations(list(working_df.index), conf['diversification_num_results']))
+    print(f'\t\t\tNum combinations to evaluate: {len(cc)}')
+    print(f'\t\t\tEstimated time: {datetime.timedelta(seconds=len(cc))}')
     exhaustive_search = pd.DataFrame()
     best_dashboard = {'solutions': pd.DataFrame(), 'score': 0.}
     for c in cc:
@@ -165,6 +167,7 @@ def evaluate_dashboard(solutions, conf, original_features):
     return ((conf['diversification_num_results'] - 1) * (1 - conf['diversification_lambda']) * sim) + (2 * conf['diversification_lambda'] * div)
 
 def save_figure(solutions, conf):
+    print('\t\tPlotting process starts')
     start_time = time.time()
     fig = plt.figure(figsize=(32, 18)) 
     i = 0  
@@ -216,14 +219,14 @@ def save_figure(solutions, conf):
         title += '    ext_metr=' + str(round(current_solution.loc[:, 'optimization_external_metric_value'].values[0], 2))
         ax.set_title(title, fontdict={'fontsize': 20, 'fontweight': 'medium'})
     plt.tight_layout(rect=[0., 0., 1., 0.85])
-    diversification_duration = str(datetime.timedelta(seconds=conf['diversification_duration']))
     end_time = time.time()
     plotting_duration = int(end_time) - int(start_time)
     plotting_duration = str(datetime.timedelta(seconds=plotting_duration))
+    print(f'\t\tPlotting process ends: {plotting_duration}')
     title = f'''{conf['dataset']}
             OPTIMIZATION method: {conf['optimization_method']}, metric: {conf['optimization_internal_metric']} 
             DIVERSIFICATION method: {conf['diversification_method']}, lambda: {conf['diversification_lambda']}, criterion: {conf['diversification_criterion']}, metric: {conf['diversification_metric']}
-            DASHABOARD score: {round(conf['dashboard_score'], 2)}, div_time: {diversification_duration}, plot_time: {plotting_duration}'''
+            DASHABOARD score: {round(conf['dashboard_score'], 2)}, div_time: {conf['diversification_duration']}, plot_time: {plotting_duration}'''
     fig.suptitle(title, fontsize=30)
     fig.savefig(os.path.join(conf['output_path'], conf['output_file_name'] + ('_outlier' if conf['outlier'] else '') + '.pdf'))
 
@@ -265,7 +268,10 @@ def main():
         optimization_path = os.path.join(OPTIMIZATION_RESULT_PATH, conf['optimization_method'])
         conf['input_path'] = os.path.join(optimization_path, 'details', working_folder)
         
+        print('\tLoading optimization process solutions')
         meta_features = pd.read_csv(os.path.join(optimization_path, 'summary', 'summary.csv'))
+        print(f'\t\tGot {meta_features.shape[0]} solutions')
+        print('\t\tFiltering..')
         meta_features = meta_features[(meta_features['dataset'] == conf['dataset']) & (meta_features['optimization_internal_metric'] == conf['optimization_internal_metric'])]
         
         meta_features1 = meta_features[meta_features['features__k'] == 'None']
@@ -290,16 +296,17 @@ def main():
                             {conf}''')
 
         meta_features = meta_features[meta_features['optimization_internal_metric_value'] >= 0.5]
-        
+        print(f'\t\tGot {meta_features.shape[0]} solutions')
+        print('\tDiversification')
         try:
             dashboard = {}
             dashboard['solutions'] = pd.read_csv(os.path.join(conf['output_path'], conf['output_file_name'] + '.csv'))
-            print('        A previous diversification dashboard result was found')
-            print('        Calculating dashboard score')
+            print('\t\tA previous dashboard was found')
+            print('\t\tCalculating dashboard score')
             dashboard['score'] = evaluate_dashboard(dashboard['solutions'], conf, original_features)
         except:
-            print('        A previous diversification result was not found')
-            print('        Diversification process starts')
+            print('\t\tA previous dashboard was not found')
+            print('\t\tDiversification process starts')
             start_time = time.time()
             if conf['diversification_method'] == 'mmr':
                 dashboard = diversificate_mmr(meta_features, conf, original_features)
@@ -310,13 +317,14 @@ def main():
                                 {conf}''')
             end_time = time.time()
             conf['diversification_duration'] = int(end_time) - int(start_time)
-            print('        Diversification process ends')
+            conf['diversification_duration'] = str(datetime.timedelta(seconds=conf['diversification_duration']))
+            print(f'''\t\tDiversification process ends: {conf['diversification_duration']}''')
             dashboard['solutions'].to_csv(os.path.join(conf['output_path'], conf['output_file_name'] + '.csv'), index=False)
         dashboard_score = dashboard['score']
         conf['dashboard_score'] = dashboard_score
-        print(f'        Dashboard score: {round(dashboard_score, 2)}')
+        print(f'\t\tDashboard score: {round(dashboard_score, 2)}')
 
-        print('        Plotting')
+        print('\tPlotting')
         for outlier_removal in [True, False]:
             conf['outlier'] = outlier_removal
             plot_path = os.path.join(conf['output_path'], conf['output_file_name'] + ('_outlier' if conf['outlier'] else '') + '.pdf')
