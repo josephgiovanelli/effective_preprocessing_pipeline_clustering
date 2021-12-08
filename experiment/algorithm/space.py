@@ -1,7 +1,6 @@
 
 from sklearn.cluster import KMeans, MiniBatchKMeans, MeanShift, SpectralClustering, AgglomerativeClustering, DBSCAN, OPTICS, Birch
 from sklearn.mixture import GaussianMixture
-from sklearn_extra.cluster import KMedoids
 
 from hyperopt import hp
 

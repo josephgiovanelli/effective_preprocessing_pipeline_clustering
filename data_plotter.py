@@ -13,7 +13,6 @@ from sklearn.preprocessing import RobustScaler, StandardScaler, MinMaxScaler, Po
 
 from sklearn.cluster import KMeans, MiniBatchKMeans, MeanShift, SpectralClustering, AgglomerativeClustering, DBSCAN, OPTICS, Birch
 from sklearn.mixture import GaussianMixture
-from sklearn_extra.cluster import KMedoids
 from sklearn import metrics
 
 from imblearn.pipeline import Pipeline
