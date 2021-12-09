@@ -270,9 +270,9 @@ def main():
         
         print('\tLoading optimization process solutions')
         meta_features = pd.read_csv(os.path.join(optimization_path, 'summary', 'summary.csv'))
+        meta_features = meta_features[(meta_features['dataset'] == conf['dataset']) & (meta_features['optimization_internal_metric'] == conf['optimization_internal_metric'])]
         print(f'\t\tGot {meta_features.shape[0]} solutions')
         print('\t\tFiltering..')
-        meta_features = meta_features[(meta_features['dataset'] == conf['dataset']) & (meta_features['optimization_internal_metric'] == conf['optimization_internal_metric'])]
         
         meta_features1 = meta_features[meta_features['features__k'] == 'None']
         meta_features2 = meta_features[meta_features['features__k'] != 'None']
