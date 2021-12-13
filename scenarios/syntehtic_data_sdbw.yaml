@@ -1,6 +1,6 @@
 general:
   dataset_kind: uci
-  dataset: iris
+  dataset: synthetic_data
   seed: 42
 optimizations:
   smbo:
