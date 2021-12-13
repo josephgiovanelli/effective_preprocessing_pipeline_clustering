@@ -8,6 +8,7 @@ import os
 import pandas as pd
 from hyperopt import STATUS_OK, STATUS_FAIL
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
+from s_dbw import S_Dbw
 from sklearn import metrics
 
 from experiment.algorithm import space as ALGORITHM_SPACE
@@ -73,6 +74,8 @@ def objective(pipeline_config, algo_config, X, y, context, config):
             internal_metric = calinski_harabasz_score(Xt, result)
         elif config['metric'] == 'dbi':
             internal_metric = -1 * davies_bouldin_score(Xt, result)
+        elif config['metric'] == 'sdbw':
+            internal_metric = -1 * S_Dbw(Xt, result)
         external_metric = metrics.adjusted_mutual_info_score(yt, result)
         status = STATUS_OK
     except Exception as e:
