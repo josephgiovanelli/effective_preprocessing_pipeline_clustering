@@ -272,7 +272,7 @@ def main():
         meta_features = pd.read_csv(os.path.join(optimization_path, 'summary', 'summary.csv'))
         meta_features = meta_features[(meta_features['dataset'] == conf['dataset']) & (meta_features['optimization_internal_metric'] == conf['optimization_internal_metric'])]
         if conf['optimization_method'] == 'smbo':
-            meta_features = meta_features[meta_features['iteration'] < 131]
+            meta_features = meta_features[meta_features['iteration'] < 132]
         print(f'\t\tGot {meta_features.shape[0]} solutions')
         print('\t\tFiltering..')
 
