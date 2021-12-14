@@ -30,7 +30,13 @@ def main():
                 dataset = c['general']['dataset']
                 for optimization_method, optimization_conf in c['optimizations'].items():
                     optimization_internal_metric = optimization_conf['metric']
-                    results[optimization_method] = {dataset: [optimization_internal_metric]}
+                    #results[optimization_method] = {dataset: [optimization_internal_metric]}
+                    if optimization_method not in results:
+                        results[optimization_method] = {}
+                    if dataset not in results[optimization_method]:
+                        results[optimization_method][dataset] = []
+                    if optimization_internal_metric not in results[optimization_method][dataset]:
+                        results[optimization_method][dataset].append(optimization_internal_metric)
             except yaml.YAMLError as exc:
                 print(exc)
 
