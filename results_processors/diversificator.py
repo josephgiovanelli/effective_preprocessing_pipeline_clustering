@@ -302,10 +302,12 @@ def main():
             raise Exception(f'''missing diversification criterion for 
                             {conf}''')
 
-        if conf['optimization_internal_metric'] == 'sil':
-            meta_features = meta_features[meta_features['optimization_internal_metric_value'] >= 0.5]
         if conf['optimization_internal_metric'] == 'sdbw':
-            meta_features = meta_features[meta_features['optimization_internal_metric_value'] >= -0.4]
+            meta_features['optimization_internal_metric_value'] *= -1
+            meta_features['optimization_internal_metric_value'] = 1 - meta_features['optimization_internal_metric_value']
+            meta_features['max_optimization_internal_metric_value'] *= -1
+            meta_features['max_optimization_internal_metric_value'] = 1 - meta_features['max_optimization_internal_metric_value']
+        meta_features = meta_features[meta_features['optimization_internal_metric_value'] >= 0.5]
         print(f'\t\tGot {meta_features.shape[0]} solutions')
         print('\tDiversification')
         try:
