@@ -271,8 +271,13 @@ def main():
         print('\tLoading optimization process solutions')
         meta_features = pd.read_csv(os.path.join(optimization_path, 'summary', 'summary.csv'))
         meta_features = meta_features[(meta_features['dataset'] == conf['dataset']) & (meta_features['optimization_internal_metric'] == conf['optimization_internal_metric'])]
-        if conf['optimization_method'] == 'smbo':
+        
+        # TO FIX THE NOT UNIQUE SMBO ITERATIONS
+        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'synthetic_data':
             meta_features = meta_features[meta_features['iteration'] < 132]
+        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'iris':
+            meta_features = meta_features[meta_features['iteration'] < 88]
+
         print(f'\t\tGot {meta_features.shape[0]} solutions')
         print('\t\tFiltering..')
 
@@ -297,7 +302,10 @@ def main():
             raise Exception(f'''missing diversification criterion for 
                             {conf}''')
 
-        meta_features = meta_features[meta_features['optimization_internal_metric_value'] >= 0.5]
+        if conf['optimization_internal_metric'] == 'sil':
+            meta_features = meta_features[meta_features['optimization_internal_metric_value'] >= 0.5]
+        if conf['optimization_internal_metric'] == 'sdbw':
+            meta_features = meta_features[meta_features['optimization_internal_metric_value'] >= -0.4]
         print(f'\t\tGot {meta_features.shape[0]} solutions')
         print('\tDiversification')
         try:
