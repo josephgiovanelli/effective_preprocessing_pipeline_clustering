@@ -1,6 +1,6 @@
 general:
   dataset_kind: uci
-  dataset: synthetic_data
+  dataset: synthetic
   seed: 42
 optimizations:
   smbo:

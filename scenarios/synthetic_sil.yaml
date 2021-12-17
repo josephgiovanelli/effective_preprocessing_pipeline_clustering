@@ -1,14 +1,14 @@
 general:
   dataset_kind: uci
-  dataset: iris
+  dataset: synthetic
   seed: 42
 optimizations:
   smbo:
-    metric: sdbw
+    metric: sil
     budget_kind: iterations
     budget: 600
   exhaustive:
-    metric: sdbw
+    metric: sil
     budget_kind: iterations
     budget: inf
 diversifications:
