@@ -78,7 +78,7 @@ def load_dataset(name):
             'asymmetry coefficient',
             'length of kernel groove'
             ]
-    elif name == 'synthetic_data':
+    elif name == 'synthetic_data' or name == 'synthetic':
         features_name = [
             'feature_0',
             'feature_1',
