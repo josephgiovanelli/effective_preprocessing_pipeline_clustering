@@ -272,11 +272,29 @@ def main():
         meta_features = pd.read_csv(os.path.join(optimization_path, 'summary', 'summary.csv'))
         meta_features = meta_features[(meta_features['dataset'] == conf['dataset']) & (meta_features['optimization_internal_metric'] == conf['optimization_internal_metric'])]
         
-        # TO FIX THE NOT UNIQUE SMBO ITERATIONS
-        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'synthetic_data':
-            meta_features = meta_features[meta_features['iteration'] < 132]
+        # if it is smbo, we keep just the 25% of all the configurations
+        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'synthetic':
+            meta_features = meta_features[meta_features['iteration'] < 264/4]
         if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'iris':
-            meta_features = meta_features[meta_features['iteration'] < 88]
+            meta_features = meta_features[meta_features['iteration'] < 176/4]
+        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'breast':
+            meta_features = meta_features[meta_features['iteration'] < 440/4]
+        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'parkinsons':
+            meta_features = meta_features[meta_features['iteration'] < 1012/4]
+        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'seeds':
+            meta_features = meta_features[meta_features['iteration'] < 352/4]
+        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'wine':
+            meta_features = meta_features[meta_features['iteration'] < 616/4]
+        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'blood':
+            meta_features = meta_features[meta_features['iteration'] < 176/4]
+        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'vehicle':
+            meta_features = meta_features[meta_features['iteration'] < 836/4]
+        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'diabetes':
+            meta_features = meta_features[meta_features['iteration'] < 396/4]
+        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'appendicitis':
+            meta_features = meta_features[meta_features['iteration'] < 352/4]
+        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'ecoli':
+            meta_features = meta_features[meta_features['iteration'] < 352/4]
 
         print(f'\t\tGot {meta_features.shape[0]} solutions')
         print('\t\tFiltering..')

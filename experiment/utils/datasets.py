@@ -1,22 +1,39 @@
-from sklearn.datasets import load_breast_cancer, load_iris, load_wine, load_digits, fetch_covtype
 import pandas as pd
 import numpy as np
 import os
+import openml
+
+from sklearn.datasets import load_breast_cancer, load_iris, load_wine, load_digits, fetch_covtype
+from experiment.pipeline.PrototypeSingleton import PrototypeSingleton
 
 def get_dataset(name):
     loader = {
-        'breast': breast_cancer,
-        'iris': iris,
-        'wine': wine,
-        'digits': digits,
-        'covtype': covtype
-        #'echr_article_1': echr.binary.get_dataset(article='1', flavors=[echr.Flavor.desc]).load
+        'breast': 15,
+        'iris': 61,
+        'parkinsons': 1488,
+        'seeds': 1499,
+        'wine': 187,
+        'blood': 1464,
+        'vehicle': 54,
+        'diabetes': 37,
+        'appendicitis': 1456,
+        'ecoli': 40671
     }
     if name in loader:
-        return loader[name]()
+        return load_dataset_from_openml(loader[name])
     else:
-        return load_dataset(name)
+        return load_dataset_from_csv(name)
 
+def load_dataset_from_openml(id):
+    dataset = openml.datasets.get_dataset(id)
+    X, y, categorical_indicator, _ = dataset.get_data(
+        dataset_format='array',
+        target=dataset.default_target_attribute
+    )
+    dataset_features_names = [str(elem) for elem in list(dataset.features.values())]
+    dataset_features_names = dataset_features_names[:-1]
+    set_singleton(dataset.name, X, y, categorical_indicator, dataset_features_names)
+    return X, y
 
 def breast_cancer():
     data = load_breast_cancer()
@@ -40,7 +57,7 @@ def covtype():
     data = fetch_covtype
     return data.data, data.target, data.feature_names
 
-def load_dataset(name):
+def load_dataset_from_csv(name):
     data = pd.read_csv(os.path.join('datasets', name +'.csv'), header=None)
     data = data.to_numpy()
     if name == 'parkinsons':
@@ -78,7 +95,7 @@ def load_dataset(name):
             'asymmetry coefficient',
             'length of kernel groove'
             ]
-    elif name == 'synthetic_data' or name == 'synthetic':
+    elif name == 'synthetic_data' or name == 'old_synthetic' or name == 'synthetic':
         features_name = [
             'feature_0',
             'feature_1',
@@ -89,4 +106,22 @@ def load_dataset(name):
         ]
     else:
         raise Exception('No features names assigned')
-    return data[:, :-1], data[:, -1], features_name
+    X, y = data[:, :-1], data[:, -1]
+    categorical_indicator = [False for _ in range(X.shape[1])]
+    set_singleton(name, X, y, categorical_indicator, features_name)
+    return X, y
+
+def set_singleton(dataset_name, X, y, categorical_indicator, dataset_features_names):
+    num_features = [i for i, x in enumerate(categorical_indicator) if x == False]
+    cat_features = [i for i, x in enumerate(categorical_indicator) if x == True]
+    PrototypeSingleton.getInstance().setFeatures(num_features, cat_features)
+    PrototypeSingleton.getInstance().set_X_y(X, y)
+    PrototypeSingleton.getInstance().setDatasetFeaturesName(dataset_features_names)
+    print('DATASET:')
+    print('#' * 50)
+    print(f'\tname:\t{dataset_name}')
+    print(f'\tshape:\t{X.shape}')
+    print(f'\tnumerical features:\t{len(num_features)}\n\tcategorical features:\t{len(cat_features)}')
+    print(f'\tfirst instance of X:\t{X[0, :]}')
+    print(f'\tfirst instance of y:\t{y[0]}')
+    print('#' * 50 + '\n')

@@ -17,7 +17,6 @@ def validate(scenario):
 
 def to_config(scenario, optimization_method):
 	config = {
-		'dataset_kind': scenario['general']['dataset_kind'],
 		'dataset': scenario['general']['dataset'],
 		'seed': scenario['general']['seed'],
 		'metric': scenario['optimizations'][optimization_method]['metric'],

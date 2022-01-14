@@ -1,0 +1,30 @@
+general:
+  dataset: breast
+  seed: 42
+optimizations:
+  smbo:
+    metric: sil
+    budget_kind: iterations
+    budget: 2000
+  exhaustive:
+    metric: sil
+    budget_kind: iterations
+    budget: inf
+diversifications:
+  mmr:
+    num_results: 3
+    method: mmr
+    lambda: 0.5
+    criterion: features_set
+    metric: euclidean
+  exhaustive:
+    num_results: 3
+    method: exhaustive
+    lambda: 0.5
+    criterion: features_set
+    metric: euclidean
+runs:
+  - smbo_mmr
+  - smbo_exhaustive
+  - exhaustive_mmr
+  - exhaustive_exhaustive

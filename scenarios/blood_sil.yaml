@@ -1,12 +1,11 @@
 general:
-  dataset_kind: uci
-  dataset: synthetic
+  dataset: blood
   seed: 42
 optimizations:
   smbo:
     metric: sil
     budget_kind: iterations
-    budget: 600
+    budget: 2000
   exhaustive:
     metric: sil
     budget_kind: iterations
@@ -16,13 +15,13 @@ diversifications:
     num_results: 3
     method: mmr
     lambda: 0.5
-    criterion: features_set_n_clusters
+    criterion: features_set
     metric: euclidean
   exhaustive:
     num_results: 3
     method: exhaustive
     lambda: 0.5
-    criterion: features_set_n_clusters
+    criterion: features_set
     metric: euclidean
 runs:
   - smbo_mmr

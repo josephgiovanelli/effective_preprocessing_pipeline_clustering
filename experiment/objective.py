@@ -6,6 +6,7 @@ import os
 
 
 import pandas as pd
+import numpy as np
 from hyperopt import STATUS_OK, STATUS_FAIL
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 from s_dbw import S_Dbw
@@ -77,6 +78,8 @@ def objective(pipeline_config, algo_config, X, y, context, config):
         elif config['metric'] == 'sdbw':
             internal_metric = -1 * S_Dbw(Xt, result)
         external_metric = metrics.adjusted_mutual_info_score(yt, result)
+        internal_metric = np.float64(internal_metric)
+        external_metric = np.float64(external_metric)
         status = STATUS_OK
     except Exception as e:
         internal_metric = float('-inf')
