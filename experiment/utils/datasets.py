@@ -33,7 +33,7 @@ def load_dataset_from_openml(id):
     dataset_features_names = [str(elem) for elem in list(dataset.features.values())]
     dataset_features_names = dataset_features_names[:-1]
     set_singleton(dataset.name, X, y, categorical_indicator, dataset_features_names)
-    return X, y
+    return X, y, dataset_features_names
 
 def breast_cancer():
     data = load_breast_cancer()
