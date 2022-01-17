@@ -1,5 +1,5 @@
 general:
-  dataset: appendicitis
+  dataset: thyroid
   seed: 42
 optimizations:
   smbo:

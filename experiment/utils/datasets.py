@@ -8,7 +8,7 @@ from experiment.pipeline.PrototypeSingleton import PrototypeSingleton
 
 def get_dataset(name):
     loader = {
-        'breast': 15,
+        'breast': 1465, #this is breast-tissue, not breast cancer
         'iris': 61,
         'parkinsons': 1488,
         'seeds': 1499,
@@ -16,7 +16,7 @@ def get_dataset(name):
         'blood': 1464,
         'vehicle': 54,
         'diabetes': 37,
-        'appendicitis': 1456,
+        'thyroid': 40682,
         'ecoli': 40671
     }
     if name in loader:
