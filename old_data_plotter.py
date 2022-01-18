@@ -41,27 +41,27 @@ def rotate(p, origin=(0, 0), degrees=0):
 
 def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clusters, internal_metric):
     
-    X, y, original_features = datasets.get_dataset(dataset)
-    
-    #y[y[:] == 4] = 3
-    #X = np.delete(X, 2, 1)
-    #print(X)
-    #data = np.column_stack((X, y))
-    #pd.DataFrame(data).to_csv("datasets/old_synthetic_2.csv", header=None, index=None)
-
-    #X[:, 1] *= 10
-    #data = np.column_stack((X, y))
-    #data[data[:, -1] == 3, 1] -= 50
-    #data[data[:, -1] == 3, 0] += 2.5
-    #data[data[:, -1] == 0, 1] -= 50
-    #data[data[:, -1] == 0, 0] -= 10
-    #X[:, 1] -= 50
-    #X, y = data[:, :-1], data[:, -1]
-
+    #X, y, original_features = datasets.get_dataset(dataset)
+    X, y = make_blobs(n_samples=(400, 1000, 300, 300), n_features=2, centers=[(-15, -12.5), (-2.5, -12.5), (-7.5, -22), (0, -22.)], cluster_std=[3, 3, 1.5, 1.5],  shuffle=True, random_state=42)
+    X[:, 1] *= 10
+    data = np.column_stack((X, y))
+    data[data[:, -1] == 0, 0] -= 10
+    data[data[:, -1] == 1, 0] += 5
+    data[data[:, -1] == 2, 0] -= 10
+    data[data[:, -1] == 3, 0] += 5
+    data[data[:, -1] == 0, 1] += 20
+    data[data[:, -1] == 1, 1] += 20
+    data[data[:, -1] == 2, 1] -= 20
+    data[data[:, -1] == 3, 1] -= 25
+    X, y = data[:, :-1], data[:, -1]
+    X = np.column_stack((X, np.random.uniform(low=5, high=100, size=(2000, 2))))
+    original_features = [str(i) for i in range(X.shape[0])]
+    data = np.column_stack((X, y))
+    pd.DataFrame(data).to_csv("datasets/synthetic.csv", header=None, index=None)
 
     myFeatureEngineeringTransformer = GenericSPEC(k=n_features)
     myScaler = StandardScaler()
-    myOutlierDetector = MyOutlierDetector(n_neighbors=32)
+    myOutlierDetector = MyOutlierDetector(n_neighbors=100)
     myEstimator = KMeans(max_iter=10, n_clusters=n_clusters, random_state=42)
     pipe = Pipeline([ 
         ('features', myFeatureEngineeringTransformer if features else FunctionTransformer()),
@@ -130,17 +130,17 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
     fig.savefig(dataset + features_str + scaler_str + outlier_str + clustering_str)
     plt.show()
 
-plot(dataset='old_synthetic_2d', features=True, n_features=2, scaler=True, outlier=True, n_clusters=4, natural_clusters=True, internal_metric='sil')
-plot(dataset='old_synthetic_2d', features=True, n_features=2, scaler=True, outlier=True, n_clusters=4, natural_clusters=False, internal_metric='sil')
+plot(dataset='synthetic2', features=True, n_features=2, scaler=True, outlier=True, n_clusters=4, natural_clusters=True, internal_metric='sil')
+plot(dataset='synthetic2', features=True, n_features=2, scaler=True, outlier=True, n_clusters=4, natural_clusters=False, internal_metric='sil')
 
-plot(dataset='old_synthetic_2d', features=True, n_features=2, scaler=True, outlier=False, n_clusters=4, natural_clusters=True, internal_metric='sil')
-plot(dataset='old_synthetic_2d', features=True, n_features=2, scaler=True, outlier=False, n_clusters=4, natural_clusters=False, internal_metric='sil')
+plot(dataset='synthetic2', features=True, n_features=2, scaler=True, outlier=False, n_clusters=4, natural_clusters=True, internal_metric='sil')
+plot(dataset='synthetic2', features=True, n_features=2, scaler=True, outlier=False, n_clusters=4, natural_clusters=False, internal_metric='sil')
 
-plot(dataset='old_synthetic_2d', features=True, n_features=2, scaler=False, outlier=False, n_clusters=4, natural_clusters=True, internal_metric='sil')
-plot(dataset='old_synthetic_2d', features=True, n_features=2, scaler=False, outlier=False, n_clusters=4, natural_clusters=False, internal_metric='sil')
+plot(dataset='synthetic2', features=True, n_features=2, scaler=False, outlier=False, n_clusters=4, natural_clusters=True, internal_metric='sil')
+plot(dataset='synthetic2', features=True, n_features=2, scaler=False, outlier=False, n_clusters=4, natural_clusters=False, internal_metric='sil')
 
-plot(dataset='old_synthetic_2d', features=False, n_features=6, scaler=False, outlier=False, n_clusters=4, natural_clusters=True, internal_metric='sil')
-plot(dataset='old_synthetic_2d', features=False, n_features=6, scaler=False, outlier=False, n_clusters=4, natural_clusters=False, internal_metric='sil')
+plot(dataset='synthetic2', features=False, n_features=6, scaler=False, outlier=False, n_clusters=4, natural_clusters=True, internal_metric='sil')
+plot(dataset='synthetic2', features=False, n_features=6, scaler=False, outlier=False, n_clusters=4, natural_clusters=False, internal_metric='sil')
 
 '''
 plot silhouette chart

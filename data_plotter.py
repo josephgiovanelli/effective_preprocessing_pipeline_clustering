@@ -31,22 +31,22 @@ from s_dbw import S_Dbw
 from experiment.pipeline.outlier_detectors import MyOutlierDetector
 from experiment.utils import datasets
 
-def rotate(p, origin=(0, 0), degrees=0):
-    angle = np.deg2rad(degrees)
-    R = np.array([[np.cos(angle), -np.sin(angle)],
-                  [np.sin(angle),  np.cos(angle)]])
-    o = np.atleast_2d(origin)
-    p = np.atleast_2d(p)
-    return np.squeeze((R @ (p.T-o.T) + o.T).T)
-
 def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clusters, internal_metric):
     
     X, y, original_features = datasets.get_dataset(dataset)
-    """
-    X, y = make_blobs(n_samples=(400, 1000, 300, 300), n_features=2, centers=[(-15, -12.5), (-2.5, -12.5), (-7.5, -22), (0, -22.)], cluster_std=[2, 2, 1.2, 1.2],  shuffle=True, random_state=42)
-    X[:, 1] *= 5
-    X = np.column_stack((X, np.random.uniform(low=5, high=55, size=(2000, 3))))
-    """
+
+    '''
+    X, y = make_blobs(n_samples=(400, 1000, 300, 300), n_features=2, centers=[(-15, -10), (-2.5, -10), (-7.5, -22), (0, -22.)], cluster_std=[1, 2.5, 1., 1.],  shuffle=True, random_state=42)
+    X[:, 1] *= 10
+    X[:, 0] *= 5
+    X = np.column_stack((X, np.random.uniform(low=5, high=100, size=(2000, 3))))
+    np.random.seed(42)
+
+    original_features = [str(i) for i in range(X.shape[0])]
+    data = np.column_stack((X, y))
+    pd.DataFrame(data).to_csv("datasets/synthetic.csv", header=None, index=None)
+    '''
+
     myFeatureEngineeringTransformer = GenericSPEC(k=n_features)
     myScaler = StandardScaler()
     myOutlierDetector = MyOutlierDetector(n_neighbors=100)
@@ -118,6 +118,9 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
     fig.savefig(dataset + features_str + scaler_str + outlier_str + clustering_str)
     plt.show()
 
+plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=True, n_clusters=2, natural_clusters=True, internal_metric='sil')
+plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=True, n_clusters=2, natural_clusters=False, internal_metric='sil')
+
 plot(dataset='synthetic', features=True, n_features=2, scaler=True, outlier=True, n_clusters=4, natural_clusters=True, internal_metric='sil')
 plot(dataset='synthetic', features=True, n_features=2, scaler=True, outlier=True, n_clusters=4, natural_clusters=False, internal_metric='sil')
 
@@ -127,8 +130,8 @@ plot(dataset='synthetic', features=True, n_features=2, scaler=True, outlier=Fals
 plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=False, n_clusters=4, natural_clusters=True, internal_metric='sil')
 plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=False, n_clusters=4, natural_clusters=False, internal_metric='sil')
 
-plot(dataset='synthetic', features=False, n_features=6, scaler=False, outlier=False, n_clusters=4, natural_clusters=True, internal_metric='sil')
-plot(dataset='synthetic', features=False, n_features=6, scaler=False, outlier=False, n_clusters=4, natural_clusters=False, internal_metric='sil')
+plot(dataset='synthetic', features=False, n_features=5, scaler=False, outlier=False, n_clusters=4, natural_clusters=True, internal_metric='sil')
+plot(dataset='synthetic', features=False, n_features=5, scaler=False, outlier=False, n_clusters=4, natural_clusters=False, internal_metric='sil')
 
 '''
 plot silhouette chart
