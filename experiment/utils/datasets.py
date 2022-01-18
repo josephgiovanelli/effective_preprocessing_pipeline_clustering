@@ -95,21 +95,20 @@ def load_dataset_from_csv(name):
             'asymmetry coefficient',
             'length of kernel groove'
             ]
-    elif name == 'synthetic_data' or name == 'old_synthetic' or name == 'synthetic':
+    elif name == 'synthetic' or name == 'old_synthetic_2d' or name == 'old_synthetic_3d':
         features_name = [
             'feature_0',
             'feature_1',
             'feature_2',
             'feature_3',
             'feature_4',
-            'feature_5',
         ]
     else:
         raise Exception('No features names assigned')
     X, y = data[:, :-1], data[:, -1]
     categorical_indicator = [False for _ in range(X.shape[1])]
     set_singleton(name, X, y, categorical_indicator, features_name)
-    return X, y
+    return X, y, features_name
 
 def set_singleton(dataset_name, X, y, categorical_indicator, dataset_features_names):
     num_features = [i for i, x in enumerate(categorical_indicator) if x == False]
