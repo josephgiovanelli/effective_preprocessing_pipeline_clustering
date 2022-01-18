@@ -39,8 +39,9 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
     X, y = make_blobs(n_samples=(400, 1000, 300, 300), n_features=2, centers=[(-15, -10), (-2.5, -10), (-7.5, -22), (0, -22.)], cluster_std=[1, 2.5, 1., 1.],  shuffle=True, random_state=42)
     X[:, 1] *= 10
     X[:, 0] *= 5
-    X = np.column_stack((X, np.random.uniform(low=5, high=100, size=(2000, 3))))
     np.random.seed(42)
+    X = np.column_stack((X, np.random.uniform(low=5, high=100, size=(2000, 3))))
+    
 
     original_features = [str(i) for i in range(X.shape[0])]
     data = np.column_stack((X, y))
@@ -97,11 +98,11 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
     if Xt.shape[1] < 3:
         ax = fig.add_subplot(1, 1, 1)
         ax.scatter(Xt[:, 0], Xt[:, 1] if Xt.shape[1] > 1 else [(max+min)/2] * Xt.shape[0], c=[colors[int(i)] for i in y_to_plot])
-        ax.scatter(centers[:, 0], centers[:, 1] if Xt.shape[1] > 1 else [(max+min)/2] * Xt.shape[0], c='cyan', marker='*', s=10)
+        #ax.scatter(centers[:, 0], centers[:, 1] if Xt.shape[1] > 1 else [(max+min)/2] * Xt.shape[0], c='cyan', marker='*', s=10)
     else:
         ax = fig.add_subplot(1, 1, 1, projection='3d')
         ax.scatter(Xt[:, 0], Xt[:, 1], Xt[:, 2], c=[colors[int(i)] for i in y_to_plot])
-        ax.scatter(centers[:, 0], centers[:, 1], centers[:, 2], c='cyan', marker='*', s=10)
+        #ax.scatter(centers[:, 0], centers[:, 1], centers[:, 2], c='cyan', marker='*', s=10)
 
 
     #ax.set_xlim([min, max])
@@ -111,12 +112,13 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
     if Xt.shape[1] == 3:
         #ax.set_zlim([min, max])
         ax.set_zlabel(labels[2])
-    features_str = '__features_' + str(n_features)
-    scaler_str = '__scaler_' + str(scaler)
-    outlier_str = '__outlier_' + str(outlier)
-    clustering_str = '__n_clusters_' + str(n_clusters) + '_natural_' + str(natural_clusters)
-    fig.savefig(dataset + features_str + scaler_str + outlier_str + clustering_str)
-    plt.show()
+    features_str = 'features_' if features else ''
+    scaler_str = 'scaler_' if scaler else ''
+    outlier_str = 'outlier_' if outlier else ''
+    clustering_str = 'natural' if natural_clusters else 'pred'
+    fig.tight_layout()
+    fig.savefig('toy_' + features_str + scaler_str + outlier_str + clustering_str + '.pdf')
+    #plt.show()
 
 plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=True, n_clusters=2, natural_clusters=True, internal_metric='sil')
 plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=True, n_clusters=2, natural_clusters=False, internal_metric='sil')
