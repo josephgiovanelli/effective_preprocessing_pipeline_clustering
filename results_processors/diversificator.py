@@ -274,7 +274,7 @@ def main():
         
         # if it is smbo, we keep just the 25% of all the configurations
         if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'synthetic':
-            meta_features = meta_features[meta_features['iteration'] < 220/4]
+            meta_features = meta_features[meta_features['iteration'] < 176/4]
         if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'iris':
             meta_features = meta_features[meta_features['iteration'] < 176/4]
         if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'breast':
