@@ -14,5 +14,5 @@ def params_RobustScaler():
 
 def params_MyOutlierDetector():
     return {
-        'n_neighbors':[100]
+        'n_neighbors':[32]
     }
