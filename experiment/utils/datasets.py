@@ -101,6 +101,7 @@ def load_dataset_from_csv(name):
             'feature_1',
             'feature_2',
             'feature_3',
+            'feature_4',
         ]
     else:
         raise Exception('No features names assigned')
