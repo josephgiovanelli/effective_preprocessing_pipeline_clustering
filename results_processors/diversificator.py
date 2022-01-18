@@ -315,7 +315,7 @@ def main():
         if conf['diversification_criterion'] == 'clustering':
             meta_features = meta_features[meta_features['outlier'] == 'None']
         elif conf['diversification_criterion'] == 'features_set' or conf['diversification_criterion'] == 'features_set_n_clusters':
-            meta_features = meta_features[(meta_features['outlier'] == 'None') | ((meta_features['outlier'] != 'None') & (meta_features['outlier__n_neighbors'] == '32'))]
+            meta_features = meta_features[(meta_features['outlier'] == 'None') | ((meta_features['outlier'] != 'None') & (meta_features['outlier__n_neighbors'] == '100'))]
         else:
             raise Exception(f'''missing diversification criterion for 
                             {conf}''')
