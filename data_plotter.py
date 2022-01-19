@@ -108,7 +108,7 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
     #ax.set_xlim([min, max])
     #ax.set_ylim([min, max])
     ax.set_xlabel(labels[0])
-    ax.set_ylabel(labels[1])
+    ax.set_ylabel(labels[1] if Xt.shape[1] > 1 else 'None')
     if Xt.shape[1] == 3:
         #ax.set_zlim([min, max])
         ax.set_zlabel(labels[2])
@@ -117,8 +117,11 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
     outlier_str = 'outlier_' if outlier else ''
     clustering_str = 'natural' if natural_clusters else 'pred'
     fig.tight_layout()
-    fig.savefig('toy_' + features_str + scaler_str + outlier_str + clustering_str + '.pdf')
-    #plt.show()
+    #fig.savefig('toy_' + features_str + scaler_str + outlier_str + clustering_str + '.pdf')
+    plt.show()
+
+plot(dataset='synthetic', features=True, n_features=1, scaler=False, outlier=True, n_clusters=2, natural_clusters=True, internal_metric='sil')
+plot(dataset='synthetic', features=True, n_features=1, scaler=False, outlier=True, n_clusters=2, natural_clusters=False, internal_metric='sil')
 
 plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=True, n_clusters=2, natural_clusters=True, internal_metric='sil')
 plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=True, n_clusters=2, natural_clusters=False, internal_metric='sil')
