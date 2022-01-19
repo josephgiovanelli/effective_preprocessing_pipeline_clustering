@@ -36,7 +36,7 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
     X, y, original_features = datasets.get_dataset(dataset)
 
     '''
-    X, y = make_blobs(n_samples=(400, 1000, 300, 300), n_features=2, centers=[(-15, -10), (-2.5, -10), (-7.5, -22), (0, -22.)], cluster_std=[1, 2.5, 1., 1.],  shuffle=True, random_state=42)
+    X, y = make_blobs(n_samples=(400, 1000, 300, 300), n_features=2, centers=[(-20, -10), (-2.5, -10), (-7.5, -22), (0, -22.)], cluster_std=[3.5, 2.5, 1., 1.],  shuffle=True, random_state=42)
     X[:, 1] *= 10
     X[:, 0] *= 5
     np.random.seed(42)
@@ -120,23 +120,26 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
     #fig.savefig('toy_' + features_str + scaler_str + outlier_str + clustering_str + '.pdf')
     plt.show()
 
-plot(dataset='synthetic', features=True, n_features=1, scaler=False, outlier=True, n_clusters=2, natural_clusters=True, internal_metric='sil')
-plot(dataset='synthetic', features=True, n_features=1, scaler=False, outlier=True, n_clusters=2, natural_clusters=False, internal_metric='sil')
+#plot(dataset='synthetic', features=True, n_features=3, scaler=False, outlier=True, n_clusters=3, natural_clusters=True, internal_metric='sil')
+#plot(dataset='synthetic', features=True, n_features=3, scaler=False, outlier=True, n_clusters=3, natural_clusters=False, internal_metric='sil')
 
-plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=True, n_clusters=2, natural_clusters=True, internal_metric='sil')
-plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=True, n_clusters=2, natural_clusters=False, internal_metric='sil')
+#plot(dataset='synthetic', features=True, n_features=1, scaler=False, outlier=True, n_clusters=2, natural_clusters=True, internal_metric='sil')
+#plot(dataset='synthetic', features=True, n_features=1, scaler=False, outlier=True, n_clusters=2, natural_clusters=False, internal_metric='sil')
 
-plot(dataset='synthetic', features=True, n_features=2, scaler=True, outlier=True, n_clusters=4, natural_clusters=True, internal_metric='sil')
-plot(dataset='synthetic', features=True, n_features=2, scaler=True, outlier=True, n_clusters=4, natural_clusters=False, internal_metric='sil')
+#plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=True, n_clusters=2, natural_clusters=True, internal_metric='sil')
+#plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=True, n_clusters=2, natural_clusters=False, internal_metric='sil')
 
-plot(dataset='synthetic', features=True, n_features=2, scaler=True, outlier=False, n_clusters=4, natural_clusters=True, internal_metric='sil')
-plot(dataset='synthetic', features=True, n_features=2, scaler=True, outlier=False, n_clusters=4, natural_clusters=False, internal_metric='sil')
+#plot(dataset='synthetic', features=True, n_features=2, scaler=True, outlier=True, n_clusters=4, natural_clusters=True, internal_metric='sil')
+#plot(dataset='synthetic', features=True, n_features=2, scaler=True, outlier=True, n_clusters=4, natural_clusters=False, internal_metric='sil')
 
-plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=False, n_clusters=4, natural_clusters=True, internal_metric='sil')
-plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=False, n_clusters=4, natural_clusters=False, internal_metric='sil')
+#plot(dataset='synthetic', features=True, n_features=2, scaler=True, outlier=False, n_clusters=4, natural_clusters=True, internal_metric='sil')
+#plot(dataset='synthetic', features=True, n_features=2, scaler=True, outlier=False, n_clusters=4, natural_clusters=False, internal_metric='sil')
 
-plot(dataset='synthetic', features=False, n_features=5, scaler=False, outlier=False, n_clusters=4, natural_clusters=True, internal_metric='sil')
-plot(dataset='synthetic', features=False, n_features=5, scaler=False, outlier=False, n_clusters=4, natural_clusters=False, internal_metric='sil')
+#plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=False, n_clusters=4, natural_clusters=True, internal_metric='sil')
+#plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=False, n_clusters=4, natural_clusters=False, internal_metric='sil')
+
+#plot(dataset='synthetic', features=False, n_features=5, scaler=False, outlier=False, n_clusters=4, natural_clusters=True, internal_metric='sil')
+#plot(dataset='synthetic', features=False, n_features=5, scaler=False, outlier=False, n_clusters=4, natural_clusters=False, internal_metric='sil')
 
 '''
 plot silhouette chart
