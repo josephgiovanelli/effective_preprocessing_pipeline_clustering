@@ -35,7 +35,8 @@ def load_result(input_path, dataset, metric):
                 'optimization_internal_metric_value': [elem['internal_metric']], 
                 'optimization_external_metric_value': [elem['external_metric']],
                 'max_optimization_internal_metric_value': [elem['max_history_internal_metric']], 
-                'max_optimization_external_metric_value': [elem['max_history_external_metric']]
+                'max_optimization_external_metric_value': [elem['max_history_external_metric']],
+                'duration': [elem['duration']]
             }), ignore_index=True)
 
     return results
