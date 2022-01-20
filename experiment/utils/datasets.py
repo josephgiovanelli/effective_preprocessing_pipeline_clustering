@@ -8,16 +8,16 @@ from experiment.pipeline.PrototypeSingleton import PrototypeSingleton
 
 def get_dataset(name):
     loader = {
+        'blood': 1464,
         'breast': 1465, #this is breast-tissue, not breast cancer
+        'diabetes': 37,
+        'ecoli': 40671,
         'iris': 61,
         'parkinsons': 1488,
         'seeds': 1499,
-        'wine': 187,
-        'blood': 1464,
-        'vehicle': 54,
-        'diabetes': 37,
         'thyroid': 40682,
-        'ecoli': 40671
+        'vehicle': 54,
+        'wine': 187,
     }
     if name in loader:
         return load_dataset_from_openml(loader[name])
@@ -95,13 +95,18 @@ def load_dataset_from_csv(name):
             'asymmetry coefficient',
             'length of kernel groove'
             ]
-    elif name == 'synthetic' or name == 'old_synthetic_2d' or name == 'old_synthetic_3d':
+    elif name == 'synthetic':
         features_name = [
             'feature_0',
             'feature_1',
             'feature_2',
             'feature_3',
             'feature_4',
+        ]
+    elif name == 'iris2':
+        features_name = [
+            '[2 - petallength (numeric)]',
+            '[3 - petalwidth (numeric)]',
         ]
     else:
         raise Exception('No features names assigned')
