@@ -68,6 +68,7 @@ def objective(pipeline_config, algo_config, X, y, context, config):
 
         result = pipeline.fit_predict(X, y)
         yt_to_export['pred'] = pd.DataFrame(result.copy(), columns=['target'])
+        external_metric = metrics.adjusted_mutual_info_score(yt, result)
         if config['metric'] == 'sil':
             internal_metric = silhouette_score(Xt, result)
             #sil_samples, intra_clust_dists, inter_clust_dists = my_silhouette_samples(Xt, result)
@@ -77,7 +78,8 @@ def objective(pipeline_config, algo_config, X, y, context, config):
             internal_metric = -1 * davies_bouldin_score(Xt, result)
         elif config['metric'] == 'sdbw':
             internal_metric = -1 * S_Dbw(Xt, result)
-        external_metric = metrics.adjusted_mutual_info_score(yt, result)
+        elif config['metric'] == 'ami':
+            internal_metric = external_metric
         internal_metric = np.float64(internal_metric)
         external_metric = np.float64(external_metric)
         status = STATUS_OK
