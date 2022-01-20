@@ -103,7 +103,7 @@ def load_dataset_from_csv(name):
             'feature_3',
             'feature_4',
         ]
-    elif name == 'iris2':
+    elif name == 'iris2' or name == 'iris3':
         features_name = [
             '[2 - petallength (numeric)]',
             '[3 - petalwidth (numeric)]',
