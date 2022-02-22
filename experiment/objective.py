@@ -79,7 +79,7 @@ def objective(pipeline_config, algo_config, X, y, context, config):
         elif config['metric'] == 'sdbw':
             internal_metric = -1 * S_Dbw(Xt, result)
         elif config['metric'] == 'ssw':
-            internal_metric = -1 * pipeline[:-1].inertia_
+            internal_metric = -1 * pipeline[-1].inertia_
         elif config['metric'] == 'ami':
             internal_metric = external_metric
         internal_metric = np.float64(internal_metric)
