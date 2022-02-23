@@ -81,8 +81,9 @@ def objective(pipeline_config, algo_config, X, y, context, config):
         elif config['metric'] == 'ssw':
             internal_metric = -1 * pipeline[-1].inertia_
         elif config['metric'] == 'sw':
-            _, intra_clust_dists, _ = -1 * my_silhouette_samples(Xt, result)
+            _, intra_clust_dists, _ = my_silhouette_samples(Xt, result)
             internal_metric = intra_clust_dists.sum()
+            internal_metric = -1 * internal_metric
         elif config['metric'] == 'ami':
             internal_metric = external_metric
         internal_metric = np.float64(internal_metric)
