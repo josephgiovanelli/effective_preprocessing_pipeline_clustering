@@ -1,13 +1,13 @@
 general:
-  dataset: iris
+  dataset: wine
   seed: 42
 optimizations:
   smbo:
-    metric: ssw
+    metric: dbi
     budget_kind: iterations
     budget: 2000
   exhaustive:
-    metric: ssw
+    metric: dbi
     budget_kind: iterations
     budget: inf
 diversifications:

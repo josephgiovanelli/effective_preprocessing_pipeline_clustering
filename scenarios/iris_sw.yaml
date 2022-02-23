@@ -3,11 +3,11 @@ general:
   seed: 42
 optimizations:
   smbo:
-    metric: ssw
+    metric: sw
     budget_kind: iterations
     budget: 2000
   exhaustive:
-    metric: ssw
+    metric: sw
     budget_kind: iterations
     budget: inf
 diversifications:

@@ -25,6 +25,3 @@ diversifications:
     metric: euclidean
 runs:
   - smbo_mmr
-  - smbo_exhaustive
-  - exhaustive_mmr
-  - exhaustive_exhaustive
