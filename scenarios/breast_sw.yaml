@@ -1,9 +1,9 @@
 general:
-  dataset: iris
+  dataset: breast
   seed: 42
 optimizations:
   smbo:
-    metric: ssw
+    metric: sw
     budget_kind: iterations
     budget: 2000
 diversifications:

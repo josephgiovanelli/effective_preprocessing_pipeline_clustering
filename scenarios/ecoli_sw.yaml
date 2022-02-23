@@ -1,9 +1,9 @@
 general:
-  dataset: iris
+  dataset: ecoli
   seed: 42
 optimizations:
   smbo:
-    metric: dbi
+    metric: sw
     budget_kind: iterations
     budget: 2000
 diversifications:

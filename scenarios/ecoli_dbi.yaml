@@ -1,9 +1,9 @@
 general:
-  dataset: wine
+  dataset: ecoli
   seed: 42
 optimizations:
   smbo:
-    metric: sw
+    metric: dbi
     budget_kind: iterations
     budget: 2000
 diversifications:

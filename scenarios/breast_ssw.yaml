@@ -1,9 +1,9 @@
 general:
-  dataset: wine
+  dataset: breast
   seed: 42
 optimizations:
   smbo:
-    metric: dbi
+    metric: ssw
     budget_kind: iterations
     budget: 2000
 diversifications:
