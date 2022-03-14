@@ -30,6 +30,7 @@ from s_dbw import S_Dbw
 
 from experiment.pipeline.outlier_detectors import MyOutlierDetector
 from experiment.utils import datasets
+from experiment.utils.metrics import my_silhouette_samples
 
 def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clusters, internal_metric):
     
@@ -50,7 +51,7 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
 
     myFeatureEngineeringTransformer = GenericSPEC(k=n_features)
     myScaler = StandardScaler()
-    myOutlierDetector = MyOutlierDetector(n_neighbors=100)
+    myOutlierDetector = MyOutlierDetector(n_neighbors=32)
     myEstimator = KMeans(max_iter=10, n_clusters=n_clusters, random_state=42)
     pipe = Pipeline([ 
         ('features', myFeatureEngineeringTransformer if features else FunctionTransformer()),
@@ -67,14 +68,23 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
         yt = y
     
     if internal_metric == 'sil':
-        print(f'internal metric: {silhouette_score(Xt, y_pred)}')
+        internal_metric_value = silhouette_score(Xt, y_pred)
+        #sil_samples, intra_clust_dists, inter_clust_dists = my_silhouette_samples(Xt, result)
     elif internal_metric == 'ch':
-        print(f'internal metric: {calinski_harabasz_score(Xt, y_pred)}')
+        internal_metric_value = calinski_harabasz_score(Xt, y_pred)
     elif internal_metric == 'dbi':
-        print(f'internal metric: {-1 * davies_bouldin_score(Xt, y_pred)}')
+        internal_metric_value = -1 * davies_bouldin_score(Xt, y_pred)
     elif internal_metric == 'sdbw':
-        print(f'internal metric: {-1 * S_Dbw(Xt, y_pred)}')
+        internal_metric_value = -1 * S_Dbw(Xt, y_pred)
+    elif internal_metric == 'ssw':
+        internal_metric_value = -1 * pipe[-1].inertia_
+    elif internal_metric == 'sw':
+        _, intra_clust_dists, _ = my_silhouette_samples(Xt, y_pred)
+        internal_metric_value = intra_clust_dists.sum()
+        internal_metric_value = -1 * internal_metric_value
+    print(f'internal metric: {internal_metric_value}')
     print(f'external metric: {metrics.adjusted_mutual_info_score(yt, y_pred)}')
+    print(f'ssw: {myEstimator.inertia_}')
 
     #Xt = Xt[:, :2]
     if Xt.shape[1] > 2:
@@ -89,7 +99,7 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
         labels = [original_features[i] for i in indeces]
 
     fig = plt.figure()
-    colors = np.array(['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'grey', 'olive', 'cyan'])
+    colors = np.array(['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'grey', 'olive', 'cyan', 'mediumspringgreen', 'peru'])
     markers = ['o', 'v', '1', 's', 'p', 'P', '*', 'X', 'D', '_']
 
     y_to_plot = yt if natural_clusters else y_pred
@@ -117,7 +127,7 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
     outlier_str = 'outlier_' if outlier else ''
     clustering_str = 'natural' if natural_clusters else 'pred'
     fig.tight_layout()
-    #fig.savefig('toy_' + features_str + scaler_str + outlier_str + clustering_str + '.pdf')
+    #fig.savefig(dataset + '_' + str(n_features) +  'feat_tsne.pdf')
     plt.show()
 
 #plot(dataset='synthetic', features=True, n_features=3, scaler=False, outlier=True, n_clusters=3, natural_clusters=True, internal_metric='sil')
@@ -140,6 +150,14 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
 
 #plot(dataset='synthetic', features=False, n_features=5, scaler=False, outlier=False, n_clusters=4, natural_clusters=True, internal_metric='sil')
 #plot(dataset='synthetic', features=False, n_features=5, scaler=False, outlier=False, n_clusters=4, natural_clusters=False, internal_metric='sil')
+
+#plot(dataset='seeds', features=True, n_features=1, scaler=False, outlier=False, n_clusters=3, natural_clusters=True, internal_metric='sil')
+#plot(dataset='seeds', features=True, n_features=2, scaler=False, outlier=False, n_clusters=3, natural_clusters=True, internal_metric='sil')
+#plot(dataset='seeds', features=True, n_features=3, scaler=False, outlier=False, n_clusters=3, natural_clusters=True, internal_metric='sil')
+#plot(dataset='seeds', features=True, n_features=4, scaler=False, outlier=False, n_clusters=3, natural_clusters=True, internal_metric='sil')
+#plot(dataset='seeds', features=True, n_features=5, scaler=False, outlier=False, n_clusters=3, natural_clusters=True, internal_metric='sil')
+#plot(dataset='seeds', features=True, n_features=6, scaler=False, outlier=False, n_clusters=3, natural_clusters=True, internal_metric='sil')
+plot(dataset='synthetic', features=False, n_features=1, scaler=False, outlier=False, n_clusters=2, natural_clusters=False, internal_metric='sil')
 
 '''
 plot silhouette chart
