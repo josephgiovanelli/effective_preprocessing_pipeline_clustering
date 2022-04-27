@@ -64,6 +64,14 @@ def diversificate_mmr(meta_features, conf, original_features):
                         (meta_features['dataset'] == conf['dataset']) & 
                         (meta_features['optimization_internal_metric'] == conf['optimization_internal_metric']) & 
                         (meta_features['iteration'] == current_iteration)), 'algorithm__n_clusters'].values[0])
+            elif conf['diversification_criterion'] == 'hyper_parameter':
+                _, current_last_transformation = get_last_transformation(meta_features, conf['dataset'], conf['optimization_internal_metric'], current_iteration)
+                current_X = pd.read_csv(os.path.join(conf['input_path'], '_'.join([conf['dataset'], conf['optimization_internal_metric'], str(current_iteration), 'X', current_last_transformation]) + '.csv'))
+                current_features = [len(list(current_X.columns))]
+                current_features.append(meta_features.loc[(
+                    (meta_features['dataset'] == conf['dataset']) & 
+                    (meta_features['optimization_internal_metric'] == conf['optimization_internal_metric']) & 
+                    (meta_features['iteration'] == current_iteration)), 'algorithm__n_clusters'].values[0])
             else:
                 raise Exception(f'''missing diversification criterion for 
                                 {conf}''')
@@ -87,6 +95,22 @@ def diversificate_mmr(meta_features, conf, original_features):
                             (meta_features['dataset'] == conf['dataset']) & 
                             (meta_features['optimization_internal_metric'] == conf['optimization_internal_metric']) & 
                             (meta_features['iteration'] == int(other))), 'algorithm__n_clusters'].values[0])
+                    if conf['diversification_metric'] == 'euclidean':
+                        dist = distance.euclidean(current_features, other_features)
+                    elif conf['diversification_metric'] == 'cosine':
+                        dist = distance.cosine(current_features, other_features)
+                    else:
+                        raise Exception(f'''missing diversification metric for 
+                                        {conf}''')
+                elif conf['diversification_criterion'] == 'hyper_parameter':
+                    _, other_last_transformation = get_last_transformation(meta_features, conf['dataset'], conf['optimization_internal_metric'], int(other))
+                    other_X = pd.read_csv(os.path.join(conf['input_path'], '_'.join([conf['dataset'], conf['optimization_internal_metric'], str(int(other)), 'X', other_last_transformation]) + '.csv'))
+                    other_features = [len(list(other_X.columns))]
+                    other_features.append(meta_features.loc[(
+                        (meta_features['dataset'] == conf['dataset']) & 
+                        (meta_features['optimization_internal_metric'] == conf['optimization_internal_metric']) & 
+                        (meta_features['iteration'] == int(other))), 'algorithm__n_clusters'].values[0])
+
                     if conf['diversification_metric'] == 'euclidean':
                         dist = distance.euclidean(current_features, other_features)
                     elif conf['diversification_metric'] == 'cosine':
@@ -148,6 +172,12 @@ def evaluate_dashboard(solutions, conf, original_features):
                 features = get_one_hot_encoding(features, original_features)
                 if conf['diversification_criterion'] == 'features_set_n_clusters':
                     features.append(df.loc[df['iteration'] == iteration, 'algorithm__n_clusters'].values[0])
+                div_vectors.append(features)
+            elif conf['diversification_criterion'] == 'hyper_parameter':
+                _, last_transformation = get_last_transformation(df, conf['dataset'], conf['optimization_internal_metric'], iteration)
+                X = pd.read_csv(os.path.join(conf['input_path'], '_'.join([conf['dataset'], conf['optimization_internal_metric'], str(iteration), 'X', last_transformation]) + '.csv'))
+                features = [len(list(X.columns))]
+                features.append(df.loc[df['iteration'] == iteration, 'algorithm__n_clusters'].values[0])
                 div_vectors.append(features)
             else:
                 raise Exception(f'''missing diversification criterion for 
@@ -314,8 +344,8 @@ def main():
 
         if conf['diversification_criterion'] == 'clustering':
             meta_features = meta_features[meta_features['outlier'] == 'None']
-        elif conf['diversification_criterion'] == 'features_set' or conf['diversification_criterion'] == 'features_set_n_clusters':
-            meta_features = meta_features[(meta_features['outlier'] == 'None') | ((meta_features['outlier'] != 'None') & (meta_features['outlier__n_neighbors'] == '32'))]
+        elif conf['diversification_criterion'] == 'features_set' or conf['diversification_criterion'] == 'features_set_n_clusters' or conf['diversification_criterion'] == 'hyper_parameter':
+            meta_features = meta_features[(meta_features['outlier'] == 'None') | ((meta_features['outlier'] != 'None') & (meta_features['outlier__n_neighbors'] == ('100' if conf['dataset'] == 'synthetic' else '32')))]
         else:
             raise Exception(f'''missing diversification criterion for 
                             {conf}''')
