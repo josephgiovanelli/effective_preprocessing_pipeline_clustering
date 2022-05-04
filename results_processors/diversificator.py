@@ -99,6 +99,8 @@ def diversificate_mmr(meta_features, conf, original_features):
                         dist = distance.euclidean(current_features, other_features)
                     elif conf['diversification_metric'] == 'cosine':
                         dist = distance.cosine(current_features, other_features)
+                    elif conf['diversification_metric'] == 'jaccard':
+                        dist = distance.jaccard(current_features, other_features)
                     else:
                         raise Exception(f'''missing diversification metric for 
                                         {conf}''')
@@ -115,6 +117,8 @@ def diversificate_mmr(meta_features, conf, original_features):
                         dist = distance.euclidean(current_features, other_features)
                     elif conf['diversification_metric'] == 'cosine':
                         dist = distance.cosine(current_features, other_features)
+                    elif conf['diversification_metric'] == 'jaccard':
+                        dist = distance.jaccard(current_features, other_features)
                     else:
                         raise Exception(f'''missing diversification metric for 
                                         {conf}''')
@@ -188,6 +192,8 @@ def evaluate_dashboard(solutions, conf, original_features):
             return distance.euclidean(div_vectors[0], div_vectors[1])
         elif conf['diversification_metric'] == 'cosine':
             return distance.cosine(div_vectors[0], div_vectors[1])
+        elif conf['diversification_metric'] == 'jaccard':
+            return distance.jaccard(div_vectors[0], div_vectors[1])
         else:
             raise Exception(f'''missing diversification metric for 
                             {conf}''')
@@ -211,32 +217,33 @@ def save_figure(solutions, conf):
         if Xt.shape[1] < 3:
             ax = fig.add_subplot(3, 3, i)
         else:
-            ax = fig.add_subplot(3, 3, i, projection='3d')
+            #ax = fig.add_subplot(3, 3, i, projection='3d')
+            ax = fig.add_subplot(3, 3, i)
         colors = np.array(['blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'grey', 'olive', 'cyan', 'indigo', 'black'])
         old_X = Xt.copy()
-        if Xt.shape[1] > 3:
-            Xt = pd.DataFrame(TSNE(n_components=3, random_state=42).fit_transform(Xt.to_numpy(), yt.to_numpy()), columns=['TSNE_0', 'TSNE_1', 'TSNE_2'])
+        if Xt.shape[1] > 2:
+            Xt = pd.DataFrame(TSNE(n_components=2, random_state=42).fit_transform(Xt.to_numpy(), yt.to_numpy()), columns=['TSNE_0', 'TSNE_1'])
             if conf['outlier']:
                 Xt, yt = MyOutlierDetector(n_neighbors=32).fit_resample(Xt.to_numpy(), yt.iloc[:, 0].to_numpy())
-                Xt, yt = pd.DataFrame(Xt, columns=['TSNE_0', 'TSNE_1', 'TSNE_2']), pd.DataFrame(yt, columns=['target'])
+                Xt, yt = pd.DataFrame(Xt, columns=['TSNE_0', 'TSNE_1']), pd.DataFrame(yt, columns=['target'])
         n_selected_features = Xt.shape[1]
         Xt = Xt.iloc[:, :n_selected_features]
         min, max = Xt.min().min(), Xt.max().max()
         range = (max-min)/10
         xs = Xt.iloc[:, 0]
         ys = [(max+min)/2] * Xt.shape[0] if n_selected_features < 2 else Xt.iloc[:, 1]
-        zs = [(max+min)/2] * Xt.shape[0] if n_selected_features < 3 else Xt.iloc[:, 2]
+        #zs = [(max+min)/2] * Xt.shape[0] if n_selected_features < 3 else Xt.iloc[:, 2]
         if Xt.shape[1] < 3:
             ax.scatter(xs, ys, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
-        else:
-            ax.scatter(xs, ys, zs, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
+        #else:
+            #ax.scatter(xs, ys, zs, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
         ax.set_xlim([min - range, max + range])
         ax.set_ylim([min - range, max + range])
         ax.set_xlabel(list(Xt.columns)[0], fontsize=16)
         ax.set_ylabel('None' if n_selected_features < 2 else list(Xt.columns)[1], fontsize=16)
-        if Xt.shape[1] >= 3:
-            ax.set_zlim([min, max])
-            ax.set_zlabel('None' if n_selected_features < 3 else list(Xt.columns)[2], fontsize=16)
+        #if Xt.shape[1] >= 3:
+            #ax.set_zlim([min, max])
+            #ax.set_zlabel('None' if n_selected_features < 3 else list(Xt.columns)[2], fontsize=16)
         title = '\n'.join([operator for operator in pipeline.values() ])
         current_solution = solutions.loc[(
             (solutions['dataset'] == conf['dataset']) & 
