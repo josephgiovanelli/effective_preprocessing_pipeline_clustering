@@ -14,15 +14,15 @@ diversifications:
   mmr:
     num_results: 3
     method: mmr
-    lambda: 0.5
+    lambda: 0.7
     criterion: features_set
-    metric: euclidean
+    metric: jaccard
   exhaustive:
     num_results: 3
     method: exhaustive
-    lambda: 0.5
+    lambda: 0.7
     criterion: features_set
-    metric: euclidean
+    metric: jaccard
 runs:
   - smbo_mmr
   - smbo_exhaustive

@@ -294,6 +294,8 @@ def main():
             except yaml.YAMLError as exc:
                 print(exc)
 
+    timing_df = pd.DataFrame()
+
     for i in range(len(confs)):
         conf = confs[i]
         print(f'''{i+1}th conf out of {len(confs)}: {conf}''')
@@ -384,8 +386,8 @@ def main():
                 raise Exception(f'''missing diversification method for 
                                 {conf}''')
             end_time = time.time()
-            conf['diversification_duration'] = int(end_time) - int(start_time)
-            conf['diversification_duration'] = str(datetime.timedelta(seconds=conf['diversification_duration']))
+            conf['diversification_duration_s'] = int(end_time) - int(start_time)
+            conf['diversification_duration'] = str(datetime.timedelta(seconds=conf['diversification_duration_s']))
             print(f'''\t\tDiversification process ends: {conf['diversification_duration']}''')
             dashboard['solutions'].to_csv(os.path.join(conf['output_path'], conf['output_file_name'] + '.csv'), index=False)
         dashboard_score = dashboard['score']
@@ -397,6 +399,17 @@ def main():
             conf['outlier'] = outlier_removal
             plot_path = os.path.join(conf['output_path'], conf['output_file_name'] + ('_outlier' if conf['outlier'] else '') + '.pdf')
             if not os.path.exists(plot_path):
-                save_figure(dashboard['solutions'], conf)     
+                save_figure(dashboard['solutions'], conf)
+        try:     
+            timing_df = timing_df.append({
+                "dataset": conf["dataset"], 
+                "optimization": conf['optimization_method'], 
+                "diversification": conf['diversification_method'], 
+                "timing": conf['diversification_duration_s'], 
+                "score":dashboard['score']
+                }, ignore_index=True)
+            timing_df.to_csv(os.path.join(DIVERSIFICATION_RESULT_PATH, "timing.csv"), index=False)
+        except:
+            print("I think a diversification result was already present.")
         
 main()
