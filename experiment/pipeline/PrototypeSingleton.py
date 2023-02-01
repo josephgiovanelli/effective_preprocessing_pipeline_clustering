@@ -69,14 +69,14 @@ class PrototypeSingleton:
             names.append('None')
         return names
 
-    def setPipeline(self, params):
+    def setPipeline(self, params, space):
         for param in params:
             self.parts.append(param)
 
         for part in self.parts:
-            self.PROTOTYPE[part] = self.POOL[part]
+            self.PROTOTYPE[part] = [elem for elem in self.POOL[part] if (elem == None) or (elem.__class__.__name__ in space.keys())]
 
-        self.DOMAIN_SPACE = generate_domain_space(self.PROTOTYPE)
+        self.DOMAIN_SPACE = generate_domain_space(self.PROTOTYPE, space)
 
     def setFeatures(self, num_features, cat_features):
         self.original_numerical_features = num_features

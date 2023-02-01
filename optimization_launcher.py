@@ -7,8 +7,10 @@ from tqdm import tqdm
 
 from utils import get_scenario_info, SCENARIO_PATH, OPTIMIZATION_RESULT_PATH
 from experiment.utils import scenarios as scenarios_util
+from experiment.utils import cli
 
 scenarios = get_scenario_info()
+args = cli.parse_args()
 
 scenario_with_results = {k: v for k, v in scenarios.items() if v['results'] is not None}
 t_with_results = PrettyTable(['NAME','RESULTS'])
@@ -45,11 +47,12 @@ with tqdm(total=len(to_run)) as pbar:
 
         result_path = os.path.join(OPTIMIZATION_RESULT_PATH, optimization_approach)
 
-        cmd = 'python ./optimizer.py -s {} -p {} -r {} -o {}'.format(
+        cmd = 'python ./optimizer.py -s {} -p {} -r {} -o {} -sp {}'.format(
             os.path.join(SCENARIO_PATH, info['path']),
             "features normalize outlier",
             result_path,
-            optimization_approach)
+            optimization_approach,
+            args.space_path)
         with open(os.path.join(result_path, '{}_stdout.txt'.format(base_scenario)), "a") as log_out:
             with open(os.path.join(result_path, '{}_stderr.txt'.format(base_scenario)), "a") as log_err:
                 start_time = time.time()

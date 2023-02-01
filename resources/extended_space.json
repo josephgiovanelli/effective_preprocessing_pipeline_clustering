@@ -1,0 +1,31 @@
+{
+    "RobustScaler": {
+        "quantile_range": [
+            [
+                25.0,
+                75.0
+            ],
+            [
+                10.0,
+                90.0
+            ],
+            [
+                5.0,
+                95.0
+            ]
+        ],
+        "with_centering": [
+            true,
+            false
+        ],
+        "with_scaling": [
+            true,
+            false
+        ]
+    },
+    "MyOutlierDetector": {
+        "n_neighbors": [
+            100
+        ]
+    }
+}

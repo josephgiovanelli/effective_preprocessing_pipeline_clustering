@@ -15,13 +15,16 @@ from sklearn.model_selection import train_test_split
 def main(args):
     scenario = scenarios.load(args.scenario)
     config = scenarios.to_config(scenario, args.optimization_approach)
+    with open(args.space_path, "r") as f:
+        space = json.load(f)
+
     print('SCENARIO:')
     print('#' * 50)
     print(f'{json.dumps(scenario, indent=4, sort_keys=True)}')
     print('#' * 50 + '\n')
 
     X, y, _ = datasets.get_dataset(config['dataset'])
-    PrototypeSingleton.getInstance().setPipeline(args.pipeline)
+    PrototypeSingleton.getInstance().setPipeline(args.pipeline, space)
 
     config['result_path'] = args.result_path
     policy = policies.initiate(config)

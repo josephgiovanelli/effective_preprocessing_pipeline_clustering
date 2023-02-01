@@ -1,0 +1,9 @@
+{
+    "MyOutlierDetector": {
+        "n_neighbors": [
+            100
+        ]
+    },
+    "StandardScaler": {},
+    "GenericSPEC": {}
+}

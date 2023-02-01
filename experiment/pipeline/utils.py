@@ -7,18 +7,22 @@ from sklearn.pipeline import FeatureUnion
 
 from experiment.pipeline.space import *
 
-def expand_params(operation, operator):
-    try:
-        params = globals()['params_{}'.format(type(operator).__name__)]()
-        expanded_params = {}
+def expand_params(operation, operator, space):
+    expanded_params = {}
+
+    if operator != None:
+        try:
+            params = globals()['params_{}'.format(type(operator).__name__)]()
+        except Exception as e:
+            params = space[type(operator).__name__]
+
         for param_name, param_val in params.items():
             expanded_params['{}__{}'.format(operation, param_name)] = param_val
-        return expanded_params
-    except Exception as e:
-        return {} # TODO: Warning in verbose mode
+
+    return expanded_params
 
 
-def generate_grid(prototype):
+def generate_grid(prototype, space):
     final_grid = []
     elements = [zip([k] * len(o), o) for k,o in prototype.items()]
     for element in itertools.product(*elements):
@@ -27,7 +31,7 @@ def generate_grid(prototype):
         for operation, operator in config.items():
             config[operation] = [operator] # Trick since ScikitLearn requires list
             if operator is not None:
-                params.update(expand_params(operation, operator))
+                params.update(expand_params(operation, operator, space))
         config.update(params)
         final_grid.append(config)
     return final_grid
@@ -54,7 +58,7 @@ def pretty_print_grid(grid):
         print(print_conf)
 
 
-def generate_domain_space(prototype):
+def generate_domain_space(prototype, space):
     domain_space = {}
     print('SEARCH SPACE:')
     print('#' * 50)
@@ -64,7 +68,7 @@ def generate_domain_space(prototype):
         for operator in operators:
             print(f'\t\t{operator}')
             label = '{}_{}'.format(operation, type(operator).__name__ if operator is not None else 'NoneType')
-            params = expand_params(operation, operator)
+            params = expand_params(operation, operator, space)
             operator_config = {}
             to_print_operator_config = ''
             for k, v in params.items():
