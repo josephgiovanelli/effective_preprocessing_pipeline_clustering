@@ -19,7 +19,7 @@ script_dir = os.path.dirname( __file__ )
 mymodule_dir = os.path.join( script_dir, '..' )
 sys.path.append( mymodule_dir )
 from utils import create_directory, get_scenario_info, SCENARIO_PATH, OPTIMIZATION_RESULT_PATH, DIVERSIFICATION_RESULT_PATH
-from experiment.pipeline.outlier_detectors import MyOutlierDetector
+from experiment.pipeline.outlier_detectors import LocalOutlierDetector
 from experiment.utils import datasets
 
 def get_last_transformation(df, dataset, optimization_internal_metric, iteration):
@@ -224,7 +224,7 @@ def save_figure(solutions, conf):
         if Xt.shape[1] > 2:
             Xt = pd.DataFrame(TSNE(n_components=2, random_state=42).fit_transform(Xt.to_numpy(), yt.to_numpy()), columns=['TSNE_0', 'TSNE_1'])
             if conf['outlier']:
-                Xt, yt = MyOutlierDetector(n_neighbors=32).fit_resample(Xt.to_numpy(), yt.iloc[:, 0].to_numpy())
+                Xt, yt = LocalOutlierDetector(n_neighbors=32).fit_resample(Xt.to_numpy(), yt.iloc[:, 0].to_numpy())
                 Xt, yt = pd.DataFrame(Xt, columns=['TSNE_0', 'TSNE_1']), pd.DataFrame(yt, columns=['target'])
         n_selected_features = Xt.shape[1]
         Xt = Xt.iloc[:, :n_selected_features]

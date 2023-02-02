@@ -23,7 +23,7 @@
             false
         ]
     },
-    "MyOutlierDetector": {
+    "LocalOutlierDetector": {
         "n_neighbors": [
             100
         ]

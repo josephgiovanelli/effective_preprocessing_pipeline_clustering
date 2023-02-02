@@ -4,8 +4,6 @@ import numpy as np
 from numpy.core.numeric import indices
 import pandas as pd
 
-from fsfc.generic import GenericSPEC
-
 from sklearn.neighbors import LocalOutlierFactor
 
 from sklearn.compose import ColumnTransformer
@@ -28,7 +26,9 @@ from sklearn.datasets import make_blobs
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 from s_dbw import S_Dbw
 
-from experiment.pipeline.outlier_detectors import MyOutlierDetector
+
+from experiment.pipeline.outlier_detectors import LocalOutlierDetector, IsolationOutlierDetector#, SGDOutlierDetector
+from fsfc.generic import GenericSPEC, NormalizedCut, Lasso
 from experiment.utils import datasets
 from experiment.utils.metrics import my_silhouette_samples
 
@@ -49,14 +49,14 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
     pd.DataFrame(data).to_csv("datasets/synthetic.csv", header=None, index=None)
     '''
 
-    myFeatureEngineeringTransformer = GenericSPEC(k=n_features)
+    myFeatureEngineeringTransformer = NormalizedCut(k=n_features)
     myScaler = StandardScaler()
-    myOutlierDetector = MyOutlierDetector(n_neighbors=32)
+    localOutlierDetector = LocalOutlierDetector(n_neighbors=32)
     myEstimator = KMeans(max_iter=10, n_clusters=n_clusters, random_state=42)
     pipe = Pipeline([ 
         ('features', myFeatureEngineeringTransformer if features else FunctionTransformer()),
         ('scaler', myScaler if scaler else FunctionTransformer()), 
-        ('outlier', myOutlierDetector if outlier else FunctionTransformer()), 
+        ('outlier', localOutlierDetector if outlier else FunctionTransformer()), 
         ('estimator', myEstimator)
         ])
     
@@ -127,8 +127,8 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
     outlier_str = 'outlier_' if outlier else ''
     clustering_str = 'natural' if natural_clusters else 'pred'
     fig.tight_layout()
-    #fig.savefig(dataset + '_' + str(n_features) +  'feat_tsne.pdf')
-    plt.show()
+    fig.savefig(dataset + '_' + str(n_features) +  'feat_tsne.png')
+    #plt.show()
 
 #plot(dataset='synthetic', features=True, n_features=3, scaler=False, outlier=True, n_clusters=3, natural_clusters=True, internal_metric='sil')
 #plot(dataset='synthetic', features=True, n_features=3, scaler=False, outlier=True, n_clusters=3, natural_clusters=False, internal_metric='sil')
@@ -157,7 +157,7 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
 #plot(dataset='seeds', features=True, n_features=4, scaler=False, outlier=False, n_clusters=3, natural_clusters=True, internal_metric='sil')
 #plot(dataset='seeds', features=True, n_features=5, scaler=False, outlier=False, n_clusters=3, natural_clusters=True, internal_metric='sil')
 #plot(dataset='seeds', features=True, n_features=6, scaler=False, outlier=False, n_clusters=3, natural_clusters=True, internal_metric='sil')
-plot(dataset='synthetic', features=False, n_features=1, scaler=False, outlier=False, n_clusters=2, natural_clusters=False, internal_metric='sil')
+plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=False, n_clusters=2, natural_clusters=False, internal_metric='sil')
 
 '''
 plot silhouette chart

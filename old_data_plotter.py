@@ -28,7 +28,7 @@ from sklearn.datasets import make_blobs
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 from s_dbw import S_Dbw
 
-from experiment.pipeline.outlier_detectors import MyOutlierDetector
+from experiment.pipeline.outlier_detectors import LocalOutlierDetector
 from experiment.utils import datasets
 
 def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clusters, internal_metric):
@@ -50,12 +50,12 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
 
     myFeatureEngineeringTransformer = GenericSPEC(k=n_features)
     myScaler = StandardScaler()
-    myOutlierDetector = MyOutlierDetector(n_neighbors=100)
+    localOutlierDetector = LocalOutlierDetector(n_neighbors=100)
     myEstimator = KMeans(max_iter=10, n_clusters=n_clusters, random_state=42)
     pipe = Pipeline([ 
         ('features', myFeatureEngineeringTransformer if features else FunctionTransformer()),
         ('scaler', myScaler if scaler else FunctionTransformer()), 
-        ('outlier', myOutlierDetector if outlier else FunctionTransformer()), 
+        ('outlier', localOutlierDetector if outlier else FunctionTransformer()), 
         ('estimator', myEstimator)
         ])
     
