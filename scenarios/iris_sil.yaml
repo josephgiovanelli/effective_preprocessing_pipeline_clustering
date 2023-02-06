@@ -7,10 +7,6 @@ optimizations:
     metric: sil
     budget_kind: iterations
     budget: 20000
-  exhaustive:
-    metric: sil
-    budget_kind: iterations
-    budget: inf
 diversifications:
   mmr:
     num_results: 3
