@@ -23,6 +23,8 @@ def main(args):
     print(f'{json.dumps(scenario, indent=4, sort_keys=True)}')
     print('#' * 50 + '\n')
 
+    np.random.seed(config["seed"])
+
     X, y, _ = datasets.get_dataset(config['dataset'])
     PrototypeSingleton.getInstance().setPipeline(args.pipeline, space)
 
