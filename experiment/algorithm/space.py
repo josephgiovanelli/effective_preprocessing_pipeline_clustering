@@ -1,23 +1,33 @@
 
-from sklearn.cluster import KMeans, MiniBatchKMeans, MeanShift, SpectralClustering, AgglomerativeClustering, DBSCAN, OPTICS, Birch
+from sklearn.cluster import KMeans, MiniBatchKMeans, AffinityPropagation, MeanShift, SpectralClustering, AgglomerativeClustering, DBSCAN, OPTICS, Birch
 from sklearn.mixture import GaussianMixture
 
 from hyperopt import hp
 
 algorithms = {
     'KMeans': KMeans,
+
+    # Same of KMeans but more efficient
     'MiniBatchKMeans': MiniBatchKMeans,
-    # We have import problems because of the legacy version of this tool
-    # 'KMedoids': KMedoids,
+
+    'AffinityPropagation': AffinityPropagation,
+
+    'MeanShift': MeanShift,
+
+    'SpectralClustering': SpectralClustering,
+
+    'AgglomerativeClustering': AgglomerativeClustering,
+
     # It gives overlapping clusters
     'GaussianMixture': GaussianMixture,
-    # We do not know the search space
-    'MeanShift': MeanShift,
-    'AgglomerativeClustering': AgglomerativeClustering,
-    'SpectralClustering': SpectralClustering,
+
     # We do not know the search space
     'OPTICS': OPTICS,
+
     'Birch': Birch,
+
+    # We have import problems because of the legacy version of this tool
+    # 'KMedoids': KMedoids,
 }
 
 grid_k_means = {
@@ -28,25 +38,24 @@ grid_mini_batch_k_means = {
     "n_clusters": list(range(2, 201))
 }
 
-# grid_k_medoids = {
-#     "n_clusters": list(range(2, 201))
-# }
-
-grid_gaussian_mixture = {
-    "n_components": list(range(2, 201))
+grid_affinity_propagation = {
 }
 
-# I do not know the right search space
 grid_mean_shift = {
-    "bandwidth": list(range(2, 201))
-}
-
-grid_agglomerative_clustering = {
-    "n_clusters": list(range(2, 201))
+    # "bandwidth": list(range(2, 201))
 }
 
 grid_spectral_clustering = {
     "n_clusters": list(range(2, 201))
+}
+
+grid_agglomerative_clustering = {
+    "n_clusters": list(range(2, 201)),
+    "linkage": "complete"
+}
+
+grid_gaussian_mixture = {
+    "n_components": list(range(2, 201))
 }
 
 # I do not know the right search space
@@ -58,16 +67,21 @@ grid_birch = {
     "n_clusters": list(range(2, 201))
 }
 
+# grid_k_medoids = {
+#     "n_clusters": list(range(2, 201))
+# }
+
 parameter_grid = {
     'KMeans': grid_k_means,
     'MiniBatchKMeans': grid_mini_batch_k_means,
-    # 'KMedoids': grid_k_medoids,
-    'GaussianMixture': grid_gaussian_mixture,
+    'AffinityPropagation': grid_affinity_propagation,
     'MeanShift': grid_mean_shift,
-    'AgglomerativeClustering': grid_agglomerative_clustering,
     'SpectralClustering': grid_spectral_clustering,
+    'AgglomerativeClustering': grid_agglomerative_clustering,
+    'GaussianMixture': grid_gaussian_mixture,
     'OPTICS': grid_optics,
     'Birch': grid_birch,
+    # 'KMedoids': grid_k_medoids,
 }
 
 
