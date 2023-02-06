@@ -28,7 +28,7 @@ def main(args):
 
     config['result_path'] = args.result_path
     policy = policies.initiate(config)
-    policy.run(X, y)
+    policy.run(X, y, space)
 
     serializer.serialize_results(scenario, policy, os.path.join(
         args.result_path, config['dataset'] + '_' + config['metric'] + '.json'), args.pipeline)

@@ -11,10 +11,14 @@ def expand_params(operation, operator, space):
     expanded_params = {}
 
     if operator != None:
+
         try:
             params = globals()['params_{}'.format(type(operator).__name__)]()
         except Exception as e:
-            params = space[type(operator).__name__]
+            params = {}
+
+        updated_params = space[type(operator).__name__]
+        params.update(updated_params)
 
         for param_name, param_val in params.items():
             expanded_params['{}__{}'.format(operation, param_name)] = param_val

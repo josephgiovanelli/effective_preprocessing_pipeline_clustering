@@ -15,7 +15,7 @@ from .utils import generate_domain_space
 
 from experiment.pipeline.outlier_detectors import LocalOutlierDetector, IsolationOutlierDetector#, SGDOutlierDetector
 from experiment.pipeline import space
-from fsfc.generic import GenericSPEC, NormalizedCut
+from fsfc.generic import GenericSPEC, NormalizedCut, WKMeans
 import pandas as pd
 import numpy as np
 
@@ -26,7 +26,7 @@ class PrototypeSingleton:
     POOL = {
         "normalize": [None, StandardScaler(), MinMaxScaler(), RobustScaler(), PowerTransformer()],
         "outlier": [None, LocalOutlierDetector(), IsolationOutlierDetector()],
-        "features": [None, GenericSPEC(k=3), NormalizedCut(k=3)]
+        "features": [None, GenericSPEC(k=3), NormalizedCut(k=3), WKMeans(k=3, beta=0)]
     }
 
     features_names = []

@@ -12,12 +12,12 @@ from experiment.utils.exhaustive_search import suggest
 
 class Union(Policy):
 
-    def run(self, X, y):
+    def run(self, X, y, input_space):
         super(Union, self).run(X, y)
         trials = Trials()
         space = {
             'pipeline': self.PIPELINE_SPACE,
-            'algorithm': ALGORITHM_SPACE.get_domain_space(self.max_k),
+            'algorithm': ALGORITHM_SPACE.get_domain_space(input_space, self.max_k),
         }
         obj_pl = functools.partial(objective_union,
                 X=X,

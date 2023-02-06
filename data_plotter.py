@@ -28,7 +28,7 @@ from s_dbw import S_Dbw
 
 
 from experiment.pipeline.outlier_detectors import LocalOutlierDetector, IsolationOutlierDetector#, SGDOutlierDetector
-from fsfc.generic import GenericSPEC, NormalizedCut, Lasso
+from fsfc.generic import GenericSPEC, NormalizedCut, Lasso, WKMeans
 from experiment.utils import datasets
 from experiment.utils.metrics import my_silhouette_samples
 
@@ -49,10 +49,11 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
     pd.DataFrame(data).to_csv("datasets/synthetic.csv", header=None, index=None)
     '''
 
-    myFeatureEngineeringTransformer = NormalizedCut(k=n_features)
+    myFeatureEngineeringTransformer = WKMeans(k=n_features, beta = 0)
     myScaler = StandardScaler()
     localOutlierDetector = LocalOutlierDetector(n_neighbors=32)
-    myEstimator = KMeans(max_iter=10, n_clusters=n_clusters, random_state=42)
+    # myEstimator = KMeans(max_iter=10, n_clusters=n_clusters, random_state=42)
+    myEstimator = MeanShift()
     pipe = Pipeline([ 
         ('features', myFeatureEngineeringTransformer if features else FunctionTransformer()),
         ('scaler', myScaler if scaler else FunctionTransformer()), 
@@ -84,7 +85,7 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
         internal_metric_value = -1 * internal_metric_value
     print(f'internal metric: {internal_metric_value}')
     print(f'external metric: {metrics.adjusted_mutual_info_score(yt, y_pred)}')
-    print(f'ssw: {myEstimator.inertia_}')
+    # print(f'ssw: {myEstimator.inertia_}')
 
     #Xt = Xt[:, :2]
     if Xt.shape[1] > 2:
@@ -104,10 +105,10 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
 
     y_to_plot = yt if natural_clusters else y_pred
     min, max = Xt.min(), Xt.max()
-    centers = myEstimator.cluster_centers_
+    # centers = myEstimator.cluster_centers_
     if Xt.shape[1] < 3:
         ax = fig.add_subplot(1, 1, 1)
-        ax.scatter(Xt[:, 0], Xt[:, 1] if Xt.shape[1] > 1 else [(max+min)/2] * Xt.shape[0], c=[colors[int(i)] for i in y_to_plot])
+        ax.scatter(Xt[:, 0], Xt[:, 1] if Xt.shape[1] > 1 else [(max+min)/2] * Xt.shape[0], c=[colors[int(i) % len(colors)] for i in y_to_plot])
         #ax.scatter(centers[:, 0], centers[:, 1] if Xt.shape[1] > 1 else [(max+min)/2] * Xt.shape[0], c='cyan', marker='*', s=10)
     else:
         ax = fig.add_subplot(1, 1, 1, projection='3d')
