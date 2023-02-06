@@ -47,12 +47,11 @@ with tqdm(total=len(to_run)) as pbar:
 
         result_path = os.path.join(OPTIMIZATION_RESULT_PATH, optimization_approach)
 
-        cmd = 'python ./optimizer.py -s {} -p {} -r {} -o {} -sp {}'.format(
+        cmd = 'python ./optimizer.py -s {} -p {} -r {} -o {}'.format(
             os.path.join(SCENARIO_PATH, info['path']),
             "features normalize outlier",
             result_path,
-            optimization_approach,
-            args.space_path)
+            optimization_approach)
         with open(os.path.join(result_path, '{}_stdout.txt'.format(base_scenario)), "a") as log_out:
             with open(os.path.join(result_path, '{}_stderr.txt'.format(base_scenario)), "a") as log_err:
                 start_time = time.time()

@@ -19,6 +19,7 @@ def to_config(scenario, optimization_method):
 	config = {
 		'dataset': scenario['general']['dataset'],
 		'seed': scenario['general']['seed'],
+		'space': scenario['general']['space'],
 		'metric': scenario['optimizations'][optimization_method]['metric'],
 		'budget_kind': scenario['optimizations'][optimization_method]['budget_kind'],
 		'budget': scenario['optimizations'][optimization_method]['budget'],

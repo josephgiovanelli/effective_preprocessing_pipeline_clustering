@@ -26,7 +26,7 @@ def load_result(input_path, dataset, metric):
                 #'normalize__with_mean': ['None' if (elem['pipeline']['normalize'][0] == 'normalize_NoneType' or elem['pipeline']['normalize'][0] == 'normalize_MinMaxScaler') else elem['pipeline']['normalize'][1]['normalize__with_mean']], 
                 #'normalize__with_std': ['None' if (elem['pipeline']['normalize'][0] == 'normalize_NoneType' or elem['pipeline']['normalize'][0] == 'normalize_MinMaxScaler') else elem['pipeline']['normalize'][1]['normalize__with_std']], 
                 'outlier': ['None' if elem['pipeline']['outlier'][0] == 'outlier_NoneType' else elem['pipeline']['outlier'][0]], 
-                'outlier__n_neighbors': ['None' if elem['pipeline']['outlier'][0] == 'outlier_NoneType' else elem['pipeline']['outlier'][1]['outlier__n_neighbors']], 
+                'outlier__n_neighbors': ['None' if elem['pipeline']['outlier'][0] == 'outlier_NoneType' or elem['pipeline']['outlier'][0] =='outlier_IsolationOutlierDetector' else elem['pipeline']['outlier'][1]['outlier__n_neighbors']], 
                 'algorithm': [elem['algorithm'][0]], 
                 #'algorithm__max_iter': [elem['algorithm'][1]['max_iter']], 
                 'algorithm__n_clusters': [elem['algorithm'][1]['n_clusters']], 

@@ -15,7 +15,7 @@ from sklearn.model_selection import train_test_split
 def main(args):
     scenario = scenarios.load(args.scenario)
     config = scenarios.to_config(scenario, args.optimization_approach)
-    with open(args.space_path, "r") as f:
+    with open(os.path.join("resources", f"""{config["space"]}_space.json"""), "r") as f:
         space = json.load(f)
 
     print('SCENARIO:')

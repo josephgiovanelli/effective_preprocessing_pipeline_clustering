@@ -282,6 +282,7 @@ def main():
                     diversification_method = run.split('_')[1]
                     conf = {
                     'dataset': c['general']['dataset'],
+                    'space': c['general']['space'],
                     'optimization_method': optimization_method,
                     'optimization_internal_metric': c['optimizations'][optimization_method]['metric'],
                     'diversification_num_results': c['diversifications'][diversification_method]['num_results'],
@@ -306,41 +307,24 @@ def main():
         conf['output_file_name'] = f'''{conf['diversification_criterion']}_0-{int(conf['diversification_lambda']*10)}_{conf['diversification_metric']}'''
         optimization_path = os.path.join(OPTIMIZATION_RESULT_PATH, conf['optimization_method'])
         conf['input_path'] = os.path.join(optimization_path, 'details', working_folder)
-        
+
         print('\tLoading optimization process solutions')
         meta_features = pd.read_csv(os.path.join(optimization_path, 'summary', 'summary.csv'))
         meta_features = meta_features[(meta_features['dataset'] == conf['dataset']) & (meta_features['optimization_internal_metric'] == conf['optimization_internal_metric'])]
-        
+
+        _, _, original_features = datasets.get_dataset(conf['dataset'])
+        num_features = len(original_features)
         # if it is smbo, we keep just the 25% of all the configurations
-        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'synthetic':
-            meta_features = meta_features[meta_features['iteration'] < 220/4]
-        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'iris':
-            meta_features = meta_features[meta_features['iteration'] < 176/4]
-        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'breast':
-            meta_features = meta_features[meta_features['iteration'] < 440/4]
-        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'parkinsons':
-            meta_features = meta_features[meta_features['iteration'] < 1012/4]
-        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'seeds':
-            meta_features = meta_features[meta_features['iteration'] < 352/4]
-        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'wine':
-            meta_features = meta_features[meta_features['iteration'] < 616/4]
-        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'blood':
-            meta_features = meta_features[meta_features['iteration'] < 176/4]
-        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'vehicle':
-            meta_features = meta_features[meta_features['iteration'] < 836/4]
-        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'diabetes':
-            meta_features = meta_features[meta_features['iteration'] < 396/4]
-        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'appendicitis':
-            meta_features = meta_features[meta_features['iteration'] < 352/4]
-        if conf['optimization_method'] == 'smbo' and conf['dataset'] == 'ecoli':
-            meta_features = meta_features[meta_features['iteration'] < 352/4]
+        if conf['optimization_method'] == 'smbo':
+            mul_fact = 44 if conf['space'] == 'toy' else 2310
+            tot_conf = mul_fact * (num_features if conf['space'] == 'toy' else (1 + 4*(num_features-1)))
+            meta_features = meta_features[meta_features['iteration'] < tot_conf/4]
 
         print(f'\t\tGot {meta_features.shape[0]} solutions')
         print('\t\tFiltering..')
 
         meta_features1 = meta_features[meta_features['features__k'] == 'None']
         meta_features2 = meta_features[meta_features['features__k'] != 'None']
-        _, _, original_features = datasets.get_dataset(conf['dataset'])
         meta_features2 = meta_features2[meta_features2['features__k'].astype(np.int32) < len(original_features)]
         meta_features = pd.concat([meta_features1, meta_features2], ignore_index=True)
 
