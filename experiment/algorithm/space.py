@@ -51,7 +51,7 @@ grid_spectral_clustering = {
 
 grid_agglomerative_clustering = {
     "n_clusters": list(range(2, 201)),
-    "linkage": "complete"
+    "linkage": ["complete"]
 }
 
 grid_gaussian_mixture = {
