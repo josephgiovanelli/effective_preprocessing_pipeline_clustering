@@ -6,6 +6,7 @@ from experiment.algorithm import space as ALGORITHM_SPACE
 from experiment.objective import objective_union
 from functools import partial
 from hyperopt import tpe, fmin, Trials
+from ..objective import stop
 
 from experiment.utils.exhaustive_search import suggest
 
@@ -32,11 +33,13 @@ class Union(Policy):
             space=space,
             algo=partial(suggest, nbMaxSucessiveFailures=1000) if self.config['budget'] == 'inf' else tpe.suggest,
             max_evals=np.inf if self.config['budget'] == 'inf' else (None if self.config['budget_kind'] == 'time' else self.config['budget']),
-            max_time=None if self.config['budget'] == 'inf' else (self.config['budget'] if self.config['budget_kind'] == 'time' else None),
+            # max_time=None if self.config['budget'] == 'inf' else (self.config['budget'] if self.config['budget_kind'] == 'time' else None),
             trials=trials,
             show_progressbar=False,
             verbose=0,
-            rstate=np.random.RandomState(self.config['seed'])
+            # rstate=np.random.RandomState(self.config['seed']),
+            rstate=np.random.default_rng(42),
+            early_stop_fn=stop
         )
         print('#' * 50 + '\n')
 

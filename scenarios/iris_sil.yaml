@@ -5,8 +5,8 @@ general:
 optimizations:
   smbo:
     metric: sil
-    budget_kind: time
-    budget: 28800
+    budget_kind: iterations
+    budget: 5000000000
 diversifications:
   mmr:
     num_results: 3

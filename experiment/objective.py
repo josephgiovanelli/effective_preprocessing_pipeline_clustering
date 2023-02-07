@@ -17,8 +17,20 @@ from experiment.pipeline.prototype import pipeline_conf_to_full_pipeline
 from experiment.utils.metrics import my_silhouette_samples
 from experiment.pipeline.PrototypeSingleton import PrototypeSingleton
 
+iteration_number = 0
+num_features = 0
+
+def stop(trial, count=0):
+    mul_fact = 44 if space == 'toy' else 2310
+    tot_conf = mul_fact * (num_features if space == 'toy' else (1 + 4*(num_features-1)))
+    return iteration_number+1 >= tot_conf/4, [count+1]
 
 def objective(pipeline_config, algo_config, X, y, context, config):
+    global iteration_number
+    global space
+    global num_features
+    space = config['space']
+    num_features = X.shape[1]
     pipeline_hash = hashlib.sha1(json.dumps(pipeline_config, sort_keys=True).encode()).hexdigest()
     algorithm_hash = hashlib.sha1(json.dumps(algo_config, sort_keys=True).encode()).hexdigest()
     item_hash = {
