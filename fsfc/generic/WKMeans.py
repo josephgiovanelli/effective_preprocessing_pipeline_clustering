@@ -40,7 +40,7 @@ class WKMeans(ClusteringFeatureSelector):
         self.max_iterations = max_iterations
 
     def _calc_scores_and_labels(self, x):
-        k_means = KMeans(n_clusters=self.k)
+        k_means = KMeans(n_clusters=self.k, random_state=42)
 
         # Assign random weights to each feature. Sum of weights should be equal to 1
         random_weights = np.random.rand(x.shape[1])
