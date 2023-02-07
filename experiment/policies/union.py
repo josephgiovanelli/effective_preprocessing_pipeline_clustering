@@ -24,15 +24,15 @@ class Union(Policy):
                 y=y,
                 context=self.context,
                 config=self.config)
-        
+
         print('OPTIMIZATION:')
         print('#' * 50)
         fmin(
-            fn=obj_pl, 
-            space=space, 
-            algo=partial(suggest, nbMaxSucessiveFailures=1000) if self.config['budget'] == 'inf' else tpe.suggest, 
-            max_evals=np.inf if self.config['budget'] == 'inf' else (None if self.config['budget'] == 'time' else self.config['budget']),
-            max_time=None if self.config['budget'] == 'inf' else (self.config['budget'] if self.config['budget'] == 'time' else None),     
+            fn=obj_pl,
+            space=space,
+            algo=partial(suggest, nbMaxSucessiveFailures=1000) if self.config['budget'] == 'inf' else tpe.suggest,
+            max_evals=np.inf if self.config['budget'] == 'inf' else (None if self.config['budget_kind'] == 'time' else self.config['budget']),
+            max_time=None if self.config['budget'] == 'inf' else (self.config['budget'] if self.config['budget_kind'] == 'time' else None),
             trials=trials,
             show_progressbar=False,
             verbose=0,
