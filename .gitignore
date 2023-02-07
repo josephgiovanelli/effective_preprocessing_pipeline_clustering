@@ -115,9 +115,11 @@ dmypy.json
 
 # Project
 ./results/
+./results_old/
 ./plots/
 ./scenarios/
 results/
+results_old/
 plots/
 
 # vs-code
