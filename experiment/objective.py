@@ -66,7 +66,7 @@ def objective(pipeline_config, algo_config, X, y, context, config):
                 Xt_to_export[step] = pd.DataFrame(Xt.copy(), columns=[l for l in labels if l != 'None'])
 
 
-        result = pipeline.fit_predict(X, y)
+        result = pipeline[-1].fit_predict(Xt, yt)
         yt_to_export['pred'] = pd.DataFrame(result.copy(), columns=['target'])
         external_metric = metrics.adjusted_mutual_info_score(yt, result)
         if config['metric'] == 'sil':
