@@ -1,5 +1,5 @@
 general:
-  dataset: ecoli
+  dataset: thyroid
   seed: 42
   space: extended
 optimizations:

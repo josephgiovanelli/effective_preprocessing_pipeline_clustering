@@ -1,5 +1,5 @@
 general:
-  dataset: iris
+  dataset: synthetic
   seed: 42
   space: extended
 optimizations:

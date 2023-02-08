@@ -1,5 +1,5 @@
 general:
-  dataset: parkinsons
+  dataset: wine
   seed: 42
   space: extended
 optimizations:
