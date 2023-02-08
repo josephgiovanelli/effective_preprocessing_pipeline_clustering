@@ -1,5 +1,5 @@
 general:
-  dataset: brest
+  dataset: parkinsons
   seed: 42
   space: extended
 optimizations:

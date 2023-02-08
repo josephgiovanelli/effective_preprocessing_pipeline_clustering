@@ -1,5 +1,5 @@
 general:
-  dataset: blood
+  dataset: iris
   seed: 42
   space: extended
 optimizations:

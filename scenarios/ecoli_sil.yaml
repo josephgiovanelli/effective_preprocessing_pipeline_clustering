@@ -1,5 +1,5 @@
 general:
-  dataset: diabetes
+  dataset: ecoli
   seed: 42
   space: extended
 optimizations:
