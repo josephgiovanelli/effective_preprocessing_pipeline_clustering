@@ -1,12 +1,12 @@
 general:
-  dataset: iris
+  dataset: blood
   seed: 42
   space: extended
 optimizations:
   smbo:
     metric: sil
     budget_kind: time
-    budget: 28800
+    budget: 7200
 diversifications:
   mmr:
     num_results: 3
