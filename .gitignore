@@ -117,10 +117,11 @@ dmypy.json
 ./results/
 ./results_old/
 ./plots/
-./scenarios/
+./all_scenarios/
 results/
 results_old/
 plots/
+all_scenarios/
 
 # vs-code
 .vscode
