@@ -35,12 +35,16 @@ def objective(pipeline_config, algo_config, X, y, context, config):
     algorithm = algo_config[0]
     algo_config = algo_config[1]
 
-    pipeline, _ = pipeline_conf_to_full_pipeline(
-        pipeline_config, 
-        ALGORITHM_SPACE.algorithms.get(algorithm), 
-        config['seed'], 
-        algo_config
-    )
+    try:
+        pipeline, _ = pipeline_conf_to_full_pipeline(
+            pipeline_config,
+            ALGORITHM_SPACE.algorithms.get(algorithm),
+            config['seed'],
+            algo_config
+        )
+    except Exception as e:
+        print(e)
+
     #print(pipeline)
     history_index = context['history_index'].get(item_hash['config'])
     if history_index is not None:
