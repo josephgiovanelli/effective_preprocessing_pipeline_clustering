@@ -373,14 +373,15 @@ def main():
         #     raise Exception(f'''missing diversification criterion for
         #                     {conf}''')
 
-        if args.experiment == "exp1":
-            if conf['optimization_internal_metric'] == 'sdbw':
-                meta_features['optimization_internal_metric_value'] *= -1
-                meta_features['optimization_internal_metric_value'] = 1 - meta_features['optimization_internal_metric_value']
-                meta_features['max_optimization_internal_metric_value'] *= -1
-                meta_features['max_optimization_internal_metric_value'] = 1 - meta_features['max_optimization_internal_metric_value']
-            if conf['optimization_internal_metric'] == 'sil' or conf['optimization_internal_metric'] == 'sdbw':
-                meta_features = meta_features[meta_features['optimization_internal_metric_value'] >= 0.5]
+        
+        if conf['optimization_internal_metric'] == 'sdbw':
+            meta_features['optimization_internal_metric_value'] *= -1
+            meta_features['optimization_internal_metric_value'] = 1 - meta_features['optimization_internal_metric_value']
+            meta_features['max_optimization_internal_metric_value'] *= -1
+            meta_features['max_optimization_internal_metric_value'] = 1 - meta_features['max_optimization_internal_metric_value']
+        if conf['optimization_internal_metric'] == 'sil' or conf['optimization_internal_metric'] == 'sdbw':
+            metric_threshold = 0.5 if args.experiment == "exp1" else 0.01
+            meta_features = meta_features[meta_features['optimization_internal_metric_value'] >= metric_threshold]
         print(f'\t\tGot {meta_features.shape[0]} solutions')
         print('\tDiversification')
         try:
