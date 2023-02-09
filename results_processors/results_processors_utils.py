@@ -27,6 +27,63 @@ def get_dataset(name):
     else:
         return load_dataset_from_csv(name)
 
+def load_dataset_from_csv(name):
+    data = pd.read_csv(os.path.join('datasets', name +'.csv'), header=None)
+    data = data.to_numpy()
+    if name == 'parkinsons':
+        features_name = [
+            'MDVP:Fo(Hz)',
+            'MDVP:Fhi(Hz)',
+            'MDVP:Flo(Hz)',
+            'MDVP:Jitter(%)',
+            'MDVP:Jitter(Abs)',
+            'MDVP:RAP',
+            'MDVP:PPQ',
+            'Jitter:DDP',
+            'MDVP:Shimmer',
+            'MDVP:Shimmer(dB)',
+            'Shimmer:APQ3',
+            'Shimmer:APQ5',
+            'MDVP:APQ',
+            'Shimmer:DDA',
+            'NHR',
+            'HNR',
+            'RPDE',
+            'DFA',
+            'spread1',
+            'spread2',
+            'D2',
+            'PPE'
+            ]
+    elif name == 'seeds':
+        features_name = [
+            'area',
+            'perimeter',
+            'compactness',
+            'length of kernel',
+            'width of kernel',
+            'asymmetry coefficient',
+            'length of kernel groove'
+            ]
+    elif name == 'synthetic':
+        features_name = [
+            'feature_0',
+            'feature_1',
+            'feature_2',
+            'feature_3',
+            'feature_4',
+        ]
+    elif name == 'iris2' or name == 'iris3':
+        features_name = [
+            '[2 - petallength (numeric)]',
+            '[3 - petalwidth (numeric)]',
+        ]
+    else:
+        raise Exception('No features names assigned')
+    X, y = data[:, :-1], data[:, -1]
+    categorical_indicator = [False for _ in range(X.shape[1])]
+    return X, y, features_name
+
 def load_dataset_from_openml(id):
     dataset = openml.datasets.get_dataset(id)
     X, y, categorical_indicator, _ = dataset.get_data(
