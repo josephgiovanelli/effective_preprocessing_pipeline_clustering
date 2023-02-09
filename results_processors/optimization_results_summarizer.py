@@ -28,15 +28,17 @@ def main():
             try:
                 c = yaml.safe_load(stream)
                 dataset = c['general']['dataset']
+                space = c['general']['space']
                 for optimization_method, optimization_conf in c['optimizations'].items():
                     optimization_internal_metric = optimization_conf['metric']
+                    budget = optimization_conf['budget']
                     #results[optimization_method] = {dataset: [optimization_internal_metric]}
                     if optimization_method not in results:
                         results[optimization_method] = {}
                     if dataset not in results[optimization_method]:
                         results[optimization_method][dataset] = []
-                    if optimization_internal_metric not in results[optimization_method][dataset]:
-                        results[optimization_method][dataset].append(optimization_internal_metric)
+                    if (optimization_internal_metric, budget) not in results[optimization_method][dataset]:
+                        results[optimization_method][dataset].append((optimization_internal_metric, budget, space))
             except yaml.YAMLError as exc:
                 print(exc)
 
@@ -62,7 +64,16 @@ def main():
                         print(e)
             end_time = time.time()
             duration = int(end_time) - int(start_time)
+            print(summary)
+
+            summary["total_duration"] = summary.groupby("dataset")["duration"].transform("sum")
+            summary['cumsum'] = summary.groupby('dataset')['duration'].transform(pd.Series.cumsum)
+            summary['cumsum'] *= summary["budget"] / summary["total_duration"]
+            summary['percentage'] = summary.groupby('dataset')['iteration'].transform("max") / summary['tot_conf']
+            # summary["cumulated_duration"] = summary["duration"].cumsum()
             print(f'Summarization process ends: {datetime.timedelta(seconds=duration)}\n')
+            #pd.read_csv("results/optimization/smbo/summary/summary.csv").groupby(["dataset"]).sum()["duration"]["iris"]
+            #summary["cumulated_duration"] = summary.groupby(["dataset"])["duration"].transform("sum")
             summary.to_csv(os.path.join(output_path, output_file_name), index=False)
 
 main()

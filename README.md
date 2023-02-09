@@ -13,11 +13,16 @@
 130
   - toy (all) in effective_preprocessing_pipeline_clustering_toy
   - ext (smbo) in effective_preprocessing_pipeline_clustering
-    - it (smbo w/ 10000) in results_it
-    - time (smbo w/ 28800) in results
+    - it (smbo bugged w/ 10000) in results_it
+    - time (smbo w/ 28800) in results_old
+    - time_new (smbo w/ 7200 on blood, breast, diabetes) in results
 132
   - ext (exh) in effective_preprocessing_pipeline_clustering_old
-  - ext (smbo w/ space/4 on parkinsons) in effective_preprocessing_pipeline_clustering
+  - ext (smbo) in effective_preprocessing_pipeline_clustering
+    - time (smbo w/ space/4 on iris) in results_old
+    - time_new (smbo w/ 7200 on ecoli, iris, parkinsons, seeds) in results
 134
-  - ext (smbo w/ 20000) in effective_preprocessing_pipeline_clustering_old
-  - ext (smbo w/ space/4 on iris) in effective_preprocessing_pipeline_clustering
+  - ext (smbo w/ buged 20000) in effective_preprocessing_pipeline_clustering_old
+  - ext (smbo) in effective_preprocessing_pipeline_clustering
+    - time (smbo w/ space/4 on parkinsons) in results_old
+    - time_new (smbo w/ 7200 on synthetic, thyroid, vehicle, wine) in results
