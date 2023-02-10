@@ -14,7 +14,7 @@ from results_processors_utils import load_result
 script_dir = os.path.dirname( __file__ )
 mymodule_dir = os.path.join( script_dir, '..' )
 sys.path.append( mymodule_dir )
-from utils import get_scenario_info, create_directory, SCENARIO_PATH, OPTIMIZATION_RESULT_PATH
+from utils.utils import get_scenario_info, create_directory, SCENARIO_PATH, OPTIMIZATION_RESULT_PATH
 
 def main():
     
@@ -64,8 +64,6 @@ def main():
                         print(e)
             end_time = time.time()
             duration = int(end_time) - int(start_time)
-            print(summary)
-
             summary["total_duration"] = summary.groupby("dataset")["duration"].transform("sum")
             summary['cumsum'] = summary.groupby('dataset')['duration'].transform(pd.Series.cumsum)
             summary['cumsum'] *= summary["budget"] / summary["total_duration"]

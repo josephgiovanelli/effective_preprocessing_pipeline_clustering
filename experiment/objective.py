@@ -12,10 +12,10 @@ from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bo
 from s_dbw import S_Dbw
 from sklearn import metrics
 
-from experiment.algorithm import space as ALGORITHM_SPACE
-from experiment.pipeline.prototype import pipeline_conf_to_full_pipeline
-from experiment.utils.metrics import my_silhouette_samples
-from experiment.pipeline.PrototypeSingleton import PrototypeSingleton
+from algorithm import space as ALGORITHM_SPACE
+from pipeline.prototype import pipeline_conf_to_full_pipeline
+from utils.metrics import my_silhouette_samples
+from pipeline.PrototypeSingleton import PrototypeSingleton
 
 
 def objective(pipeline_config, algo_config, X, y, context, config):

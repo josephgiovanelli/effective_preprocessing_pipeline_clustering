@@ -1,13 +1,13 @@
 import functools
 import numpy as np
 
-from experiment.policies.policy import Policy
-from experiment.algorithm import space as ALGORITHM_SPACE
-from experiment.objective import objective_union
+from policies.policy import Policy
+from algorithm import space as ALGORITHM_SPACE
+from objective import objective_union
 from functools import partial
 from hyperopt import tpe, fmin, Trials
 
-from experiment.utils.exhaustive_search import suggest
+from utils.exhaustive_search import suggest
 
 
 class Union(Policy):

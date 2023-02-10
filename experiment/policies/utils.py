@@ -1,4 +1,4 @@
-from experiment.policies.union import Union
+from policies.union import Union
 
 def initiate(config):
     policies = {

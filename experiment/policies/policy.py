@@ -1,4 +1,4 @@
-from experiment.pipeline.PrototypeSingleton import PrototypeSingleton
+from pipeline.PrototypeSingleton import PrototypeSingleton
 
 import json
 

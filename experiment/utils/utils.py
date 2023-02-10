@@ -1,10 +1,9 @@
 import os
 import yaml
-import experiment
 
 from six import iteritems
 
-from experiment.utils import scenarios as scenarios_util
+from utils import scenarios as scenarios_util
 
 RESULT_PATH = 'results'
 SCENARIO_PATH = 'scenarios'

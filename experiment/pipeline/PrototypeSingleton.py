@@ -13,8 +13,8 @@ from sklearn.neighbors import LocalOutlierFactor
 
 from .utils import generate_domain_space
 
-from experiment.pipeline.outlier_detectors import LocalOutlierDetector, IsolationOutlierDetector#, SGDOutlierDetector
-from experiment.pipeline import space
+from pipeline.outlier_detectors import LocalOutlierDetector, IsolationOutlierDetector#, SGDOutlierDetector
+from pipeline import space
 from fsfc.generic import GenericSPEC, NormalizedCut, WKMeans
 import pandas as pd
 import numpy as np

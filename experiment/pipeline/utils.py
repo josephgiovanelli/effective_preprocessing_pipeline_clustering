@@ -5,7 +5,7 @@ from sklearn.decomposition import PCA
 from sklearn.feature_selection import SelectKBest
 from sklearn.pipeline import FeatureUnion
 
-from experiment.pipeline.space import *
+from pipeline.space import *
 
 def expand_params(operation, operator, space):
     expanded_params = {}

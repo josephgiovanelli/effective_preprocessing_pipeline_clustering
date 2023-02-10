@@ -5,9 +5,9 @@ import time
 from prettytable import PrettyTable
 from tqdm import tqdm
 
-from utils import get_scenario_info, SCENARIO_PATH, OPTIMIZATION_RESULT_PATH
-from experiment.utils import scenarios as scenarios_util
-from experiment.utils import cli
+from utils.utils import get_scenario_info, SCENARIO_PATH, OPTIMIZATION_RESULT_PATH
+from utils import scenarios as scenarios_util
+from utils import cli
 
 scenarios = get_scenario_info()
 args = cli.parse_args()
@@ -47,7 +47,7 @@ with tqdm(total=len(to_run)) as pbar:
 
         result_path = os.path.join(OPTIMIZATION_RESULT_PATH, optimization_approach)
 
-        cmd = 'python ./optimizer.py -s {} -p {} -r {} -o {}'.format(
+        cmd = 'python experiment/optimizer.py -s {} -p {} -r {} -o {}'.format(
             os.path.join(SCENARIO_PATH, info['path']),
             "features normalize outlier",
             result_path,

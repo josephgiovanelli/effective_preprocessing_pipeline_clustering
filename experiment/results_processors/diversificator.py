@@ -19,9 +19,9 @@ from six import iteritems
 script_dir = os.path.dirname( __file__ )
 mymodule_dir = os.path.join( script_dir, '..' )
 sys.path.append( mymodule_dir )
-from utils import create_directory, get_scenario_info, SCENARIO_PATH, OPTIMIZATION_RESULT_PATH, DIVERSIFICATION_RESULT_PATH
-from experiment.pipeline.outlier_detectors import LocalOutlierDetector
-from experiment.utils import datasets
+from utils.utils import create_directory, get_scenario_info, SCENARIO_PATH, OPTIMIZATION_RESULT_PATH, DIVERSIFICATION_RESULT_PATH
+from pipeline.outlier_detectors import LocalOutlierDetector
+from utils import datasets
 
 def get_last_transformation(df, dataset, optimization_internal_metric, iteration):
     pipeline, is_there = {}, {}
@@ -268,7 +268,6 @@ def save_figure(solutions, conf):
     fig.suptitle(title, fontsize=30)
     fig.savefig(os.path.join(conf['output_path'], conf['output_file_name'] + ('_outlier' if conf['outlier'] else '') + '.pdf'))
 
-
 def parse_args():
 
     parser = argparse.ArgumentParser(description='AutoClues')
@@ -315,6 +314,8 @@ def main():
                         for current_time in range(args.cadence, args.max_time + args.cadence, args.cadence):
                             conf["time"] = current_time
                             confs.append(conf.copy())
+                    else:
+                        confs.append(conf.copy())
             except yaml.YAMLError as exc:
                 print(exc)
 
@@ -373,7 +374,6 @@ def main():
         #     raise Exception(f'''missing diversification criterion for
         #                     {conf}''')
 
-        
         if conf['optimization_internal_metric'] == 'sdbw':
             meta_features['optimization_internal_metric_value'] *= -1
             meta_features['optimization_internal_metric_value'] = 1 - meta_features['optimization_internal_metric_value']

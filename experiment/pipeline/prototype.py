@@ -15,8 +15,8 @@ from sklearn.decomposition import PCA
 from sklearn.feature_selection import SelectKBest
 from sklearn.pipeline import FeatureUnion
 
-from experiment.pipeline.PrototypeSingleton import PrototypeSingleton
-from experiment.pipeline.outlier_detectors import LocalOutlierDetector, IsolationOutlierDetector#, SGDOutlierDetector
+from pipeline.PrototypeSingleton import PrototypeSingleton
+from pipeline.outlier_detectors import LocalOutlierDetector, IsolationOutlierDetector#, SGDOutlierDetector
 
 from fsfc.generic import GenericSPEC, NormalizedCut, WKMeans
 

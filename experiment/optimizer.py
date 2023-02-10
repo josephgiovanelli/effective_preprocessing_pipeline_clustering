@@ -6,9 +6,9 @@ import numpy as np
 import pandas as pd
 
 from sklearn.impute import SimpleImputer
-from experiment.pipeline.PrototypeSingleton import PrototypeSingleton
-from experiment.utils import scenarios, serializer, cli, datasets
-from experiment import policies
+from pipeline.PrototypeSingleton import PrototypeSingleton
+from utils import scenarios, serializer, cli, datasets
+import policies
 from sklearn.model_selection import train_test_split
 
 

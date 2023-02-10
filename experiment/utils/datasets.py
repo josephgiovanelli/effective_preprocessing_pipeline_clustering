@@ -4,7 +4,7 @@ import os
 import openml
 
 from sklearn.datasets import load_breast_cancer, load_iris, load_wine, load_digits, fetch_covtype
-from experiment.pipeline.PrototypeSingleton import PrototypeSingleton
+from pipeline.PrototypeSingleton import PrototypeSingleton
 
 def get_dataset(name):
     loader = {
