@@ -1,12 +1,16 @@
 general:
   dataset: iris
   seed: 42
-  space: extended
+  space: toy
 optimizations:
   smbo:
     metric: sil
     budget_kind: time
-    budget: 7200
+    budget: 300
+  exhaustive:
+    metric: sil
+    budget_kind: time
+    budget: 300
 diversifications:
   mmr:
     num_results: 3
@@ -22,3 +26,6 @@ diversifications:
     metric: jaccard
 runs:
   - smbo_mmr
+  - exhaustive_mmr
+  - smbo_exhaustive
+  - exhaustive_exhaustive
