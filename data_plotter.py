@@ -48,12 +48,12 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
     data = np.column_stack((X, y))
     pd.DataFrame(data).to_csv("datasets/synthetic.csv", header=None, index=None)
     '''
-
-    myFeatureEngineeringTransformer = WKMeans(k=n_features, beta = 0)
-    myScaler = StandardScaler()
-    localOutlierDetector = LocalOutlierDetector(n_neighbors=32)
-    # myEstimator = KMeans(max_iter=10, n_clusters=n_clusters, random_state=42)
-    myEstimator = MeanShift()
+    np.random.seed(42)
+    myFeatureEngineeringTransformer = WKMeans(k=n_features, beta = 7)
+    myScaler = MinMaxScaler()
+    localOutlierDetector = IsolationOutlierDetector(n_estimators=100, random_state=42)
+    myEstimator = KMeans(n_clusters=n_clusters, random_state=42)
+    # myEstimator = MeanShift()
     pipe = Pipeline([ 
         ('features', myFeatureEngineeringTransformer if features else FunctionTransformer()),
         ('scaler', myScaler if scaler else FunctionTransformer()), 
@@ -158,7 +158,7 @@ def plot(dataset, features, n_features, scaler, outlier, n_clusters, natural_clu
 #plot(dataset='seeds', features=True, n_features=4, scaler=False, outlier=False, n_clusters=3, natural_clusters=True, internal_metric='sil')
 #plot(dataset='seeds', features=True, n_features=5, scaler=False, outlier=False, n_clusters=3, natural_clusters=True, internal_metric='sil')
 #plot(dataset='seeds', features=True, n_features=6, scaler=False, outlier=False, n_clusters=3, natural_clusters=True, internal_metric='sil')
-plot(dataset='synthetic', features=True, n_features=2, scaler=False, outlier=False, n_clusters=2, natural_clusters=False, internal_metric='sil')
+plot(dataset='iris', features=True, n_features=1, scaler=True, outlier=True, n_clusters=10, natural_clusters=False, internal_metric='sil')
 
 '''
 plot silhouette chart
