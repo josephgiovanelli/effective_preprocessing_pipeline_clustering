@@ -55,8 +55,7 @@ with tqdm(total=len(to_run)) as pbar:
         with open(os.path.join(result_path, '{}_stdout.txt'.format(base_scenario)), "a") as log_out:
             with open(os.path.join(result_path, '{}_stderr.txt'.format(base_scenario)), "a") as log_err:
                 start_time = time.time()
-                process = subprocess.call(
-                    cmd, shell=True, stdout=log_out, stderr=log_err)
+                process = subprocess.call(cmd, shell=True, stdout=log_out, stderr=log_err)
                 print("--- %s seconds ---" % (time.time() - start_time))
-        
+
         pbar.update(1)
