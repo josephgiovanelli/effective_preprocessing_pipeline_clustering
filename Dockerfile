@@ -1,7 +1,12 @@
 FROM mcr.microsoft.com/vscode/devcontainers/python:0-3.6
 RUN cd home && mkdir autoclues
 WORKDIR /home/autoclues
-COPY . .
+COPY datasets datasets
+COPY experiment experiment
+COPY resources resources
+COPY scenarios scenarios
+COPY scripts scripts
+COPY requirements.txt requirements.txt
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 RUN mkdir results
