@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/vscode/devcontainers/python:0-3.6
-RUN cd home && mkdir autoclues
-WORKDIR /home/autoclues
+RUN cd home && mkdir dump
+WORKDIR /home/dump
 COPY datasets datasets
 COPY experiment experiment
 COPY resources resources
