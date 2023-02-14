@@ -117,6 +117,7 @@ runs:
   - exhaustive_exhaustive
 ```
 
+
 Section by section:
 - in ```general```, you can modify the fields ```dataset```, ```seed``` (as an int), ```space``` (between ```toy``` and ```extended```, which are the possible spaces in ```resources``);
 - in ```optimizations```, you can drop one of the two optimization options (```smbo```, ```exhaustive```) and modify the fields in it;
