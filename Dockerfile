@@ -1,6 +1,7 @@
 FROM mcr.microsoft.com/vscode/devcontainers/python:0-3.6
-COPY . /home/autoclues
+RUN cd home && mkdir autoclues
 WORKDIR /home/autoclues
+COPY . .
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 RUN mkdir results
