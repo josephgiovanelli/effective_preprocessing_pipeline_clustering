@@ -17,7 +17,7 @@ jobs:
         name: Build and Publish Image
         with:
           github-push-secret: ${{ secrets.GITHUB_TOKEN }}
-          docker-image-name: autoclues
+          docker-image-name: effective_preprocessing_pipeline_clustering
           docker-image-tag: ${{github.ref_name}}
       - uses: "marvinpinto/action-automatic-releases@latest"
         name: Create release
