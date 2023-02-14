@@ -1,7 +1,7 @@
 #!/bin/bash
 
-[ "$(ls -A /home/autoprep)" ] || cp -R /home/dump/. /home/autoprep
-cd /home/autoprep
+[ "$(ls -A /home/autoclues)" ] || cp -R /home/dump/. /home/autoclues
+cd /home/autoclues
 chmod 777 ./scripts/*
 
 printf '\n\nOPTIMIZATION\n\n'
