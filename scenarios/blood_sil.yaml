@@ -1,16 +1,12 @@
 general:
   dataset: blood
   seed: 42
-  space: toy
+  space: extended
 optimizations:
   smbo:
     metric: sil
     budget_kind: time
-    budget: 300
-  exhaustive:
-    metric: sil
-    budget_kind: time
-    budget: inf
+    budget: 7200
 diversifications:
   mmr:
     num_results: 3
@@ -26,6 +22,3 @@ diversifications:
     metric: jaccard
 runs:
   - smbo_mmr
-  - exhaustive_mmr
-  - smbo_exhaustive
-  - exhaustive_exhaustive

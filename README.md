@@ -93,10 +93,6 @@ optimizations:
     metric: sil
     budget_kind: time
     budget: 200
-  exhaustive:
-    metric: sil
-    budget_kind: time
-    budget: inf
 diversifications:
   mmr:
     num_results: 3
