@@ -66,7 +66,7 @@ def main():
             duration = int(end_time) - int(start_time)
             summary["total_duration"] = summary.groupby("dataset")["duration"].transform("sum")
             summary['cumsum'] = summary.groupby('dataset')['duration'].transform(pd.Series.cumsum)
-            summary['cumsum'] *= summary["budget"] / summary["total_duration"]
+            # summary['cumsum'] *= summary["budget"] / summary["total_duration"]
             summary['percentage'] = summary.groupby('dataset')['iteration'].transform("max") / summary['tot_conf']
             # summary["cumulated_duration"] = summary["duration"].cumsum()
             print(f'Summarization process ends: {datetime.timedelta(seconds=duration)}\n')

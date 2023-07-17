@@ -14,6 +14,7 @@ from sklearn.neighbors import LocalOutlierFactor
 from .utils import generate_domain_space
 
 from pipeline.outlier_detectors import LocalOutlierDetector, IsolationOutlierDetector#, SGDOutlierDetector
+from pipeline.feature_selectors import PearsonThreshold
 from pipeline import space
 from fsfc.generic import GenericSPEC, NormalizedCut, WKMeans
 import pandas as pd
@@ -26,7 +27,7 @@ class PrototypeSingleton:
     POOL = {
         "normalize": [None, StandardScaler(), MinMaxScaler(), RobustScaler(), PowerTransformer()],
         "outlier": [None, LocalOutlierDetector(), IsolationOutlierDetector()],
-        "features": [None, GenericSPEC(k=3), NormalizedCut(k=3), WKMeans(k=3, beta=0)]
+        "features": [None, PearsonThreshold(threshold=0.5)]
     }
 
     features_names = []

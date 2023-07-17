@@ -115,10 +115,12 @@ dmypy.json
 
 # Project
 ./results/
+./results_less_older/
 ./results_old/
 ./plots/
 ./all_scenarios/
 results/
+results_less_older/
 results_old/
 plots/
 all_scenarios/

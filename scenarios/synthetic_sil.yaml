@@ -7,6 +7,10 @@ optimizations:
     metric: sil
     budget_kind: time
     budget: 100
+  exhaustive:
+    metric: sil
+    budget_kind: time
+    budget: inf
 diversifications:
   mmr:
     num_results: 3
@@ -22,3 +26,6 @@ diversifications:
     metric: jaccard
 runs:
   - smbo_mmr
+  - exhaustive_mmr
+  - smbo_exhaustive
+  - exhaustive_exhaustive
