@@ -6,10 +6,6 @@ optimizations:
   smbo:
     metric: sil
     budget_kind: time
-    budget: inf
-  exhaustive:
-    metric: sil
-    budget_kind: time
     budget: 7200
 diversifications:
   mmr:
