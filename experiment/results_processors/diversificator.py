@@ -52,7 +52,7 @@ def diversificate_mmr(meta_features, conf, original_features):
         confs = working_df['iteration'].to_list()
         mmr = pd.DataFrame()
         for current_iteration in confs:
-            current_optimization_internal_metric_value = float(working_df[working_df['iteration'] == current_iteration]['optimization_internal_metric_value'])
+            current_optimization_internal_metric_value = float(working_df[working_df['iteration'] == current_iteration]['optimization_internal_metric_value'].values[0])
             if conf['diversification_criterion'] == 'clustering':
                 current_y_pred = pd.read_csv(os.path.join(conf['input_path'], '_'.join([conf['dataset'], conf['optimization_internal_metric'], str(current_iteration), 'y', 'pred']) + '.csv'))
             elif conf['diversification_criterion'] == 'features_set' or  conf['diversification_criterion'] == 'features_set_n_clusters':
@@ -344,8 +344,9 @@ def main():
         if args.experiment == "exp1":
             # if it is smbo, we keep just the 25% of all the configurations
             if conf['optimization_method'] == 'smbo':
-                mul_fact = 44 if conf['space'] == 'toy' else 2310
-                tot_conf = mul_fact * (num_features if conf['space'] == 'toy' else (1 + 4*(num_features-1)))
+                # mul_fact = 44 if conf['space'] == 'toy' else 2310
+                # tot_conf = mul_fact * (num_features if conf['space'] == 'toy' else (1 + 4*(num_features-1)))
+                tot_conf = 484 if conf['space'] == 'toy' else 25410
                 meta_features = meta_features[meta_features['iteration'] < tot_conf/4]
         else:
             if conf['optimization_method'] == 'smbo':
@@ -380,7 +381,7 @@ def main():
             meta_features['max_optimization_internal_metric_value'] *= -1
             meta_features['max_optimization_internal_metric_value'] = 1 - meta_features['max_optimization_internal_metric_value']
         if conf['optimization_internal_metric'] == 'sil' or conf['optimization_internal_metric'] == 'sdbw':
-            metric_threshold = 0.5 if args.experiment == "exp1" else 0.01
+            metric_threshold = 0.3 if args.experiment == "exp1" else 0.01
             meta_features = meta_features[meta_features['optimization_internal_metric_value'] >= metric_threshold]
         print(f'\t\tGot {meta_features.shape[0]} solutions')
         print('\tDiversification')
