@@ -1,5 +1,5 @@
 general:
-  dataset: synthetic
+  dataset: ecoli
   seed: 42
   space: toy
 optimizations:
