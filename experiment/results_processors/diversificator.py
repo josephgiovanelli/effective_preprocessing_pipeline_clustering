@@ -364,7 +364,7 @@ def main():
         #     meta_features = meta_features[(meta_features['normalize__with_mean'] == 'None') | (meta_features['normalize__with_mean'] == 'True')]
         # if 'normalize__with_std' in list(meta_features.columns):
         #     meta_features = meta_features[(meta_features['normalize__with_std'] == 'None') | (meta_features['normalize__with_std'] == 'True')]
-        meta_features = meta_features[~((meta_features['normalize'] != 'None') & (meta_features['features__k'] == '1'))]
+        # meta_features = meta_features[~((meta_features['normalize'] != 'None') & (meta_features['features__k'] == '1'))]
 
         # if conf['diversification_criterion'] == 'clustering':
         #     meta_features = meta_features[meta_features['outlier'] == 'None']
