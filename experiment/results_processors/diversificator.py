@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn import metrics
 from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA
 from matplotlib import cm
 from scipy.spatial import distance
 from six import iteritems
@@ -30,6 +31,23 @@ from utils.utils import (
 )
 from pipeline.outlier_detectors import LocalOutlierDetector
 from utils import datasets
+
+colors = np.array(
+    [
+        "blue",
+        "orange",
+        "green",
+        "red",
+        "purple",
+        "brown",
+        "pink",
+        "grey",
+        "olive",
+        "cyan",
+        "indigo",
+        "black",
+    ]
+)
 
 
 def get_last_transformation(df, dataset, optimization_internal_metric, iteration):
@@ -485,6 +503,88 @@ def evaluate_dashboard(solutions, conf, original_features):
     ) + (2 * conf["diversification_lambda"] * div)
 
 
+def single_plot(ax, Xt, yt, conf, pipeline, solutions, row, type):
+    old_X = Xt.copy()
+    if Xt.shape[1] > 2 and type != "PARA":
+        Xt = pd.DataFrame(
+            TSNE(n_components=2, random_state=42).fit_transform(
+                Xt.to_numpy(), yt.to_numpy()
+            )
+            if type == "TSNE"
+            else PCA(n_components=2, random_state=42).fit_transform(
+                Xt.to_numpy(), yt.to_numpy()
+            ),
+            columns=[f"{type}_0", f"{type}_1"],
+        )
+        if conf["outlier"]:
+            Xt, yt = LocalOutlierDetector(n_neighbors=32).fit_resample(
+                Xt.to_numpy(), yt.iloc[:, 0].to_numpy()
+            )
+            Xt, yt = pd.DataFrame(Xt, columns=[f"{type}_0", f"{type}_1"]), pd.DataFrame(
+                yt, columns=["target"]
+            )
+    n_selected_features = Xt.shape[1]
+    Xt = Xt.iloc[:, :n_selected_features]
+    if type != "PARA":
+        min, max = Xt.min().min(), Xt.max().max()
+        range = (max - min) / 10
+        xs = Xt.iloc[:, 0]
+        ys = (
+            [(max + min) / 2] * Xt.shape[0]
+            if n_selected_features < 2
+            else Xt.iloc[:, 1]
+        )
+        # zs = [(max+min)/2] * Xt.shape[0] if n_selected_features < 3 else Xt.iloc[:, 2]
+        if Xt.shape[1] < 3:
+            ax.scatter(xs, ys, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
+        # else:
+        # ax.scatter(xs, ys, zs, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
+        ax.set_xlim([min - range, max + range])
+        ax.set_ylim([min - range, max + range])
+        ax.set_xlabel(list(Xt.columns)[0], fontsize=16)
+        ax.set_ylabel(
+            "None" if n_selected_features < 2 else list(Xt.columns)[1], fontsize=16
+        )
+        # if Xt.shape[1] >= 3:
+        # ax.set_zlim([min, max])
+        # ax.set_zlabel('None' if n_selected_features < 3 else list(Xt.columns)[2], fontsize=16)
+    else:
+        ax = pd.plotting.parallel_coordinates(
+            pd.concat([Xt, yt], axis=1), "target", color=colors
+        )
+    if type == "TSNE":
+        title = "\n".join([operator for operator in pipeline.values()])
+        current_solution = solutions.loc[
+            (
+                (solutions["dataset"] == conf["dataset"])
+                & (
+                    solutions["optimization_internal_metric"]
+                    == conf["optimization_internal_metric"]
+                )
+                & (solutions["iteration"] == int(row["iteration"]))
+            ),
+            :,
+        ]
+        k_features = "\nk= " + str(old_X.shape[1])
+        n_clusters = "    n=" + str(
+            int(current_solution.loc[:, "algorithm__n_clusters"].values[0])
+        )
+        title += k_features + n_clusters
+        title += "\nint_metr=" + str(
+            round(
+                current_solution.loc[:, "optimization_internal_metric_value"].values[0],
+                2,
+            )
+        )
+        title += "    ext_metr=" + str(
+            round(
+                current_solution.loc[:, "optimization_external_metric_value"].values[0],
+                2,
+            )
+        )
+        ax.set_title(title, fontdict={"fontsize": 20, "fontweight": "medium"})
+
+
 def save_figure(solutions, conf):
     print("\t\tPlotting process starts")
     start_time = time.time()
@@ -530,97 +630,23 @@ def save_figure(solutions, conf):
             )
         )
 
-        if Xt.shape[1] < 3:
-            ax = fig.add_subplot(3, 3, i)
-        else:
-            # ax = fig.add_subplot(3, 3, i, projection='3d')
-            ax = fig.add_subplot(3, 3, i)
-        colors = np.array(
-            [
-                "blue",
-                "orange",
-                "green",
-                "red",
-                "purple",
-                "brown",
-                "pink",
-                "grey",
-                "olive",
-                "cyan",
-                "indigo",
-                "black",
-            ]
-        )
-        old_X = Xt.copy()
-        # if Xt.shape[1] > 2:
-        #     Xt = pd.DataFrame(
-        #         TSNE(n_components=2, random_state=42).fit_transform(
-        #             Xt.to_numpy(), yt.to_numpy()
-        #         ),
-        #         columns=["TSNE_0", "TSNE_1"],
-        #     )
-        #     if conf["outlier"]:
-        #         Xt, yt = LocalOutlierDetector(n_neighbors=32).fit_resample(
-        #             Xt.to_numpy(), yt.iloc[:, 0].to_numpy()
-        #         )
-        #         Xt, yt = pd.DataFrame(Xt, columns=["TSNE_0", "TSNE_1"]), pd.DataFrame(
-        #             yt, columns=["target"]
-        #         )
-        n_selected_features = Xt.shape[1]
-        Xt = Xt.iloc[:, :n_selected_features]
-        # min, max = Xt.min().min(), Xt.max().max()
-        # range = (max - min) / 10
-        # xs = Xt.iloc[:, 0]
-        # ys = (
-        #     [(max + min) / 2] * Xt.shape[0]
-        #     if n_selected_features < 2
-        #     else Xt.iloc[:, 1]
-        # )
-        # # zs = [(max+min)/2] * Xt.shape[0] if n_selected_features < 3 else Xt.iloc[:, 2]
-        # if Xt.shape[1] < 3:
-        #     ax.scatter(xs, ys, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
-        # # else:
-        # # ax.scatter(xs, ys, zs, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
-        # ax.set_xlim([min - range, max + range])
-        # ax.set_ylim([min - range, max + range])
-        # ax.set_xlabel(list(Xt.columns)[0], fontsize=16)
-        # ax.set_ylabel(
-        #     "None" if n_selected_features < 2 else list(Xt.columns)[1], fontsize=16
-        # )
-        # # if Xt.shape[1] >= 3:
-        # # ax.set_zlim([min, max])
-        # # ax.set_zlabel('None' if n_selected_features < 3 else list(Xt.columns)[2], fontsize=16)
-        title = "\n".join([operator for operator in pipeline.values()])
-        current_solution = solutions.loc[
-            (
-                (solutions["dataset"] == conf["dataset"])
-                & (
-                    solutions["optimization_internal_metric"]
-                    == conf["optimization_internal_metric"]
-                )
-                & (solutions["iteration"] == int(row["iteration"]))
-            ),
-            :,
-        ]
-        k_features = "\nk= " + str(old_X.shape[1])
-        n_clusters = "    n=" + str(
-            int(current_solution.loc[:, "algorithm__n_clusters"].values[0])
-        )
-        title += k_features + n_clusters
-        title += "\nint_metr=" + str(
-            round(
-                current_solution.loc[:, "optimization_internal_metric_value"].values[0],
-                2,
+        for idx, subplot_type in enumerate(["TSNE", "PCA", "PARA"]):
+            if Xt.shape[1] < 3:
+                ax = fig.add_subplot(3, 3, i + (3 * idx))
+            else:
+                # ax = fig.add_subplot(3, 3, i, projection='3d')
+                ax = fig.add_subplot(3, 3, i + (3 * idx))
+            single_plot(
+                ax=ax,
+                Xt=Xt,
+                yt=yt,
+                conf=conf,
+                pipeline=pipeline,
+                solutions=solutions,
+                row=row,
+                type=subplot_type,
             )
-        )
-        title += "    ext_metr=" + str(
-            round(
-                current_solution.loc[:, "optimization_external_metric_value"].values[0],
-                2,
-            )
-        )
-        ax = pd.plotting.parallel_coordinates(pd.concat([Xt, yt], axis=1), "target", color=colors)
-        ax.set_title(title, fontdict={"fontsize": 20, "fontweight": "medium"})
+
     plt.tight_layout(rect=[0.0, 0.0, 1.0, 0.85])
     end_time = time.time()
     plotting_duration = int(end_time) - int(start_time)
