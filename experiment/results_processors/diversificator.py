@@ -552,44 +552,44 @@ def save_figure(solutions, conf):
             ]
         )
         old_X = Xt.copy()
-        if Xt.shape[1] > 2:
-            Xt = pd.DataFrame(
-                TSNE(n_components=2, random_state=42).fit_transform(
-                    Xt.to_numpy(), yt.to_numpy()
-                ),
-                columns=["TSNE_0", "TSNE_1"],
-            )
-            if conf["outlier"]:
-                Xt, yt = LocalOutlierDetector(n_neighbors=32).fit_resample(
-                    Xt.to_numpy(), yt.iloc[:, 0].to_numpy()
-                )
-                Xt, yt = pd.DataFrame(Xt, columns=["TSNE_0", "TSNE_1"]), pd.DataFrame(
-                    yt, columns=["target"]
-                )
+        # if Xt.shape[1] > 2:
+        #     Xt = pd.DataFrame(
+        #         TSNE(n_components=2, random_state=42).fit_transform(
+        #             Xt.to_numpy(), yt.to_numpy()
+        #         ),
+        #         columns=["TSNE_0", "TSNE_1"],
+        #     )
+        #     if conf["outlier"]:
+        #         Xt, yt = LocalOutlierDetector(n_neighbors=32).fit_resample(
+        #             Xt.to_numpy(), yt.iloc[:, 0].to_numpy()
+        #         )
+        #         Xt, yt = pd.DataFrame(Xt, columns=["TSNE_0", "TSNE_1"]), pd.DataFrame(
+        #             yt, columns=["target"]
+        #         )
         n_selected_features = Xt.shape[1]
         Xt = Xt.iloc[:, :n_selected_features]
-        min, max = Xt.min().min(), Xt.max().max()
-        range = (max - min) / 10
-        xs = Xt.iloc[:, 0]
-        ys = (
-            [(max + min) / 2] * Xt.shape[0]
-            if n_selected_features < 2
-            else Xt.iloc[:, 1]
-        )
-        # zs = [(max+min)/2] * Xt.shape[0] if n_selected_features < 3 else Xt.iloc[:, 2]
-        if Xt.shape[1] < 3:
-            ax.scatter(xs, ys, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
-        # else:
-        # ax.scatter(xs, ys, zs, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
-        ax.set_xlim([min - range, max + range])
-        ax.set_ylim([min - range, max + range])
-        ax.set_xlabel(list(Xt.columns)[0], fontsize=16)
-        ax.set_ylabel(
-            "None" if n_selected_features < 2 else list(Xt.columns)[1], fontsize=16
-        )
-        # if Xt.shape[1] >= 3:
-        # ax.set_zlim([min, max])
-        # ax.set_zlabel('None' if n_selected_features < 3 else list(Xt.columns)[2], fontsize=16)
+        # min, max = Xt.min().min(), Xt.max().max()
+        # range = (max - min) / 10
+        # xs = Xt.iloc[:, 0]
+        # ys = (
+        #     [(max + min) / 2] * Xt.shape[0]
+        #     if n_selected_features < 2
+        #     else Xt.iloc[:, 1]
+        # )
+        # # zs = [(max+min)/2] * Xt.shape[0] if n_selected_features < 3 else Xt.iloc[:, 2]
+        # if Xt.shape[1] < 3:
+        #     ax.scatter(xs, ys, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
+        # # else:
+        # # ax.scatter(xs, ys, zs, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
+        # ax.set_xlim([min - range, max + range])
+        # ax.set_ylim([min - range, max + range])
+        # ax.set_xlabel(list(Xt.columns)[0], fontsize=16)
+        # ax.set_ylabel(
+        #     "None" if n_selected_features < 2 else list(Xt.columns)[1], fontsize=16
+        # )
+        # # if Xt.shape[1] >= 3:
+        # # ax.set_zlim([min, max])
+        # # ax.set_zlabel('None' if n_selected_features < 3 else list(Xt.columns)[2], fontsize=16)
         title = "\n".join([operator for operator in pipeline.values()])
         current_solution = solutions.loc[
             (
@@ -619,6 +619,7 @@ def save_figure(solutions, conf):
                 2,
             )
         )
+        ax = pd.plotting.parallel_coordinates(pd.concat([Xt, yt], axis=1), "target", color=colors)
         ax.set_title(title, fontdict={"fontsize": 20, "fontweight": "medium"})
     plt.tight_layout(rect=[0.0, 0.0, 1.0, 0.85])
     end_time = time.time()
