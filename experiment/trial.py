@@ -64,6 +64,7 @@ from fsfc.generic import GenericSPEC, NormalizedCut, WKMeans
 from sklearn.metrics import silhouette_score
 
 import matplotlib.pyplot as plt
+import plotly.express as px
 
 
 colors = np.array(
@@ -132,40 +133,54 @@ def plot_cluster_data(df, target_column):
     )
     # print(Xt)
 
-    for i, cluster_label in enumerate(unique_clusters):
-        print(i)
-        cluster_data = Xt[Xt[target_column] == cluster_label]
-        plt.scatter(
-            cluster_data.iloc[:, 0],
-            cluster_data.iloc[:, 1],
-            c=[colors[i]] * cluster_data.shape[0],
-            label=f"Cluster {cluster_label}",
-        )
+    # for i, cluster_label in enumerate(unique_clusters):
+    #     print(i)
+    #     cluster_data = Xt[Xt[target_column] == cluster_label]
+    #     plt.scatter(
+    #         cluster_data.iloc[:, 0],
+    #         cluster_data.iloc[:, 1],
+    #         c=[colors[i]] * cluster_data.shape[0],
+    #         label=f"Cluster {cluster_label}",
+    #     )
 
-        n_selected_features = Xt.shape[1]
-        Xt = Xt.iloc[:, :n_selected_features]
-        min, max = Xt.min().min(), Xt.max().max()
-        range = (max - min) / 10
-        xs = Xt.iloc[:, 0]
-        ys = (
-            [(max + min) / 2] * Xt.shape[0]
-            if n_selected_features < 2
-            else Xt.iloc[:, 1]
-        )
-        # zs = [(max+min)/2] * Xt.shape[0] if n_selected_features < 3 else Xt.iloc[:, 2]
-        if Xt.shape[1] < 3:
-            ax.scatter(xs, ys, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
-        # else:
-        # ax.scatter(xs, ys, zs, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
-        ax.set_xlim([min - range, max + range])
-        ax.set_ylim([min - range, max + range])
-        ax.set_xlabel(list(Xt.columns)[0], fontsize=16)
-        ax.set_ylabel(
-            "None" if n_selected_features < 2 else list(Xt.columns)[1], fontsize=16
-        )
-        # if Xt.shape[1] >= 3:
-        # ax.set_zlim([min, max])
-        # ax.set_zlabel('None' if n_selected_features < 3 else list(Xt.columns)[2], fontsize=16)
+    #     n_selected_features = Xt.shape[1]
+    #     Xt = Xt.iloc[:, :n_selected_features]
+    #     min, max = Xt.min().min(), Xt.max().max()
+    #     range = (max - min) / 10
+    #     xs = Xt.iloc[:, 0]
+    #     ys = (
+    #         [(max + min) / 2] * Xt.shape[0]
+    #         if n_selected_features < 2
+    #         else Xt.iloc[:, 1]
+    #     )
+    #     # zs = [(max+min)/2] * Xt.shape[0] if n_selected_features < 3 else Xt.iloc[:, 2]
+    #     if Xt.shape[1] < 3:
+    #         ax.scatter(xs, ys, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
+    #     # else:
+    #     # ax.scatter(xs, ys, zs, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
+    #     ax.set_xlim([min - range, max + range])
+    #     ax.set_ylim([min - range, max + range])
+    #     ax.set_xlabel(list(Xt.columns)[0], fontsize=16)
+    #     ax.set_ylabel(
+    #         "None" if n_selected_features < 2 else list(Xt.columns)[1], fontsize=16
+    #     )
+    #     # if Xt.shape[1] >= 3:
+    #     # ax.set_zlim([min, max])
+    #     # ax.set_zlabel('None' if n_selected_features < 3 else list(Xt.columns)[2], fontsize=16)
+
+    fig = px.parallel_coordinates(
+        df,
+        color="target",
+        # labels={
+        #     "species_id": "Species",
+        #     "sepal_width": "Sepal Width",
+        #     "sepal_length": "Sepal Length",
+        #     "petal_width": "Petal Width",
+        #     "petal_length": "Petal Length",
+        # },
+        color_continuous_scale=px.colors.diverging.Tealrose,
+        color_continuous_midpoint=2,
+    )
 
     return fig
 
@@ -191,9 +206,10 @@ if __name__ == "__main__":
     fig = plot_cluster_data(df, "target")
 
     # Save the figure as a PNG file
-    fig.savefig("clustering_plot.png", dpi=300, bbox_inches="tight")
+    # fig.savefig("clustering_plot.png", dpi=300, bbox_inches="tight")
+    fig.write_image("clustering_plot.png")
 
     # Close the figure (optional)
-    plt.close(fig)
+    # plt.close(fig)
 
     print(internal_metric)
