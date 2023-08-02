@@ -86,31 +86,34 @@ colors = np.array(
 
 
 def single_plot(ax, df, target_column, unique_clusters, type):
-    if df.shape[1] > 3 and type != "PARA":
-        Xt = pd.concat(
-            [
-                pd.DataFrame(
-                    TSNE(n_components=2, random_state=42).fit_transform(
-                        pd.read_csv(
-                            "results/optimization/smbo/details/ecoli_sil/ecoli_sil_478_X_normalize.csv"
-                        ).to_numpy(),
-                        # df.iloc[:, :-1].to_numpy(),
-                        df.iloc[:, -1].to_numpy(),
-                    )
-                    if type == "TSNE"
-                    else PCA(n_components=2, random_state=42).fit_transform(
-                        pd.read_csv(
-                            "results/optimization/smbo/details/ecoli_sil/ecoli_sil_478_X_normalize.csv"
-                        ).to_numpy(),
-                        # df.iloc[:, :-1].to_numpy(),
-                        df.iloc[:, -1].to_numpy(),
+    if type != "PARA":
+        if df.shape[1] > 3:
+            Xt = pd.concat(
+                [
+                    pd.DataFrame(
+                        TSNE(n_components=2, random_state=42).fit_transform(
+                            # pd.read_csv(
+                            #     "results/optimization/smbo/details/ecoli_sil/ecoli_sil_478_X_normalize.csv"
+                            # ).to_numpy(),
+                            df.iloc[:, :-1].to_numpy(),
+                            df.iloc[:, -1].to_numpy(),
+                        )
+                        if type == "TSNE"
+                        else PCA(n_components=2, random_state=42).fit_transform(
+                            # pd.read_csv(
+                            #     "results/optimization/smbo/details/ecoli_sil/ecoli_sil_478_X_normalize.csv"
+                            # ).to_numpy(),
+                            df.iloc[:, :-1].to_numpy(),
+                            df.iloc[:, -1].to_numpy(),
+                        ),
+                        columns=[f"{type}_0", f"{type}_1"],
                     ),
-                    columns=[f"{type}_0", f"{type}_1"],
-                ),
-                df[target_column],
-            ],
-            axis=1,
-        )
+                    df[target_column],
+                ],
+                axis=1,
+            )
+        else:
+            Xt = df
         # print(Xt)
 
         for i, cluster_label in enumerate(unique_clusters):
@@ -177,7 +180,7 @@ def plot_cluster_data(df, target_column):
 
 
 if __name__ == "__main__":
-    X, y, _ = get_dataset("ecoli")
+    X, y, dataset_features_names = get_dataset("iris")
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
     pipe = Pipeline(
         [
@@ -186,8 +189,8 @@ if __name__ == "__main__":
             ("svc", AgglomerativeClustering(n_clusters=2, linkage="complete")),
         ]
     )
-    Xt = pipe[:-1].fit_transform(X)
-    pd.DataFrame(Xt).to_csv("clusering.csv", index=False)
+    Xt = pd.DataFrame(pipe[:-1].fit_transform(X), columns=[feature for idx, feature in enumerate(dataset_features_names) if pipe[0]._get_support_mask()[idx]])
+    Xt.to_csv("clusering.csv", index=False)
     y_pred = pipe.fit_predict(X, y)
     internal_metric = silhouette_score(Xt, y_pred)
     df = pd.concat([pd.DataFrame(Xt), pd.DataFrame(y_pred, columns=["target"])], axis=1)
