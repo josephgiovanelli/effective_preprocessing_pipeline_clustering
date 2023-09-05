@@ -14,7 +14,7 @@ from sklearn import metrics
 
 from algorithm import space as ALGORITHM_SPACE
 from pipeline.prototype import pipeline_conf_to_full_pipeline
-from utils.metrics import my_silhouette_samples
+from utils.metrics import my_silhouette_samples, weighted_metric
 from pipeline.PrototypeSingleton import PrototypeSingleton
 
 
@@ -72,30 +72,31 @@ def objective(pipeline_config, algo_config, X, y, context, config):
 
         result = pipeline[-1].fit_predict(Xt, yt)
         yt_to_export['pred'] = pd.DataFrame(result.copy(), columns=['target'])
-        external_metric = metrics.adjusted_mutual_info_score(yt, result)
+        external_metric = 1 - metrics.adjusted_mutual_info_score(yt, result)
         if config['metric'] == 'sil':
-            internal_metric = silhouette_score(Xt, result)
+            internal_metric = 1 - silhouette_score(Xt, result)
             #sil_samples, intra_clust_dists, inter_clust_dists = my_silhouette_samples(Xt, result)
         elif config['metric'] == 'ch':
-            internal_metric = calinski_harabasz_score(Xt, result)
+            internal_metric = -1 * calinski_harabasz_score(Xt, result)
         elif config['metric'] == 'dbi':
-            internal_metric = -1 * davies_bouldin_score(Xt, result)
+            internal_metric = -davies_bouldin_score(Xt, result)
         elif config['metric'] == 'sdbw':
-            internal_metric = -1 * S_Dbw(Xt, result)
+            internal_metric = S_Dbw(Xt, result)
         elif config['metric'] == 'ssw':
-            internal_metric = -1 * pipeline[-1].inertia_
+            internal_metric = pipeline[-1].inertia_
         elif config['metric'] == 'sw':
             _, intra_clust_dists, _ = my_silhouette_samples(Xt, result)
             internal_metric = intra_clust_dists.sum()
-            internal_metric = -1 * internal_metric
         elif config['metric'] == 'ami':
             internal_metric = external_metric
+        else:
+            internal_metric = weighted_metric(X.copy(), Xt, result, config['metric'])
         internal_metric = np.float64(internal_metric)
         external_metric = np.float64(external_metric)
         status = STATUS_OK
     except Exception as e:
-        internal_metric = float('-inf')
-        external_metric = float('-inf')
+        internal_metric = float('inf')
+        external_metric = float('inf')
         status = STATUS_FAIL
         print(e)
     stop = time.time()
@@ -121,7 +122,7 @@ def objective(pipeline_config, algo_config, X, y, context, config):
         'start_time': start,
         'stop_time': stop,
         'duration': stop - start,
-        'loss': 1 - internal_metric, 
+        'loss': internal_metric, 
         'status': status, 
         'internal_metric': internal_metric,
         'external_metric': external_metric,

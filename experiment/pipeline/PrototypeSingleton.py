@@ -27,7 +27,7 @@ class PrototypeSingleton:
     POOL = {
         "normalize": [None, StandardScaler(), MinMaxScaler(), RobustScaler(), PowerTransformer()],
         "outlier": [None, LocalOutlierDetector(), IsolationOutlierDetector()],
-        "features": [None, PearsonThreshold(threshold=0.5)]
+        "features": [None, PearsonThreshold(threshold=0.5), GenericSPEC(k=3), NormalizedCut(k=3), WKMeans(k=3, beta=0)]
     }
 
     features_names = []

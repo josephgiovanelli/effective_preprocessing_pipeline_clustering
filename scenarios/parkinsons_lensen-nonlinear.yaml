@@ -1,10 +1,10 @@
 general:
-  dataset: synthetic
+  dataset: parkinsons
   seed: 42
   space: extended
 optimizations:
   smbo:
-    metric: sil
+    metric: lensen-nonlinear
     budget_kind: time
     budget: 7200
 diversifications:
