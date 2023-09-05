@@ -1,10 +1,10 @@
 general:
-  dataset: parkinsons
+  dataset: thyroid
   seed: 42
   space: extended
 optimizations:
   smbo:
-    metric: lensen-nonlinear
+    metric: hancer-extended
     budget_kind: time
     budget: 7200
 diversifications:
