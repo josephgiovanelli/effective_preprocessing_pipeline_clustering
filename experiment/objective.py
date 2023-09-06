@@ -57,6 +57,7 @@ def objective(pipeline_config, algo_config, X, y, context, config):
         labels = PrototypeSingleton.getInstance().getFeaturesFromMask()
         Xt_to_export['original'] = pd.DataFrame(Xt.copy(), columns=[l for l in labels if l != 'None'])
         yt_to_export['original'] = pd.DataFrame(yt.copy(), columns=['target'])
+        indeces = []
         if len(pipeline.steps) > 1:
             for step, operator in pipeline[:-1].named_steps.items():
                 if step == 'outlier':
@@ -68,7 +69,6 @@ def objective(pipeline_config, algo_config, X, y, context, config):
                     if step == 'features':
                         mask = pipeline['features'].get_support()
                         labels = PrototypeSingleton.getInstance().getFeaturesFromMask(mask)
-                    indeces = []
                 Xt_to_export[step] = pd.DataFrame(Xt.copy(), columns=[l for l in labels if l != 'None'])
 
 
