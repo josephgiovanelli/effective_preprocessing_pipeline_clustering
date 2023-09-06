@@ -13,8 +13,8 @@ class Policy(object):
             'history_hash': [],
             'history_index': {},
             'history': [],
-            'max_history_internal_metric': float('-inf'),
-            'max_history_external_metric': float('-inf'),
+            'max_history_internal_metric': float('inf'),
+            'max_history_external_metric': float('inf'),
             'best_config': {},
         }
 

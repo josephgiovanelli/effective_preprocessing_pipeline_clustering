@@ -4,7 +4,7 @@ general:
   space: extended
 optimizations:
   smbo:
-    metric: hancer-extended
+    metric: lensen-nonlinear
     budget_kind: time
     budget: 7200
 diversifications:

@@ -17,6 +17,7 @@ class MyOutlierDetector(BaseSampler):
         self.accept_sparse = accept_sparse
         self.kw_args = kw_args
         self.validate = validate
+        self.indeces = []
 
     def fit(self, X, y):
         """Check inputs and statistics of the sampler.
@@ -47,6 +48,7 @@ class MyOutlierDetector(BaseSampler):
 
     def _fit_resample(self, X, y):
         filter = self.estimator.fit_predict(X)
+        self.indeces = np.where(np.array(filter) == 1)
         new_X = np.array([X[i, :] for i in range(len(filter)) if filter[i] != -1])
         new_y = np.array([y[i] for i in range(len(filter)) if filter[i] != -1])
         return new_X, new_y

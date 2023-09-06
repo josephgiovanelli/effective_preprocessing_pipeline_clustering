@@ -62,11 +62,13 @@ def objective(pipeline_config, algo_config, X, y, context, config):
                 if step == 'outlier':
                     Xt, yt = operator.fit_resample(Xt, yt)
                     yt_to_export[step] = pd.DataFrame(yt.copy(), columns=['target'])
+                    indeces = operator.indeces
                 else:
                     Xt = operator.fit_transform(Xt, None)
                     if step == 'features':
                         mask = pipeline['features'].get_support()
                         labels = PrototypeSingleton.getInstance().getFeaturesFromMask(mask)
+                    indeces = []
                 Xt_to_export[step] = pd.DataFrame(Xt.copy(), columns=[l for l in labels if l != 'None'])
 
 
@@ -90,7 +92,7 @@ def objective(pipeline_config, algo_config, X, y, context, config):
         elif config['metric'] == 'ami':
             internal_metric = external_metric
         else:
-            internal_metric = weighted_metric(X.copy(), Xt, result, config['metric'])
+            internal_metric = weighted_metric(X.copy(), Xt.copy(), result.copy(), config['metric'], indeces)
         internal_metric = np.float64(internal_metric)
         external_metric = np.float64(external_metric)
         status = STATUS_OK
@@ -132,7 +134,7 @@ def objective(pipeline_config, algo_config, X, y, context, config):
         'max_history_external_metric': context['max_history_external_metric'],
     })
 
-    if context['max_history_internal_metric'] < internal_metric:
+    if context['max_history_internal_metric'] > internal_metric:
         item['max_history_internal_metric'] = internal_metric
         item['max_history_external_metric'] = external_metric
         context['max_history_internal_metric'] = internal_metric
