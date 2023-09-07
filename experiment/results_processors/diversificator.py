@@ -846,6 +846,11 @@ def main():
             meta_features = meta_features[
                 meta_features["optimization_internal_metric_value"] >= metric_threshold
             ]
+        
+        if conf["optimization_internal_metric"] in ["lensen-nonlinear", "hancer-extended"]:
+            meta_features["optimization_internal_metric_value"] *= -1
+            meta_features["max_optimization_internal_metric_value"] *= -1
+
         meta_features.to_csv(
             os.path.join(
                 conf["output_path"],
@@ -858,7 +863,7 @@ def main():
             try:
                 dashboard = {}
                 dashboard["solutions"] = pd.read_csv(
-                    os.path.join(conf["output_path"], conf["output_file_name"] + ".csv")
+                    os.path.join(conf["output_path"], conf["output_file_name"] + "_after_filtering.csv")
                 )
                 print("\t\tA previous dashboard was found")
                 print("\t\tCalculating dashboard score")
