@@ -388,6 +388,8 @@ def diversificate_exhaustive(meta_features, conf, original_features):
 def evaluate_dashboard(solutions, conf, original_features):
     def compute_pairwise_div(df, conf, original_features):
         df = df.reset_index()
+        # print(df.iloc[0])
+        # print(df.iloc[1])
         first_iteration = int(df.loc[0, "iteration"])
         second_iteration = int(df.loc[1, "iteration"])
         div_vectors = []
@@ -848,6 +850,9 @@ def main():
             ]
         
         if conf["optimization_internal_metric"] in ["lensen-nonlinear", "hancer-extended"]:
+            meta_features = meta_features[
+                    meta_features["optimization_internal_metric_value"] != float('inf')
+                ]
             meta_features["optimization_internal_metric_value"] *= -1
             meta_features["max_optimization_internal_metric_value"] *= -1
 
