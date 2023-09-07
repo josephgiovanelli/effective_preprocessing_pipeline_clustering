@@ -868,7 +868,7 @@ def main():
             try:
                 dashboard = {}
                 dashboard["solutions"] = pd.read_csv(
-                    os.path.join(conf["output_path"], conf["output_file_name"] + "_after_filtering.csv")
+                    os.path.join(conf["output_path"], conf["output_file_name"] + ".csv")
                 )
                 print("\t\tA previous dashboard was found")
                 print("\t\tCalculating dashboard score")
