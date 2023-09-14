@@ -7,6 +7,8 @@ import os
 
 import pandas as pd
 import numpy as np
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 from hyperopt import STATUS_OK, STATUS_FAIL
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 from s_dbw import S_Dbw
@@ -75,24 +77,30 @@ def objective(pipeline_config, algo_config, X, y, context, config):
         result = pipeline[-1].fit_predict(Xt, yt)
         yt_to_export['pred'] = pd.DataFrame(result.copy(), columns=['target'])
         external_metric = 1 - metrics.adjusted_mutual_info_score(yt, result)
-        if config['metric'] == 'sil':
+        metric = config['metric']
+        if "sil-" in metric:
+            if Xt.shape[1] > 2:
+                func = TSNE if metric.split("-")[1] == 'tsne' else PCA
+                Xt = func(n_components=2, random_state=42).fit_transform(Xt)
+            metric = "sil"
+        if metric == 'sil':
             internal_metric = 1 - silhouette_score(Xt, result)
             #sil_samples, intra_clust_dists, inter_clust_dists = my_silhouette_samples(Xt, result)
-        elif config['metric'] == 'ch':
+        elif metric == 'ch':
             internal_metric = -1 * calinski_harabasz_score(Xt, result)
-        elif config['metric'] == 'dbi':
+        elif metric == 'dbi':
             internal_metric = -davies_bouldin_score(Xt, result)
-        elif config['metric'] == 'sdbw':
+        elif metric == 'sdbw':
             internal_metric = S_Dbw(Xt, result)
-        elif config['metric'] == 'ssw':
+        elif metric == 'ssw':
             internal_metric = pipeline[-1].inertia_
-        elif config['metric'] == 'sw':
+        elif metric == 'sw':
             _, intra_clust_dists, _ = my_silhouette_samples(Xt, result)
             internal_metric = intra_clust_dists.sum()
-        elif config['metric'] == 'ami':
+        elif metric == 'ami':
             internal_metric = external_metric
         else:
-            internal_metric = weighted_metric(X.copy(), Xt.copy(), result.copy(), config['metric'], indeces)
+            internal_metric = weighted_metric(X.copy(), Xt.copy(), result.copy(), metric, indeces)
         internal_metric = np.float64(internal_metric)
         external_metric = np.float64(external_metric)
         status = STATUS_OK
