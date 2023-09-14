@@ -1,12 +1,12 @@
 general:
-  dataset: diabetes
+  dataset: ecoli
   seed: 42
   space: extended
 optimizations:
   smbo:
-    metric: lensen-nonlinear
+    metric: sil-tsne
     budget_kind: time
-    budget: 7200
+    budget: 100
 diversifications:
   mmr:
     num_results: 3

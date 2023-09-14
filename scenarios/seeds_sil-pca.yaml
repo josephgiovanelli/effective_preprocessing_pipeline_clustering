@@ -1,10 +1,10 @@
 general:
-  dataset: blood
+  dataset: seeds
   seed: 42
   space: extended
 optimizations:
   smbo:
-    metric: hancer-extended
+    metric: sil-pca
     budget_kind: time
     budget: 7200
 diversifications:

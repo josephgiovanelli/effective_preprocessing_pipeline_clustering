@@ -718,12 +718,11 @@ def main():
                 for run in c["runs"]:
                     optimization_method = run.split("_")[0]
                     diversification_method = run.split("_")[1]
-                    optimization_internal_metric = c["optimizations"][optimization_method]["metric"]
                     conf = {
                         "dataset": c["general"]["dataset"],
                         "space": c["general"]["space"],
                         "optimization_method": optimization_method,
-                        "optimization_internal_metric": optimization_internal_metric if "sil-" not in optimization_internal_metric else "sil",
+                        "optimization_internal_metric": c["optimizations"][optimization_method]["metric"],
                         "diversification_num_results": c["diversifications"][
                             diversification_method
                         ]["num_results"],
@@ -842,16 +841,15 @@ def main():
         if (
             conf["optimization_internal_metric"] == "sil"
             or conf["optimization_internal_metric"] == "sdbw"
+            or "sil-" in conf["optimization_internal_metric"]
         ):
             metric_threshold = 0.3 #if args.experiment == "exp1" else 0.01
             meta_features = meta_features[
                 meta_features["optimization_internal_metric_value"] >= metric_threshold
             ]
-        
+
+        meta_features = meta_features[meta_features["optimization_internal_metric_value"] != float('inf')]
         if conf["optimization_internal_metric"] in ["lensen-nonlinear", "hancer-extended"]:
-            meta_features = meta_features[
-                    meta_features["optimization_internal_metric_value"] != float('inf')
-                ]
             meta_features["optimization_internal_metric_value"] *= -1
             meta_features["max_optimization_internal_metric_value"] *= -1
 
