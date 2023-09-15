@@ -857,7 +857,7 @@ def main():
             "sil-" in conf["optimization_internal_metric"]
         ):
             meta_features = meta_features[
-                meta_features["optimization_internal_metric_value"] < metric_threshold
+                meta_features["optimization_internal_metric_value"] > -metric_threshold
             ]
 
 
