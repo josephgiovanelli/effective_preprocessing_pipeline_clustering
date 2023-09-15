@@ -838,20 +838,22 @@ def main():
             meta_features["max_optimization_internal_metric_value"] = (
                 1 - meta_features["max_optimization_internal_metric_value"]
             )
-        if (
-            conf["optimization_internal_metric"] == "sil"
-            or conf["optimization_internal_metric"] == "sdbw"
-            or "sil-" in conf["optimization_internal_metric"]
-        ):
-            metric_threshold = 0.3 #if args.experiment == "exp1" else 0.01
-            meta_features = meta_features[
-                meta_features["optimization_internal_metric_value"] >= metric_threshold
-            ]
 
         meta_features = meta_features[meta_features["optimization_internal_metric_value"] != float('inf')]
         if conf["optimization_internal_metric"] in ["lensen-nonlinear", "hancer-extended", "sil-tsne", "sil-pca"]:
             meta_features["optimization_internal_metric_value"] *= -1
             meta_features["max_optimization_internal_metric_value"] *= -1
+
+        if (
+            conf["optimization_internal_metric"] == "sil"
+            or conf["optimization_internal_metric"] == "sdbw"
+            or "sil-" in conf["optimization_internal_metric"]
+        ):
+            metric_threshold = 0.5 #if args.experiment == "exp1" else 0.01
+            meta_features = meta_features[
+                meta_features["optimization_internal_metric_value"] >= metric_threshold
+            ]
+
 
         meta_features.to_csv(
             os.path.join(
