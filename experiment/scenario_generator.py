@@ -42,8 +42,8 @@ if __name__ == "__main__":
         for dataset in range(20):
             for metric in ["sil-tsne", "sil-pca"]:
                 task_template = copy.deepcopy(template)
-                task_template["general"]["dataset"] = dataset
+                task_template["general"]["dataset"] = f"syn{dataset}"
                 task_template["optimizations"]["smbo"]["metric"] = metric
-                with open(os.path.join(input_path, f"{dataset}_{metric}.yaml"), "w") as f:
+                with open(os.path.join(input_path, f"syn{dataset}_{metric}.yaml"), "w") as f:
                     yaml.dump(task_template, f)
             pbar.update()
