@@ -1,0 +1,24 @@
+diversifications:
+  exhaustive:
+    criterion: features_set
+    lambda: 0.7
+    method: mmr
+    metric: jaccard
+    num_results: 3
+  mmr:
+    criterion: features_set
+    lambda: 0.7
+    method: mmr
+    metric: jaccard
+    num_results: 3
+general:
+  dataset: 13
+  seed: 42
+  space: extended
+optimizations:
+  smbo:
+    budget: 1800
+    budget_kind: time
+    metric: sil-pca
+runs:
+- smbo_mmr

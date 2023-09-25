@@ -109,7 +109,8 @@ def load_dataset_from_csv(name):
             '[3 - petalwidth (numeric)]',
         ]
     else:
-        raise Exception('No features names assigned')
+        features_name = [f"feature_{idx}" for idx in range(data.shape[1] - 1)] + ["target"]
+        # raise Exception('No features names assigned')
     X, y = data[:, :-1], data[:, -1]
     categorical_indicator = [False for _ in range(X.shape[1])]
     set_singleton(name, X, y, categorical_indicator, features_name)
