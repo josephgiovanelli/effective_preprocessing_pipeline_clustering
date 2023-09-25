@@ -109,7 +109,7 @@ def load_dataset_from_csv(name):
             '[3 - petalwidth (numeric)]',
         ]
     else:
-        features_name = [f"feature_{idx}" for idx in range(data.shape[1] - 1)] + ["target"]
+        features_name = [f"feature_{idx}" for idx in range(data.shape[1] - 1)]
         # raise Exception('No features names assigned')
     X, y = data[:, :-1], data[:, -1]
     categorical_indicator = [False for _ in range(X.shape[1])]
