@@ -58,7 +58,7 @@ def covtype():
     return data.data, data.target, data.feature_names
 
 def load_dataset_from_csv(name):
-    data = pd.read_csv(os.path.join('datasets', name +'.csv'), header=None)
+    data = pd.read_csv(os.path.join('datasets', str(name) +'.csv'), header=None)
     data = data.to_numpy()
     if name == 'parkinsons':
         features_name = [
