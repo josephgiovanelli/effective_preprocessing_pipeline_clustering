@@ -2,17 +2,17 @@ num_features = 6
 
 def params_GenericSPEC():
     return {
-        'k': list(range(2, num_features))
+        'k': [2] if num_features in [2, 3] else list(range(2, num_features))
     }
 
 def params_NormalizedCut():
     return {
-        'k': list(range(2, num_features))
+        'k': [2] if num_features in [2, 3] else list(range(2, num_features))
     }
 
 def params_WKMeans():
     return {
-        'k': list(range(2, num_features))
+        'k': [2] if num_features in [2, 3] else list(range(2, num_features))
     }
 
 def params_PearsonThreshold():
