@@ -46,6 +46,6 @@ if __name__ == "__main__":
                 task_template["general"]["dataset"] = f"syn{dataset}"
                 for div in ["exhaustive", "mmr"]:
                     task_template["diversifications"][div]["lambda"] = div_lambda
-                with open(os.path.join(input_path, f"syn{dataset}_{div_lambda}.yaml"), "w") as f:
+                with open(os.path.join(input_path, f"""syn{dataset}_{str(div_lambda).split(".")[1]}.yaml"""), "w") as f:
                     yaml.dump(task_template, f)
             pbar.update()
