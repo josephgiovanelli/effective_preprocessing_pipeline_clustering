@@ -16,21 +16,22 @@ template = {
     "optimizations": {
         "smbo": {
             "budget_kind": "time",
-            "budget": 1800
+            "budget": 1800,
+            "metric": "sil-tsne"
         }},
     "diversifications": {
         "mmr": {
             "num_results": 3,
             "method": "mmr",
             "lambda": 0.7,
-            "criterion": "features_set",
+            "criterion": "clustering",
             "metric": "jaccard"
         },
         "exhaustive": {
             "num_results": 3,
             "method": "mmr",
             "lambda": 0.7,
-            "criterion": "features_set",
+            "criterion": "clustering",
             "metric": "jaccard"
         }},
     "runs": ["smbo_mmr"]
@@ -40,10 +41,11 @@ if __name__ == "__main__":
     input_path = make_dir(os.path.join("/", "home", "scenarios"))
     with tqdm(total=20) as pbar:
         for dataset in range(20):
-            for metric in ["sil-tsne", "sil-pca"]:
+            for div_lambda in [0.5, 0.7]:
                 task_template = copy.deepcopy(template)
                 task_template["general"]["dataset"] = f"syn{dataset}"
-                task_template["optimizations"]["smbo"]["metric"] = metric
-                with open(os.path.join(input_path, f"syn{dataset}_{metric}.yaml"), "w") as f:
+                for div in ["exhaustive", "mmr"]:
+                    task_template["diversifications"][div]["lambda"] = div_lambda
+                with open(os.path.join(input_path, f"syn{dataset}_{div_lambda}.yaml"), "w") as f:
                     yaml.dump(task_template, f)
             pbar.update()
