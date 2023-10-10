@@ -50,7 +50,7 @@ colors = np.array(
 )
 
 
-def get_last_transformation(df, dataset, optimization_internal_metric, iteration):
+def get_last_transformation(df, dataset, optimization_internal_metric, iteration, conf):
     pipeline, is_there = {}, {}
     for transformation in ["features", "normalize", "outlier"]:
         pipeline[transformation] = df.loc[
@@ -64,7 +64,7 @@ def get_last_transformation(df, dataset, optimization_internal_metric, iteration
         is_there[transformation] = pipeline[transformation] != "None"
     last_transformation = (
         "outlier"
-        if is_there["outlier"]
+        if (is_there["outlier"] and conf["diversification_criterion"] != "clustering")
         else (
             "normalize"
             if is_there["normalize"]
@@ -124,6 +124,7 @@ def diversificate_mmr(meta_features, conf, original_features):
                     conf["dataset"],
                     conf["optimization_internal_metric"],
                     current_iteration,
+                    conf,
                 )
                 current_X = pd.read_csv(
                     os.path.join(
@@ -163,6 +164,7 @@ def diversificate_mmr(meta_features, conf, original_features):
                     conf["dataset"],
                     conf["optimization_internal_metric"],
                     current_iteration,
+                    conf,
                 )
                 current_X = pd.read_csv(
                     os.path.join(
@@ -234,6 +236,7 @@ def diversificate_mmr(meta_features, conf, original_features):
                         conf["dataset"],
                         conf["optimization_internal_metric"],
                         int(other),
+                        conf,
                     )
                     other_X = pd.read_csv(
                         os.path.join(
@@ -284,6 +287,7 @@ def diversificate_mmr(meta_features, conf, original_features):
                         conf["dataset"],
                         conf["optimization_internal_metric"],
                         int(other),
+                        conf,
                     )
                     other_X = pd.read_csv(
                         os.path.join(
@@ -409,7 +413,11 @@ def evaluate_dashboard(solutions, conf, original_features):
                 or conf["diversification_criterion"] == "features_set_n_clusters"
             ):
                 _, last_transformation = get_last_transformation(
-                    df, conf["dataset"], conf["optimization_internal_metric"], iteration
+                    df,
+                    conf["dataset"],
+                    conf["optimization_internal_metric"],
+                    iteration,
+                    conf,
                 )
                 X = pd.read_csv(
                     os.path.join(
@@ -436,7 +444,11 @@ def evaluate_dashboard(solutions, conf, original_features):
                 div_vectors.append(features)
             elif conf["diversification_criterion"] == "hyper_parameter":
                 _, last_transformation = get_last_transformation(
-                    df, conf["dataset"], conf["optimization_internal_metric"], iteration
+                    df,
+                    conf["dataset"],
+                    conf["optimization_internal_metric"],
+                    iteration,
+                    conf,
                 )
                 X = pd.read_csv(
                     os.path.join(
@@ -590,6 +602,7 @@ def save_figure(solutions, conf):
             conf["dataset"],
             conf["optimization_internal_metric"],
             int(row["iteration"]),
+            conf,
         )
 
         Xt = pd.read_csv(
