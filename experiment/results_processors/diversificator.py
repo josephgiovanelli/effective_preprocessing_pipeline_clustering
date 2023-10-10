@@ -91,7 +91,7 @@ def diversificate_mmr(meta_features, conf, original_features):
     solutions = solutions.append(first_solution)
     working_df = working_df.drop([first_solution.name])
 
-    for _ in range(conf["diversification_num_results"] - 1):
+    for _ in range(min(conf["diversification_num_results"] - 1, working_df.shape[0])):
         confs = working_df["iteration"].to_list()
         mmr = pd.DataFrame()
         for current_iteration in confs:
