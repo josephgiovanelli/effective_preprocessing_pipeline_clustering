@@ -106,8 +106,7 @@ def diversificate_mmr(meta_features, conf, original_features):
                         conf["input_path"],
                         "_".join(
                             [
-                                conf["dataset"],
-                                conf["optimization_internal_metric"],
+                                conf["file_name"],
                                 str(current_iteration),
                                 "y",
                                 "pred",
@@ -131,8 +130,7 @@ def diversificate_mmr(meta_features, conf, original_features):
                         conf["input_path"],
                         "_".join(
                             [
-                                conf["dataset"],
-                                conf["optimization_internal_metric"],
+                                conf["file_name"],
                                 str(current_iteration),
                                 "X",
                                 current_last_transformation,
@@ -171,8 +169,7 @@ def diversificate_mmr(meta_features, conf, original_features):
                         conf["input_path"],
                         "_".join(
                             [
-                                conf["dataset"],
-                                conf["optimization_internal_metric"],
+                                conf["file_name"],
                                 str(current_iteration),
                                 "X",
                                 current_last_transformation,
@@ -209,8 +206,7 @@ def diversificate_mmr(meta_features, conf, original_features):
                             conf["input_path"],
                             "_".join(
                                 [
-                                    conf["dataset"],
-                                    conf["optimization_internal_metric"],
+                                    conf["file_name"],
                                     str(int(other)),
                                     "y",
                                     "pred",
@@ -244,8 +240,7 @@ def diversificate_mmr(meta_features, conf, original_features):
                             conf["input_path"],
                             "_".join(
                                 [
-                                    conf["dataset"],
-                                    conf["optimization_internal_metric"],
+                                    conf["file_name"],
                                     str(int(other)),
                                     "X",
                                     other_last_transformation,
@@ -295,8 +290,7 @@ def diversificate_mmr(meta_features, conf, original_features):
                             conf["input_path"],
                             "_".join(
                                 [
-                                    conf["dataset"],
-                                    conf["optimization_internal_metric"],
+                                    conf["file_name"],
                                     str(int(other)),
                                     "X",
                                     other_last_transformation,
@@ -400,8 +394,7 @@ def evaluate_dashboard(solutions, conf, original_features):
                         conf["input_path"],
                         "_".join(
                             [
-                                conf["dataset"],
-                                conf["optimization_internal_metric"],
+                                conf["file_name"],
                                 str(iteration),
                                 "y",
                                 "pred",
@@ -423,8 +416,7 @@ def evaluate_dashboard(solutions, conf, original_features):
                         conf["input_path"],
                         "_".join(
                             [
-                                conf["dataset"],
-                                conf["optimization_internal_metric"],
+                                conf["file_name"],
                                 str(iteration),
                                 "X",
                                 last_transformation,
@@ -451,8 +443,7 @@ def evaluate_dashboard(solutions, conf, original_features):
                         conf["input_path"],
                         "_".join(
                             [
-                                conf["dataset"],
-                                conf["optimization_internal_metric"],
+                                conf["file_name"],
                                 str(iteration),
                                 "X",
                                 last_transformation,
@@ -606,8 +597,7 @@ def save_figure(solutions, conf):
                 conf["input_path"],
                 "_".join(
                     [
-                        conf["dataset"],
-                        conf["optimization_internal_metric"],
+                        conf["file_name"],
                         str(int(row["iteration"])),
                         "X",
                         last_transformation,
@@ -621,8 +611,7 @@ def save_figure(solutions, conf):
                 conf["input_path"],
                 "_".join(
                     [
-                        conf["dataset"],
-                        conf["optimization_internal_metric"],
+                        conf["file_name"],
                         str(int(row["iteration"])),
                         "y",
                         "pred",
@@ -933,6 +922,7 @@ def main():
             try:
                 timing_df = timing_df.append(
                     {
+                        "file_name": conf["file_name"],
                         "dataset": conf["dataset"],
                         "optimization": conf["optimization_method"],
                         "diversification": conf["diversification_method"],
