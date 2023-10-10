@@ -813,8 +813,8 @@ def main():
         #     meta_features = meta_features[(meta_features['normalize__with_std'] == 'None') | (meta_features['normalize__with_std'] == 'True')]
         # meta_features = meta_features[~((meta_features['normalize'] != 'None') & (meta_features['features__k'] == '1'))]
 
-        # if conf['diversification_criterion'] == 'clustering':
-        #     meta_features = meta_features[meta_features['outlier'] == 'None']
+        if conf["diversification_criterion"] == "clustering":
+            meta_features = meta_features[meta_features["outlier"] == "None"]
         # elif conf['diversification_criterion'] == 'features_set' or conf['diversification_criterion'] == 'features_set_n_clusters' or conf['diversification_criterion'] == 'hyper_parameter':
         #     meta_features = meta_features[(meta_features['outlier'] == 'None') | ((meta_features['outlier'] != 'None') & (meta_features['outlier__n_neighbors'] == ('100' if conf['dataset'] == 'synthetic' else '32')))]
         # else:
