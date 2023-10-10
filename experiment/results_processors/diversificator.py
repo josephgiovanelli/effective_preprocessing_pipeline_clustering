@@ -719,10 +719,13 @@ def main():
                     optimization_method = run.split("_")[0]
                     diversification_method = run.split("_")[1]
                     conf = {
+                        "file_name": scenario.split(".")[0],
                         "dataset": c["general"]["dataset"],
                         "space": c["general"]["space"],
                         "optimization_method": optimization_method,
-                        "optimization_internal_metric": c["optimizations"][optimization_method]["metric"],
+                        "optimization_internal_metric": c["optimizations"][
+                            optimization_method
+                        ]["metric"],
                         "diversification_num_results": c["diversifications"][
                             diversification_method
                         ]["num_results"],
@@ -754,7 +757,7 @@ def main():
         conf = confs[i]
         print(f"""{i+1}th conf out of {len(confs)}: {conf}""")
 
-        working_folder = conf["dataset"] + "_" + conf["optimization_internal_metric"]
+        working_folder = conf["file_name"]
         conf["diversification_path"] = os.path.join(
             DIVERSIFICATION_RESULT_PATH,
             conf["optimization_method"],
@@ -839,12 +842,19 @@ def main():
                 1 - meta_features["max_optimization_internal_metric_value"]
             )
 
-        meta_features = meta_features[meta_features["optimization_internal_metric_value"] != float('inf')]
-        if conf["optimization_internal_metric"] in ["lensen-nonlinear", "hancer-extended", "sil-tsne", "sil-pca"]:
+        meta_features = meta_features[
+            meta_features["optimization_internal_metric_value"] != float("inf")
+        ]
+        if conf["optimization_internal_metric"] in [
+            "lensen-nonlinear",
+            "hancer-extended",
+            "sil-tsne",
+            "sil-pca",
+        ]:
             meta_features["optimization_internal_metric_value"] *= -1
             meta_features["max_optimization_internal_metric_value"] *= -1
 
-        metric_threshold = 0.5 #if args.experiment == "exp1" else 0.01
+        metric_threshold = 0.5  # if args.experiment == "exp1" else 0.01
         if (
             conf["optimization_internal_metric"] == "sil"
             or conf["optimization_internal_metric"] == "sdbw"
@@ -853,13 +863,10 @@ def main():
                 meta_features["optimization_internal_metric_value"] >= metric_threshold
             ]
 
-        if (
-            "sil-" in conf["optimization_internal_metric"]
-        ):
+        if "sil-" in conf["optimization_internal_metric"]:
             meta_features = meta_features[
                 meta_features["optimization_internal_metric_value"] > -metric_threshold
             ]
-
 
         meta_features.to_csv(
             os.path.join(
