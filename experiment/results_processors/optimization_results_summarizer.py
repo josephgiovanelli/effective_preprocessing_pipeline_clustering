@@ -79,11 +79,9 @@ def main():
             print("\tSummarization process starts")
             summary = pd.DataFrame()
             start_time = time.time()
-            print(results[optimization_method])
             for dataset, infos in results[optimization_method].items():
                 print(f"\t\tdataset: {dataset}\n\t\t\tinternal_metrics: {infos}")
                 for info in infos:
-                    print(info)
                     try:
                         summary = summary.append(
                             load_result(
@@ -94,7 +92,6 @@ def main():
                         )
                     except Exception as e:
                         print(e)
-            print(summary)
             end_time = time.time()
             duration = int(end_time) - int(start_time)
             summary["total_duration"] = summary.groupby("dataset")[
