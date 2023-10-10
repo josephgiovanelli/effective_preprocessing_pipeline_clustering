@@ -3,38 +3,35 @@ import os
 import copy
 from tqdm import tqdm
 
+
 def make_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
     return os.path.normpath(path)
 
+
 template = {
-    "general": {
-        "seed": 42,
-        "space": "extended"
-        },
+    "general": {"seed": 42, "space": "extended"},
     "optimizations": {
-        "smbo": {
-            "budget_kind": "time",
-            "budget": 1800,
-            "metric": "sil-tsne"
-        }},
+        "smbo": {"budget_kind": "time", "budget": 1800, "metric": "sil-tsne"}
+    },
     "diversifications": {
         "mmr": {
             "num_results": 3,
             "method": "mmr",
             "lambda": 0.7,
             "criterion": "clustering",
-            "metric": "jaccard"
+            "metric": "ami",
         },
         "exhaustive": {
             "num_results": 3,
             "method": "mmr",
             "lambda": 0.7,
             "criterion": "clustering",
-            "metric": "jaccard"
-        }},
-    "runs": ["smbo_mmr"]
+            "metric": "ami",
+        },
+    },
+    "runs": ["smbo_mmr"],
 }
 
 if __name__ == "__main__":
@@ -46,6 +43,12 @@ if __name__ == "__main__":
                 task_template["general"]["dataset"] = f"syn{dataset}"
                 for div in ["exhaustive", "mmr"]:
                     task_template["diversifications"][div]["lambda"] = div_lambda
-                with open(os.path.join(input_path, f"""syn{dataset}_{str(div_lambda).split(".")[1]}.yaml"""), "w") as f:
+                with open(
+                    os.path.join(
+                        input_path,
+                        f"""syn{dataset}_{str(div_lambda).split(".")[1]}.yaml""",
+                    ),
+                    "w",
+                ) as f:
                     yaml.dump(task_template, f)
             pbar.update()

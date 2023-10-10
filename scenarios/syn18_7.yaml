@@ -3,13 +3,13 @@ diversifications:
     criterion: clustering
     lambda: 0.7
     method: mmr
-    metric: jaccard
+    metric: ami
     num_results: 3
   mmr:
     criterion: clustering
     lambda: 0.7
     method: mmr
-    metric: jaccard
+    metric: ami
     num_results: 3
 general:
   dataset: syn18
