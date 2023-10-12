@@ -20,15 +20,15 @@ template = {
             "num_results": 3,
             "method": "mmr",
             "lambda": 0.5,
-            "criterion": "features_set",
-            "metric": "jaccard",
+            "criterion": "clustering",
+            "metric": "ami",
         },
         "exhaustive": {
             "num_results": 3,
             "method": "mmr",
             "lambda": 0.5,
-            "criterion": "features_set",
-            "metric": "jaccard",
+            "criterion": "clustering",
+            "metric": "ami",
         },
     },
     "runs": ["smbo_mmr"],
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     input_path = make_dir(os.path.join("/", "home", "scenarios"))
     with tqdm(total=20) as pbar:
         for dataset in range(20):
-            for div_lambda in [0.5, 0.7]:
+            for div_lambda in [0.5]:
                 task_template = copy.deepcopy(template)
                 task_template["general"]["dataset"] = f"syn{dataset}"
                 for div in ["exhaustive", "mmr"]:
