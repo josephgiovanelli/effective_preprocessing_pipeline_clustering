@@ -1,18 +1,18 @@
 diversifications:
   exhaustive:
-    criterion: clustering
-    lambda: 0.5
+    criterion: features_set
+    lambda: 0.7
     method: mmr
-    metric: ami
+    metric: jaccard
     num_results: 3
   mmr:
-    criterion: clustering
-    lambda: 0.5
+    criterion: features_set
+    lambda: 0.7
     method: mmr
-    metric: ami
+    metric: jaccard
     num_results: 3
 general:
-  dataset: syn4
+  dataset: syn2
   seed: 42
   space: extended
 optimizations:
