@@ -12,7 +12,7 @@ diversifications:
     metric: ami
     num_results: 3
 general:
-  dataset: syn14
+  dataset: postures
   seed: 42
   space: extended
 optimizations:
