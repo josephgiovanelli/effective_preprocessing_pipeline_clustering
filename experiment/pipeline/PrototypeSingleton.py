@@ -58,6 +58,7 @@ class PrototypeSingleton:
     parts = []
     X = []
     y = []
+    index = []
     original_numerical_features = []
     original_categorical_features = []
     current_numerical_features = []
@@ -114,6 +115,9 @@ class PrototypeSingleton:
     def set_X_y(self, X, y):
         self.X = X
         self.y = y
+
+    def setDatasetIndex(self, index):
+        self.index = index.copy()
 
     def resetFeatures(self):
         self.current_numerical_features = self.original_numerical_features

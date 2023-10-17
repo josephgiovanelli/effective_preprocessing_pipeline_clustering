@@ -3,6 +3,7 @@ import json
 import time
 import sys
 import os
+import traceback
 
 
 import pandas as pd
@@ -64,20 +65,31 @@ def objective(pipeline_config, algo_config, X, y, context, config):
 
     start = time.time()
     try:
-        Xt, yt = X.copy(), y.copy()
+        Xt, yt = X.copy(), y.copy().reshape(-1, 1).astype(int)
         Xt_to_export, yt_to_export = {}, {}
         labels = PrototypeSingleton.getInstance().getFeaturesFromMask()
-        Xt_to_export["original"] = pd.DataFrame(
-            Xt.copy(), columns=[l for l in labels if l != "None"]
+
+        indeces = (
+            PrototypeSingleton.getInstance().index.copy().reshape(-1, 1).astype(int)
         )
-        yt_to_export["original"] = pd.DataFrame(yt.copy(), columns=["target"])
-        indeces = []
+        Xt_to_export["original"] = pd.DataFrame(
+            np.concatenate([indeces, Xt.copy()], axis=1),
+            columns=["index"] + [l for l in labels if l != "None"],
+        )
+        yt_to_export["original"] = pd.DataFrame(
+            np.concatenate([indeces, yt.copy()], axis=1), columns=["index", "target"]
+        )
         if len(pipeline.steps) > 1:
             for step, operator in pipeline[:-1].named_steps.items():
                 if step == "outlier":
                     Xt, yt = operator.fit_resample(Xt, yt)
-                    yt_to_export[step] = pd.DataFrame(yt.copy(), columns=["target"])
-                    indeces = operator.indeces
+                    yt = yt.reshape(-1, 1).astype(int)
+                    indeces = operator.indeces.reshape(-1, 1).astype(int)
+                    yt_to_export[step] = pd.DataFrame(
+                        np.concatenate([indeces, yt.copy()], axis=1),
+                        columns=["index", "target"],
+                    )
+                    # PrototypeSingleton.getInstance().setDatasetIndex(indeces)
                 else:
                     Xt = operator.fit_transform(Xt, None)
                     if step == "features":
@@ -86,12 +98,18 @@ def objective(pipeline_config, algo_config, X, y, context, config):
                             mask
                         )
                 Xt_to_export[step] = pd.DataFrame(
-                    Xt.copy(), columns=[l for l in labels if l != "None"]
+                    np.concatenate([indeces, Xt.copy()], axis=1),
+                    columns=["index"] + [l for l in labels if l != "None"],
                 )
 
         result = pipeline[-1].fit_predict(Xt, yt)
-        yt_to_export["pred"] = pd.DataFrame(result.copy(), columns=["target"])
-        external_metric = 1 - metrics.adjusted_mutual_info_score(yt, result)
+        yt_to_export["pred"] = pd.DataFrame(
+            np.concatenate([indeces, result.reshape(-1, 1).astype(int)], axis=1),
+            columns=["index", "target"],
+        )
+        external_metric = 1 - metrics.adjusted_mutual_info_score(
+            yt.reshape(1, -1).flatten(), result
+        )
         metric = config["metric"]
         if "sil-" in metric:
             if Xt.shape[1] > 2:
@@ -125,7 +143,10 @@ def objective(pipeline_config, algo_config, X, y, context, config):
         internal_metric = float("inf")
         external_metric = float("inf")
         status = STATUS_FAIL
-        print(e)
+        print(
+            f"""MyException: {e}
+              {traceback.print_exc()}"""
+        )
     stop = time.time()
 
     details_path = os.path.join(config["result_path"], "details", config["file_name"])

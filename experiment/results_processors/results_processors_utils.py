@@ -188,3 +188,37 @@ def save_result(results, output_path, dataset, metric):
     results.to_csv(
         os.path.join(output_path, dataset + "_" + metric + "_results.csv"), index=False
     )
+
+
+def join_indices(dfs):
+    return [
+        row["index"]
+        for _, row in dfs[0].iterrows()
+        if row["index"] in list(dfs[1]["index"])
+    ]
+
+
+def drop_index_col_from(df):
+    return [column for column in list(df.columns) if column != "index"]
+
+
+def filter_dfs(dfs, return_type):
+
+    indices = join_indices(dfs)
+    # print("#################### INDICES ####################")
+    # print(pd.DataFrame(indices))
+
+    to_return = [
+        return_type(
+            [
+                row[drop_index_col_from(df)]
+                for _, row in df.iterrows()
+                if row["index"] in indices
+            ]
+        )
+        for df in dfs
+    ]
+    # print(pd.DataFrame(to_return[0]))
+    # print(pd.DataFrame(to_return[1]))
+    # print("\n\n\n\n")
+    return to_return

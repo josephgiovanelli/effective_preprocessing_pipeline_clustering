@@ -2,6 +2,7 @@ import numpy as np
 
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn.ensemble import IsolationForest
+
 # from sklearn import linear_model
 from sklearn.utils.multiclass import check_classification_targets
 from imblearn.base import BaseSampler
@@ -45,18 +46,15 @@ class MyOutlierDetector(BaseSampler):
 
         return self
 
-
     def _fit_resample(self, X, y):
         filter = self.estimator.fit_predict(X)
-        self.indeces = np.where(np.array(filter) == 1)
+        self.indeces = np.where(np.array(filter) == 1)[0]
         new_X = np.array([X[i, :] for i in range(len(filter)) if filter[i] != -1])
         new_y = np.array([y[i] for i in range(len(filter)) if filter[i] != -1])
         return new_X, new_y
 
 
-
 class LocalOutlierDetector(MyOutlierDetector):
-
     def __init__(self, *, n_neighbors=2):
         super().__init__()
         self.n_neighbors = n_neighbors
@@ -64,12 +62,14 @@ class LocalOutlierDetector(MyOutlierDetector):
 
 
 class IsolationOutlierDetector(MyOutlierDetector):
-
     def __init__(self, *, n_estimators=100, random_state=42):
         super().__init__()
         self.n_estimators = n_estimators
         self.random_state = random_state
-        self.estimator = IsolationForest(n_estimators=self.n_estimators, random_state=self.random_state)
+        self.estimator = IsolationForest(
+            n_estimators=self.n_estimators, random_state=self.random_state
+        )
+
 
 # class SGDOutlierDetector(MyOutlierDetector):
 

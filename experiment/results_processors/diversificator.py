@@ -8,14 +8,16 @@ import itertools
 import time
 import argparse
 
+from results_processors_utils import drop_index_col_from, filter_dfs
+
 warnings.simplefilter(action="ignore", category=FutureWarning)
 import numpy as np
+from matplotlib.pyplot import cm
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn import metrics
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
-from matplotlib import cm
 from scipy.spatial import distance
 from six import iteritems
 
@@ -32,22 +34,20 @@ from utils.utils import (
 from pipeline.outlier_detectors import LocalOutlierDetector
 from utils import datasets
 
-colors = np.array(
-    [
-        "blue",
-        "orange",
-        "green",
-        "red",
-        "purple",
-        "brown",
-        "pink",
-        "grey",
-        "olive",
-        "cyan",
-        "indigo",
-        "black",
-    ]
-)
+colors = [
+    "blue",
+    "orange",
+    "green",
+    "red",
+    "purple",
+    "brown",
+    "pink",
+    "grey",
+    "olive",
+    "cyan",
+    "indigo",
+    "black",
+] * 2
 
 
 def get_last_transformation(df, dataset, optimization_internal_metric, iteration, conf):
@@ -64,7 +64,11 @@ def get_last_transformation(df, dataset, optimization_internal_metric, iteration
         is_there[transformation] = pipeline[transformation] != "None"
     last_transformation = (
         "outlier"
-        if (is_there["outlier"] and conf["diversification_criterion"] != "clustering")
+        if (
+            is_there["outlier"]
+            # and
+            # conf["diversification_criterion"] != "clustering"
+        )
         else (
             "normalize"
             if is_there["normalize"]
@@ -140,7 +144,9 @@ def diversificate_mmr(meta_features, conf, original_features):
                         + ".csv",
                     )
                 )
-                current_features = list(current_X.columns)
+                current_features = [
+                    column for column in list(current_X.columns) if column != "index"
+                ]
                 current_features = get_one_hot_encoding(
                     current_features, original_features
                 )
@@ -180,7 +186,7 @@ def diversificate_mmr(meta_features, conf, original_features):
                         + ".csv",
                     )
                 )
-                current_features = [len(list(current_X.columns))]
+                current_features = [len(list(current_X.columns)) - 1]
                 current_features.append(
                     meta_features.loc[
                         (
@@ -218,13 +224,13 @@ def diversificate_mmr(meta_features, conf, original_features):
                         )
                     )
                     if conf["diversification_metric"] == "ami":
+                        dfs = filter_dfs([current_y_pred, other_y_pred], np.array)
                         dist = 1 - metrics.adjusted_mutual_info_score(
-                            current_y_pred.to_numpy().reshape(-1),
-                            other_y_pred.to_numpy().reshape(-1),
+                            dfs[0].flatten(), dfs[1].flatten()
                         )
                     else:
                         raise Exception(
-                            f"""missing diversification metric for 
+                            f"""missing diversification metric for
                                         {conf}"""
                         )
                 elif (
@@ -252,7 +258,9 @@ def diversificate_mmr(meta_features, conf, original_features):
                             + ".csv",
                         )
                     )
-                    other_features = list(other_X.columns)
+                    other_features = [
+                        column for column in list(other_X.columns) if column != "index"
+                    ]
                     other_features = get_one_hot_encoding(
                         other_features, original_features
                     )
@@ -303,7 +311,7 @@ def diversificate_mmr(meta_features, conf, original_features):
                             + ".csv",
                         )
                     )
-                    other_features = [len(list(other_X.columns))]
+                    other_features = [len(list(other_X.columns)) - 1]
                     other_features.append(
                         meta_features.loc[
                             (
@@ -433,7 +441,7 @@ def evaluate_dashboard(solutions, conf, original_features):
                         + ".csv",
                     )
                 )
-                features = list(X.columns)
+                features = [column for column in list(X.columns) if column != "idx"]
                 features = get_one_hot_encoding(features, original_features)
                 if conf["diversification_criterion"] == "features_set_n_clusters":
                     features.append(
@@ -464,7 +472,7 @@ def evaluate_dashboard(solutions, conf, original_features):
                         + ".csv",
                     )
                 )
-                features = [len(list(X.columns))]
+                features = [len(list(X.columns)) - 1]
                 features.append(
                     df.loc[
                         df["iteration"] == iteration, "algorithm__n_clusters"
@@ -473,13 +481,14 @@ def evaluate_dashboard(solutions, conf, original_features):
                 div_vectors.append(features)
             else:
                 raise Exception(
-                    f"""missing diversification criterion for 
+                    f"""missing diversification criterion for
                                 {conf}"""
                 )
+
         if conf["diversification_metric"] == "ami":
+            dfs = filter_dfs([div_vectors[0], div_vectors[1]], np.array)
             return 1 - metrics.adjusted_mutual_info_score(
-                div_vectors[0].to_numpy().reshape(-1),
-                div_vectors[1].to_numpy().reshape(-1),
+                dfs[0].flatten(), dfs[1].flatten()
             )
         elif conf["diversification_metric"] == "euclidean":
             return distance.euclidean(div_vectors[0], div_vectors[1])
@@ -489,7 +498,7 @@ def evaluate_dashboard(solutions, conf, original_features):
             return distance.jaccard(div_vectors[0], div_vectors[1])
         else:
             raise Exception(
-                f"""missing diversification metric for 
+                f"""missing diversification metric for
                             {conf}"""
             )
 
@@ -510,6 +519,8 @@ def evaluate_dashboard(solutions, conf, original_features):
 
 def single_plot(ax, Xt, yt, conf, pipeline, solutions, row, type):
     old_X = Xt.copy()
+    colors = cm.rainbow(np.linspace(0, 1, len(np.unique(yt.to_numpy()))))
+
     if Xt.shape[1] > 2 and type != "PARA":
         Xt = pd.DataFrame(
             TSNE(n_components=2, random_state=42).fit_transform(
@@ -523,7 +534,7 @@ def single_plot(ax, Xt, yt, conf, pipeline, solutions, row, type):
         )
         if conf["outlier"]:
             Xt, yt = LocalOutlierDetector(n_neighbors=32).fit_resample(
-                Xt.to_numpy(), yt.iloc[:, 0].to_numpy()
+                Xt.to_numpy(), yt.to_numpy()
             )
             Xt, yt = pd.DataFrame(Xt, columns=[f"{type}_0", f"{type}_1"]), pd.DataFrame(
                 yt, columns=["target"]
@@ -541,7 +552,7 @@ def single_plot(ax, Xt, yt, conf, pipeline, solutions, row, type):
         )
         # zs = [(max+min)/2] * Xt.shape[0] if n_selected_features < 3 else Xt.iloc[:, 2]
         if Xt.shape[1] < 3:
-            ax.scatter(xs, ys, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
+            ax.scatter(xs, ys, c=[colors[int(i)] for i in yt.to_numpy()])
         # else:
         # ax.scatter(xs, ys, zs, c=[colors[int(i)] for i in yt.iloc[:, 0].to_numpy()])
         ax.set_xlim([min - range, max + range])
@@ -550,13 +561,17 @@ def single_plot(ax, Xt, yt, conf, pipeline, solutions, row, type):
         ax.set_ylabel(
             "None" if n_selected_features < 2 else list(Xt.columns)[1], fontsize=16
         )
+        ax.legend().set_visible(False)
         # if Xt.shape[1] >= 3:
         # ax.set_zlim([min, max])
         # ax.set_zlabel('None' if n_selected_features < 3 else list(Xt.columns)[2], fontsize=16)
     else:
         ax = pd.plotting.parallel_coordinates(
-            pd.concat([Xt, yt], axis=1), "target", color=colors
+            pd.concat([Xt, yt], axis=1),
+            "target",
+            color=[colors[int(i)] for i in yt.to_numpy()],
         )
+        ax.legend().set_visible(False)
     if type == "TSNE":
         title = "\n".join([operator for operator in pipeline.values()])
         current_solution = solutions.loc[
@@ -642,8 +657,8 @@ def save_figure(solutions, conf):
                 ax = fig.add_subplot(3, 3, i + (3 * idx))
             single_plot(
                 ax=ax,
-                Xt=Xt,
-                yt=yt,
+                Xt=Xt[drop_index_col_from(Xt)],
+                yt=yt[drop_index_col_from(yt)],
                 conf=conf,
                 pipeline=pipeline,
                 solutions=solutions,
@@ -826,8 +841,8 @@ def main():
         #     meta_features = meta_features[(meta_features['normalize__with_std'] == 'None') | (meta_features['normalize__with_std'] == 'True')]
         # meta_features = meta_features[~((meta_features['normalize'] != 'None') & (meta_features['features__k'] == '1'))]
 
-        if conf["diversification_criterion"] == "clustering":
-            meta_features = meta_features[meta_features["outlier"] == "None"]
+        # if conf["diversification_criterion"] == "clustering":
+        #     meta_features = meta_features[meta_features["outlier"] == "None"]
         # elif conf['diversification_criterion'] == 'features_set' or conf['diversification_criterion'] == 'features_set_n_clusters' or conf['diversification_criterion'] == 'hyper_parameter':
         #     meta_features = meta_features[(meta_features['outlier'] == 'None') | ((meta_features['outlier'] != 'None') & (meta_features['outlier__n_neighbors'] == ('100' if conf['dataset'] == 'synthetic' else '32')))]
         # else:
@@ -856,7 +871,7 @@ def main():
             meta_features["optimization_internal_metric_value"] *= -1
             meta_features["max_optimization_internal_metric_value"] *= -1
 
-        metric_threshold = 0.5  # if args.experiment == "exp1" else 0.01
+        metric_threshold = 1.0  # if args.experiment == "exp1" else 0.01
         if (
             conf["optimization_internal_metric"] == "sil"
             or conf["optimization_internal_metric"] == "sdbw"
@@ -922,7 +937,7 @@ def main():
             print(f"\t\tDashboard score: {round(dashboard_score, 2)}")
 
             print("\tPlotting")
-            for outlier_removal in [True, False]:
+            for outlier_removal in [False, True]:
                 conf["outlier"] = outlier_removal
                 plot_path = os.path.join(
                     conf["output_path"],

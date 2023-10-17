@@ -13,20 +13,20 @@ def make_dir(path):
 template = {
     "general": {"seed": 42, "space": "extended"},
     "optimizations": {
-        "smbo": {"budget_kind": "time", "budget": 1800, "metric": "sil-tsne"}
+        "smbo": {"budget_kind": "time", "budget": 7200, "metric": "sil-tsne"}
     },
     "diversifications": {
         "mmr": {
             "num_results": 3,
             "method": "mmr",
-            "lambda": 0.7,
+            "lambda": 0.5,
             "criterion": "clustering",
             "metric": "ami",
         },
         "exhaustive": {
             "num_results": 3,
             "method": "mmr",
-            "lambda": 0.7,
+            "lambda": 0.5,
             "criterion": "clustering",
             "metric": "ami",
         },
@@ -38,17 +38,14 @@ if __name__ == "__main__":
     input_path = make_dir(os.path.join("/", "home", "scenarios"))
     with tqdm(total=20) as pbar:
         for dataset in range(20):
-            for div_lambda in [0.7]:
-                task_template = copy.deepcopy(template)
-                task_template["general"]["dataset"] = f"syn{dataset}"
-                for div in ["exhaustive", "mmr"]:
-                    task_template["diversifications"][div]["lambda"] = div_lambda
-                with open(
-                    os.path.join(
-                        input_path,
-                        f"""syn{dataset}_{str(div_lambda).split(".")[1]}.yaml""",
-                    ),
-                    "w",
-                ) as f:
-                    yaml.dump(task_template, f)
+            task_template = copy.deepcopy(template)
+            task_template["general"]["dataset"] = f"syn{dataset}"
+            with open(
+                os.path.join(
+                    input_path,
+                    f"""syn{dataset}.yaml""",
+                ),
+                "w",
+            ) as f:
+                yaml.dump(task_template, f)
             pbar.update()
