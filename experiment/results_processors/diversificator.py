@@ -871,7 +871,7 @@ def main():
             meta_features["optimization_internal_metric_value"] *= -1
             meta_features["max_optimization_internal_metric_value"] *= -1
 
-        metric_threshold = 1.0  # if args.experiment == "exp1" else 0.01
+        metric_threshold = 0.5  # if args.experiment == "exp1" else 0.01
         if (
             conf["optimization_internal_metric"] == "sil"
             or conf["optimization_internal_metric"] == "sdbw"
