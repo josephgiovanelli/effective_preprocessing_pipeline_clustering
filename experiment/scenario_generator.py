@@ -37,30 +37,13 @@ template = {
 if __name__ == "__main__":
     input_path = make_dir(os.path.join("/", "home", "scenarios"))
     with tqdm(total=20) as pbar:
-        for dataset in [
-            "avila",
-            "diabetes",
-            "isolet",
-            "postures",
-            "blood",
-            "ecoli",
-            "parkinsons",
-            "seeds",
-            "breast",
-            "iris",
-            "pendigits",
-            "statlog",
-            "synthetic",
-            "wine",
-            "thyroid",
-            "vehicle",
-        ]:
+        for dataset in range(20):
             task_template = copy.deepcopy(template)
-            task_template["general"]["dataset"] = dataset
+            task_template["general"]["dataset"] = f"syn{dataset}"
             with open(
                 os.path.join(
                     input_path,
-                    f"""{dataset}.yaml""",
+                    f"""syn{dataset}.yaml""",
                 ),
                 "w",
             ) as f:
