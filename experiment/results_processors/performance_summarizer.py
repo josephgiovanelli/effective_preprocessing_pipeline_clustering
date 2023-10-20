@@ -3,6 +3,8 @@ import os
 import numpy as np
 import pandas as pd
 
+import traceback
+
 
 def make_dir(path):
     if not os.path.exists(path):
@@ -12,11 +14,11 @@ def make_dir(path):
 
 def main():
 
-    input_path = os.path.join("/", "home", "results")
+    input_path = os.path.join("/", "home", "results", "diversification", "smbo", "mmr")
 
-    approaches = ["clustering", "features_set"]
+    approaches = ["clustering"]
     get_metric = lambda approach: "ami" if approach == "clustering" else "jaccard"
-    params = [5, 7]
+    params = [5]
     datasets = [f"syn{i}" for i in range(20)]
     opt_metrics = [
         "optimization_internal_metric_value",
@@ -28,20 +30,26 @@ def main():
         for param in params:
             results[f"{approach}_{param}"] = pd.DataFrame()
             for dataset in datasets:
-                results[f"{approach}_{param}"] = pd.concat(
-                    [
-                        results[f"{approach}_{param}"],
-                        pd.read_csv(
-                            os.path.join(
-                                input_path,
-                                f"{get_metric(approach)}_{param}",
-                                f"{dataset}_{param}",
-                                "3",
-                                f"{approach}_0-{param}_{get_metric(approach)}.csv",
-                            )
-                        ),
-                    ]
-                )
+                try:
+                    results[f"{approach}_{param}"] = pd.concat(
+                        [
+                            results[f"{approach}_{param}"],
+                            pd.read_csv(
+                                os.path.join(
+                                    input_path,
+                                    dataset,
+                                    "3",
+                                    f"{approach}_0-{param}_{get_metric(approach)}.csv",
+                                )
+                            ),
+                        ]
+                    )
+                except Exception as e:
+                    print(
+                        f"""MyException: {e}
+                        {traceback.print_exc()}"""
+                    )
+
             output_path = make_dir(
                 os.path.join(input_path, "summary", f"{approach}_{param}")
             )

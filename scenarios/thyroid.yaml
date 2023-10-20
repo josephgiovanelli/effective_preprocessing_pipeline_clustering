@@ -1,15 +1,15 @@
 diversifications:
   exhaustive:
-    criterion: clustering
+    criterion: feature_set
     lambda: 0.5
     method: mmr
-    metric: ami
+    metric: jaccard
     num_results: 3
   mmr:
-    criterion: clustering
+    criterion: feature_set
     lambda: 0.5
     method: mmr
-    metric: ami
+    metric: jaccard
     num_results: 3
 general:
   dataset: thyroid

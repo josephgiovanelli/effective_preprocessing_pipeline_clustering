@@ -121,6 +121,7 @@ dmypy.json
 ./plots/
 ./all_scenarios/
 results/
+comparison_results/
 results_less_older/
 results_old/
 results_older/
