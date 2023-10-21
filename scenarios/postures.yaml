@@ -1,15 +1,15 @@
 diversifications:
   exhaustive:
-    criterion: features_set
+    criterion: clustering
     lambda: 0.5
     method: mmr
-    metric: jaccard
+    metric: ami
     num_results: 3
   mmr:
-    criterion: features_set
+    criterion: clustering
     lambda: 0.5
     method: mmr
-    metric: jaccard
+    metric: ami
     num_results: 3
 general:
   dataset: postures
