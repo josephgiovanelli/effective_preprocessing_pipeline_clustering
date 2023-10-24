@@ -18,7 +18,7 @@ def main():
 
     approaches = ["clustering"]
     get_metric = lambda approach: "ami" if approach == "clustering" else "jaccard"
-    params = [5]
+    params = [1800, 3600, 5400, 7200]
     datasets = [f"syn{i}" for i in range(20)]
     opt_metrics = [
         "optimization_internal_metric_value",
@@ -39,16 +39,13 @@ def main():
                                     input_path,
                                     dataset,
                                     "3",
-                                    f"{approach}_0-{param}_{get_metric(approach)}.csv",
+                                    f"{approach}_0-5_{get_metric(approach)}_{param}.csv",
                                 )
                             ),
                         ]
                     )
                 except Exception as e:
-                    print(
-                        f"""MyException: {e}
-                        {traceback.print_exc()}"""
-                    )
+                    print(e)
 
             output_path = make_dir(
                 os.path.join(input_path, "summary", f"{approach}_{param}")
