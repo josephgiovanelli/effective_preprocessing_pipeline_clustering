@@ -1,5 +1,8 @@
 import json
 import os
+import random
+
+from matplotlib import cm
 from results_processors.results_processors_utils import get_dataset
 
 import numpy as np
@@ -61,31 +64,15 @@ from pipeline.outlier_detectors import (
 
 from fsfc.generic import GenericSPEC, NormalizedCut, WKMeans
 
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import adjusted_mutual_info_score, silhouette_score
 
 import matplotlib.pyplot as plt
 import plotly.express as px
 
 
-colors = np.array(
-    [
-        "blue",
-        "orange",
-        "green",
-        "red",
-        "purple",
-        "brown",
-        "pink",
-        "grey",
-        "olive",
-        "cyan",
-        "indigo",
-        "black",
-    ]
-)
 
 
-def single_plot(ax, df, target_column, unique_clusters, type):
+def single_plot(ax, df, target_column, unique_clusters, type, colors):
     if type != "PARA":
         if df.shape[1] > 3:
             Xt = pd.concat(
@@ -129,24 +116,20 @@ def single_plot(ax, df, target_column, unique_clusters, type):
             Xt = Xt.iloc[:, :n_selected_features]
             min, max = Xt.min().min(), Xt.max().max()
             range = (max - min) / 10
-            xs = Xt.iloc[:, 0]
-            ys = (
-                [(max + min) / 2] * Xt.shape[0]
-                if n_selected_features < 2
-                else Xt.iloc[:, 1]
-            )
             ax.set_xlim([min - range, max + range])
             ax.set_ylim([min - range, max + range])
-            ax.set_xlabel(list(Xt.columns)[0], fontsize=16)
-            ax.set_ylabel(
-                "None" if n_selected_features < 2 else list(Xt.columns)[1], fontsize=16
-            )
+            ax.set_xlabel("TSNE feat.", fontsize=35)
+            ax.set_ylabel("TSNE feat.", fontsize=35)
+            ax.yaxis.labelpad = 10
+            ax.xaxis.labelpad = 10
+            ax.tick_params(axis='both', which='major', labelsize=28)
+            ax.tick_params(axis='both', which='minor', labelsize=28)
     else:
         ax = pd.plotting.parallel_coordinates(df, "target", color=colors)
-    ax.set_title(type)
+    # ax.set_title(type)
 
 
-def plot_cluster_data(df, target_column):
+def plot_cluster_data(df, target_column, colors, returned_types="all"):
     """
     Plot a dataframe with clustering results using a scatter plot.
 
@@ -157,6 +140,7 @@ def plot_cluster_data(df, target_column):
     Returns:
     None
     """
+    subplot_types = ["TSNE", "PCA", "PARA"] if returned_types == "all" else returned_types
 
     # Make sure the target_column is in the dataframe
     if target_column not in df.columns:
@@ -165,42 +149,122 @@ def plot_cluster_data(df, target_column):
     # Create a scatter plot for each cluster
     unique_clusters = df[target_column].unique()
 
-    fig = plt.figure(figsize=(24, 4.5))
-    for idx, subplot_type in enumerate(["TSNE", "PCA", "PARA"]):
-        ax = fig.add_subplot(1, 3, idx + 1)
+    fig = plt.figure(figsize=(7 * len(subplot_types), 5))
+    for idx, subplot_type in enumerate(subplot_types):
+        ax = fig.add_subplot(1, len(subplot_types), idx + 1)
         single_plot(
             ax=ax,
             df=df,
             target_column=target_column,
             unique_clusters=unique_clusters,
             type=subplot_type,
+            colors=colors
         )
 
     return fig
 
 
 if __name__ == "__main__":
-    X, y, dataset_features_names = get_dataset("iris")
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
-    pipe = Pipeline(
-        [
-            ("features", PearsonThreshold(threshold=0.7)),
-            ("scaler", StandardScaler()),
-            ("svc", AgglomerativeClustering(n_clusters=2, linkage="complete")),
-        ]
-    )
-    Xt = pd.DataFrame(pipe[:-1].fit_transform(X), columns=[feature for idx, feature in enumerate(dataset_features_names) if pipe[0]._get_support_mask()[idx]])
-    Xt.to_csv("clusering.csv", index=False)
-    y_pred = pipe.fit_predict(X, y)
-    internal_metric = silhouette_score(Xt, y_pred)
-    df = pd.concat([pd.DataFrame(Xt), pd.DataFrame(y_pred, columns=["target"])], axis=1)
 
-    fig = plot_cluster_data(df, "target")
+    random.seed(42)
+    np.random.seed(42)
 
-    # Save the figure as a PNG file
-    fig.savefig("clustering_plot.png", dpi=300, bbox_inches="tight")
+    output_path = os.path.join("/", "home", "toy_dashboard")
 
-    # Close the figure (optional)
-    plt.close(fig)
+    result = {}
+    for comb in [
+        "cl",
+        "ft_cl",
+        "ft_sc_cl",
+        "ft_sc_ou_cl"
+        ]:
 
-    print(f"silhouette: {internal_metric}")
+
+        result[comb] = {}
+        max_dict = {
+            "internal_metric": -2,
+            "external_metric": 0,
+            "n_clusters": 1,
+        }
+        print("pipeline\tn_clusters\tsilhouette\tsilhouette_TSNE\t\tami")
+        for n_clusters in range(2, 15):
+
+            steps = comb.split("_")
+
+            X, y, dataset_features_names = get_dataset("syn2")
+
+            bug_avoided = False
+            while bug_avoided == False:
+                try:
+                    pipe_array = [
+                        ("features", WKMeans(k=5, beta=-7) if "ft" in steps else FunctionTransformer()),
+                        ("scaler", MinMaxScaler() if "sc" in steps else FunctionTransformer()),
+                        ("outlier", IsolationOutlierDetector(n_estimators=100,random_state=42) if "ou" in steps else FunctionTransformer()),
+                        ("clustering", AgglomerativeClustering(n_clusters=n_clusters, linkage="complete")),
+                    ]
+                    pipe = Pipeline(pipe_array)
+
+                    if len(steps) > 1:
+                        if "ou" in steps:
+                            Xt, yt = pipe[:-1].fit_resample(X.copy(), y.copy())
+                        else:
+                            Xt = pipe[:-1].fit_transform(X.copy())
+                            yt = y
+                        columns = [feature for idx, feature in enumerate(dataset_features_names) if pipe[0]._get_support_mask()[idx]]
+                    else:
+                        Xt, yt = X, y
+                        columns = dataset_features_names
+                    y_pred = pipe.fit_predict(X.copy(), y.copy())
+                    # print(y_pred.shape)
+                    # print(Xt.shape)
+
+                    internal_metric_plain = round(silhouette_score(
+                            Xt,
+                            y_pred),
+                            2)
+                    internal_metric_TSNE = round(silhouette_score(
+                        TSNE(n_components=2, random_state=42).fit_transform(
+                            Xt,
+                            y_pred),
+                            y_pred),
+                            2)
+                    external_metric = round(adjusted_mutual_info_score(yt, y_pred), 2)
+                    bug_avoided = True
+                except:
+                    pass
+
+                if bug_avoided == True:
+                    result[comb][n_clusters] = {
+                        "sil": internal_metric_plain,
+                        "sil_TSNE": internal_metric_TSNE,
+                        "ami": external_metric,
+                        "Xt": Xt,
+                        "yt": yt,
+                        "y_pred": y_pred,
+                    }
+                    internal_metric = internal_metric_plain if len(steps) == 1 else internal_metric_TSNE
+                    if internal_metric > max_dict["internal_metric"]:
+                        max_dict["internal_metric"] = internal_metric
+                        max_dict["external_metric"] = external_metric
+                        max_dict["n_clusters"] = n_clusters
+
+            print(f"{comb}\t\t{n_clusters}\t\t{internal_metric_plain}\t\t{internal_metric_TSNE}\t\t{external_metric}")
+        print()
+
+        pd.DataFrame(result[comb]).T[["sil", "ami"]].to_csv(os.path.join(output_path, f"{comb}.csv"))
+        df = pd.concat(
+            [
+                pd.DataFrame(result[comb][max_dict["n_clusters"]]["Xt"], columns=columns),
+                pd.DataFrame(result[comb][max_dict["n_clusters"]]["y_pred"], columns=["target"])
+            ],
+            axis=1)
+
+        colors = cm.rainbow(np.linspace(0, 1, len(np.unique(result[comb][max_dict["n_clusters"]]["y_pred"]))))
+        fig = plot_cluster_data(df, "target", colors, ["TSNE"])
+
+        # Save the figure as a PNG file
+        fig.savefig(os.path.join(output_path, f"{comb}.pdf"), dpi=300, bbox_inches="tight")
+        fig.savefig(os.path.join(output_path, f"{comb}.png"), dpi=300, bbox_inches="tight")
+
+        # Close the figure (optional)
+        plt.close(fig)
