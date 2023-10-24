@@ -251,7 +251,7 @@ if __name__ == "__main__":
             print(f"{comb}\t\t{n_clusters}\t\t{internal_metric_plain}\t\t{internal_metric_TSNE}\t\t{external_metric}")
         print()
 
-        pd.DataFrame(result[comb]).T[["sil", "ami"]].to_csv(os.path.join(output_path, f"{comb}.csv"))
+        pd.DataFrame(result[comb]).T[["sil", "ami", "sil_TSNE"]].to_csv(os.path.join(output_path, f"{comb}.csv"))
         df = pd.concat(
             [
                 pd.DataFrame(result[comb][max_dict["n_clusters"]]["Xt"], columns=columns),
