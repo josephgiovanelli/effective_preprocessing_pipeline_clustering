@@ -2,6 +2,7 @@ import datetime
 import os
 import sys
 import statistics
+import traceback
 import yaml
 import warnings
 import itertools
@@ -758,9 +759,7 @@ def main():
                         ]["metric"],
                     }
                     if args.experiment == "exp2":
-                        for current_time in range(
-                            args.cadence, args.max_time + args.cadence, args.cadence
-                        ):
+                        for current_time in [60, 120, 300, 600, 900, 2700]:
                             conf["time"] = current_time
                             confs.append(conf.copy())
                     else:
@@ -771,200 +770,211 @@ def main():
     timing_df = pd.DataFrame()
 
     for i in range(len(confs)):
-        conf = confs[i]
-        print(f"""{i+1}th conf out of {len(confs)}: {conf}""")
+        try:
+        
+            conf = confs[i]
+            print(f"""{i+1}th conf out of {len(confs)}: {conf}""")
 
-        working_folder = conf["file_name"]
-        conf["diversification_path"] = os.path.join(
-            DIVERSIFICATION_RESULT_PATH,
-            conf["optimization_method"],
-            conf["diversification_method"],
-            working_folder,
-        )
-        conf["output_path"] = create_directory(
-            conf["diversification_path"], str(conf["diversification_num_results"])
-        )
-        conf[
-            "output_file_name"
-        ] = f"""{conf['diversification_criterion']}_0-{int(conf['diversification_lambda']*10)}_{conf['diversification_metric']}"""
-        if args.experiment == "exp2":
-            conf["output_file_name"] += f"""_{conf['time']}"""
-        optimization_path = os.path.join(
-            OPTIMIZATION_RESULT_PATH, conf["optimization_method"]
-        )
-        conf["input_path"] = os.path.join(optimization_path, "details", working_folder)
-
-        print("\tLoading optimization process solutions")
-        meta_features = pd.read_csv(
-            os.path.join(optimization_path, "summary", "summary.csv")
-        )
-        meta_features = meta_features[
-            (meta_features["dataset"] == conf["dataset"])
-            & (
-                meta_features["optimization_internal_metric"]
-                == conf["optimization_internal_metric"]
+            working_folder = conf["file_name"]
+            conf["diversification_path"] = os.path.join(
+                DIVERSIFICATION_RESULT_PATH,
+                conf["optimization_method"],
+                conf["diversification_method"],
+                working_folder,
             )
-        ]
-
-        _, _, original_features = datasets.get_dataset(conf["dataset"])
-        num_features = len(original_features)
-
-        if args.experiment == "exp1":
-            # if it is smbo, we keep just the 25% of all the configurations
-            if conf["optimization_method"] == "smbo":
-                # mul_fact = 44 if conf['space'] == 'toy' else 2310
-                # tot_conf = mul_fact * (num_features if conf['space'] == 'toy' else (1 + 4*(num_features-1)))
-                tot_conf = 484 if conf["space"] == "toy" else 25410
-                meta_features = meta_features[meta_features["iteration"] < tot_conf / 4]
-        else:
-            if conf["optimization_method"] == "smbo":
-                meta_features = meta_features[meta_features["cumsum"] <= conf["time"]]
-
-        print(f"\t\tGot {meta_features.shape[0]} solutions")
-        print("\t\tFiltering..")
-        meta_features.to_csv(
-            os.path.join(
-                conf["output_path"],
-                f"""{conf["output_file_name"]}_before_filtering.csv""",
+            conf["output_path"] = create_directory(
+                conf["diversification_path"], str(conf["diversification_num_results"])
             )
-        )
-
-        # meta_features1 = meta_features[meta_features['features__k'] == 'None']
-        # meta_features2 = meta_features[meta_features['features__k'] != 'None']
-        # meta_features2 = meta_features2[meta_features2['features__k'].astype(np.int32) < len(original_features)]
-        # meta_features = pd.concat([meta_features1, meta_features2], ignore_index=True)
-
-        # meta_features = meta_features[(meta_features['normalize'] == 'normalize_StandardScaler') | (meta_features['normalize'] == 'None')]
-        # if 'normalize__with_mean' in list(meta_features.columns):
-        #     meta_features = meta_features[(meta_features['normalize__with_mean'] == 'None') | (meta_features['normalize__with_mean'] == 'True')]
-        # if 'normalize__with_std' in list(meta_features.columns):
-        #     meta_features = meta_features[(meta_features['normalize__with_std'] == 'None') | (meta_features['normalize__with_std'] == 'True')]
-        # meta_features = meta_features[~((meta_features['normalize'] != 'None') & (meta_features['features__k'] == '1'))]
-
-        # if conf["diversification_criterion"] == "clustering":
-        #     meta_features = meta_features[meta_features["outlier"] == "None"]
-        # elif conf['diversification_criterion'] == 'features_set' or conf['diversification_criterion'] == 'features_set_n_clusters' or conf['diversification_criterion'] == 'hyper_parameter':
-        #     meta_features = meta_features[(meta_features['outlier'] == 'None') | ((meta_features['outlier'] != 'None') & (meta_features['outlier__n_neighbors'] == ('100' if conf['dataset'] == 'synthetic' else '32')))]
-        # else:
-        #     raise Exception(f'''missing diversification criterion for
-        #                     {conf}''')
-
-        if conf["optimization_internal_metric"] == "sdbw":
-            meta_features["optimization_internal_metric_value"] *= -1
-            meta_features["optimization_internal_metric_value"] = (
-                1 - meta_features["optimization_internal_metric_value"]
+            conf[
+                "output_file_name"
+            ] = f"""{conf['diversification_criterion']}_0-{int(conf['diversification_lambda']*10)}_{conf['diversification_metric']}"""
+            if args.experiment == "exp2":
+                conf["output_file_name"] += f"""_{conf['time']}"""
+            optimization_path = os.path.join(
+                OPTIMIZATION_RESULT_PATH, conf["optimization_method"]
             )
-            meta_features["max_optimization_internal_metric_value"] *= -1
-            meta_features["max_optimization_internal_metric_value"] = (
-                1 - meta_features["max_optimization_internal_metric_value"]
+            conf["input_path"] = os.path.join(optimization_path, "details", working_folder)
+
+            print("\tLoading optimization process solutions")
+            meta_features = pd.read_csv(
+                os.path.join(optimization_path, "summary", "summary.csv")
             )
-
-        meta_features = meta_features[
-            meta_features["optimization_internal_metric_value"] != float("inf")
-        ]
-        if conf["optimization_internal_metric"] in [
-            "lensen-nonlinear",
-            "hancer-extended",
-            "sil-tsne",
-            "sil-pca",
-        ]:
-            meta_features["optimization_internal_metric_value"] *= -1
-            meta_features["max_optimization_internal_metric_value"] *= -1
-
-        metric_threshold = 0.5  # if args.experiment == "exp1" else 0.01
-        if (
-            conf["optimization_internal_metric"] == "sil"
-            or conf["optimization_internal_metric"] == "sdbw"
-        ):
             meta_features = meta_features[
-                meta_features["optimization_internal_metric_value"] >= metric_threshold
+                (meta_features["dataset"] == conf["dataset"])
+                & (
+                    meta_features["optimization_internal_metric"]
+                    == conf["optimization_internal_metric"]
+                )
             ]
 
-        if "sil-" in conf["optimization_internal_metric"]:
-            meta_features = meta_features[
-                meta_features["optimization_internal_metric_value"] > -metric_threshold
-            ]
+            _, _, original_features = datasets.get_dataset(conf["dataset"])
+            num_features = len(original_features)
 
-        meta_features.to_csv(
-            os.path.join(
-                conf["output_path"],
-                f"""{conf["output_file_name"]}_after_filtering.csv""",
-            )
-        )
-        print(f"\t\tGot {meta_features.shape[0]} solutions")
-        if meta_features.shape[0] > 0:
-            print("\tDiversification")
-            try:
-                dashboard = {}
-                dashboard["solutions"] = pd.read_csv(
-                    os.path.join(conf["output_path"], conf["output_file_name"] + ".csv")
-                )
-                print("\t\tA previous dashboard was found")
-                print("\t\tCalculating dashboard score")
-                dashboard["score"] = evaluate_dashboard(
-                    dashboard["solutions"], conf, original_features
-                )
-            except:
-                print("\t\tA previous dashboard was not found")
-                print("\t\tDiversification process starts")
-                start_time = time.time()
-                if conf["diversification_method"] == "mmr":
-                    dashboard = diversificate_mmr(
-                        meta_features, conf, original_features
-                    )
-                elif conf["diversification_method"] == "exhaustive":
-                    dashboard = diversificate_exhaustive(
-                        meta_features, conf, original_features
-                    )
-                else:
-                    raise Exception(f"""missing diversification method for {conf}""")
-                end_time = time.time()
-                conf["diversification_duration_s"] = int(end_time) - int(start_time)
-                conf["diversification_duration"] = str(
-                    datetime.timedelta(seconds=conf["diversification_duration_s"])
-                )
-                print(
-                    f"""\t\tDiversification process ends: {conf['diversification_duration']}"""
-                )
-                dashboard["solutions"].to_csv(
-                    os.path.join(
-                        conf["output_path"], conf["output_file_name"] + ".csv"
-                    ),
-                    index=False,
-                )
-            dashboard_score = dashboard["score"]
-            conf["dashboard_score"] = dashboard_score
-            print(f"\t\tDashboard score: {round(dashboard_score, 2)}")
+            if args.experiment == "exp1":
+                # if it is smbo, we keep just the 25% of all the configurations
+                if conf["optimization_method"] == "smbo":
+                    # mul_fact = 44 if conf['space'] == 'toy' else 2310
+                    # tot_conf = mul_fact * (num_features if conf['space'] == 'toy' else (1 + 4*(num_features-1)))
+                    tot_conf = 484 if conf["space"] == "toy" else 25410
+                    meta_features = meta_features[meta_features["iteration"] < tot_conf / 4]
+            else:
+                if conf["optimization_method"] == "smbo":
+                    meta_features = meta_features[meta_features["cumsum"] <= conf["time"]]
 
-            print("\tPlotting")
-            for outlier_removal in [False, True]:
-                conf["outlier"] = outlier_removal
-                plot_path = os.path.join(
+            print(f"\t\tGot {meta_features.shape[0]} solutions")
+            print("\t\tFiltering..")
+            meta_features.to_csv(
+                os.path.join(
                     conf["output_path"],
-                    conf["output_file_name"]
-                    + ("_outlier" if conf["outlier"] else "")
-                    + ".pdf",
+                    f"""{conf["output_file_name"]}_before_filtering.csv""",
                 )
-                if not os.path.exists(plot_path):
-                    save_figure(dashboard["solutions"], conf)
-            try:
-                timing_df = timing_df.append(
-                    {
-                        "file_name": conf["file_name"],
-                        "dataset": conf["dataset"],
-                        "optimization": conf["optimization_method"],
-                        "diversification": conf["diversification_method"],
-                        "timing": conf["diversification_duration_s"],
-                        "cadence": conf["time"],
-                        "score": dashboard["score"],
-                    },
-                    ignore_index=True,
+            )
+
+            # meta_features1 = meta_features[meta_features['features__k'] == 'None']
+            # meta_features2 = meta_features[meta_features['features__k'] != 'None']
+            # meta_features2 = meta_features2[meta_features2['features__k'].astype(np.int32) < len(original_features)]
+            # meta_features = pd.concat([meta_features1, meta_features2], ignore_index=True)
+
+            # meta_features = meta_features[(meta_features['normalize'] == 'normalize_StandardScaler') | (meta_features['normalize'] == 'None')]
+            # if 'normalize__with_mean' in list(meta_features.columns):
+            #     meta_features = meta_features[(meta_features['normalize__with_mean'] == 'None') | (meta_features['normalize__with_mean'] == 'True')]
+            # if 'normalize__with_std' in list(meta_features.columns):
+            #     meta_features = meta_features[(meta_features['normalize__with_std'] == 'None') | (meta_features['normalize__with_std'] == 'True')]
+            # meta_features = meta_features[~((meta_features['normalize'] != 'None') & (meta_features['features__k'] == '1'))]
+
+            # if conf["diversification_criterion"] == "clustering":
+            #     meta_features = meta_features[meta_features["outlier"] == "None"]
+            # elif conf['diversification_criterion'] == 'features_set' or conf['diversification_criterion'] == 'features_set_n_clusters' or conf['diversification_criterion'] == 'hyper_parameter':
+            #     meta_features = meta_features[(meta_features['outlier'] == 'None') | ((meta_features['outlier'] != 'None') & (meta_features['outlier__n_neighbors'] == ('100' if conf['dataset'] == 'synthetic' else '32')))]
+            # else:
+            #     raise Exception(f'''missing diversification criterion for
+            #                     {conf}''')
+
+            if conf["optimization_internal_metric"] == "sdbw":
+                meta_features["optimization_internal_metric_value"] *= -1
+                meta_features["optimization_internal_metric_value"] = (
+                    1 - meta_features["optimization_internal_metric_value"]
                 )
-                timing_df.to_csv(
-                    os.path.join(DIVERSIFICATION_RESULT_PATH, "timing.csv"), index=False
+                meta_features["max_optimization_internal_metric_value"] *= -1
+                meta_features["max_optimization_internal_metric_value"] = (
+                    1 - meta_features["max_optimization_internal_metric_value"]
                 )
-            except:
-                print("I think a diversification result was already present.")
+
+            meta_features = meta_features[
+                meta_features["optimization_internal_metric_value"] != float("inf")
+            ]
+            if conf["optimization_internal_metric"] in [
+                "lensen-nonlinear",
+                "hancer-extended",
+                "sil-tsne",
+                "sil-pca",
+            ]:
+                meta_features["optimization_internal_metric_value"] *= -1
+                meta_features["max_optimization_internal_metric_value"] *= -1
+
+            metric_threshold = 0.5  # if args.experiment == "exp1" else 0.01
+            if (
+                conf["optimization_internal_metric"] == "sil"
+                or conf["optimization_internal_metric"] == "sdbw"
+            ):
+                meta_features = meta_features[
+                    meta_features["optimization_internal_metric_value"] >= metric_threshold
+                ]
+
+            if "sil-" in conf["optimization_internal_metric"]:
+                meta_features = meta_features[
+                    meta_features["optimization_internal_metric_value"] > -metric_threshold
+                ]
+
+            meta_features.to_csv(
+                os.path.join(
+                    conf["output_path"],
+                    f"""{conf["output_file_name"]}_after_filtering.csv""",
+                )
+            )
+            print(f"\t\tGot {meta_features.shape[0]} solutions")
+            if meta_features.shape[0] > 0:
+                print("\tDiversification")
+                try:
+                    dashboard = {}
+                    dashboard["solutions"] = pd.read_csv(
+                        os.path.join(conf["output_path"], conf["output_file_name"] + ".csv")
+                    )
+                    print("\t\tA previous dashboard was found")
+                    print("\t\tCalculating dashboard score")
+                    dashboard["score"] = evaluate_dashboard(
+                        dashboard["solutions"], conf, original_features
+                    )
+                except:
+                    print("\t\tA previous dashboard was not found")
+                    print("\t\tDiversification process starts")
+                    start_time = time.time()
+                    if conf["diversification_method"] == "mmr":
+                        dashboard = diversificate_mmr(
+                            meta_features, conf, original_features
+                        )
+                    elif conf["diversification_method"] == "exhaustive":
+                        dashboard = diversificate_exhaustive(
+                            meta_features, conf, original_features
+                        )
+                    else:
+                        raise Exception(f"""missing diversification method for {conf}""")
+                    end_time = time.time()
+                    conf["diversification_duration_s"] = int(end_time) - int(start_time)
+                    conf["diversification_duration"] = str(
+                        datetime.timedelta(seconds=conf["diversification_duration_s"])
+                    )
+                    print(
+                        f"""\t\tDiversification process ends: {conf['diversification_duration']}"""
+                    )
+                    dashboard["solutions"].to_csv(
+                        os.path.join(
+                            conf["output_path"], conf["output_file_name"] + ".csv"
+                        ),
+                        index=False,
+                    )
+                dashboard_score = dashboard["score"]
+                conf["dashboard_score"] = dashboard_score
+                print(f"\t\tDashboard score: {round(dashboard_score, 2)}")
+
+                print("\tPlotting")
+                for outlier_removal in [False, True]:
+                    conf["outlier"] = outlier_removal
+                    plot_path = os.path.join(
+                        conf["output_path"],
+                        conf["output_file_name"]
+                        + ("_outlier" if conf["outlier"] else "")
+                        + ".pdf",
+                    )
+                    if not os.path.exists(plot_path):
+                        save_figure(dashboard["solutions"], conf)
+                try:
+                    timing_df = timing_df.append(
+                        {
+                            "file_name": conf["file_name"],
+                            "dataset": conf["dataset"],
+                            "optimization": conf["optimization_method"],
+                            "diversification": conf["diversification_method"],
+                            "timing": conf["diversification_duration_s"],
+                            "cadence": conf["time"],
+                            "score": dashboard["score"],
+                        },
+                        ignore_index=True,
+                    )
+                    timing_df.to_csv(
+                        os.path.join(DIVERSIFICATION_RESULT_PATH, "timing.csv"), index=False
+                    )
+                except:
+                    print("I think a diversification result was already present.")
+        except Exception as e:
+            print(
+                f"""
+                ___________________________________________________________________________________________________________________
+                MyException: {e}
+                {traceback.print_exc()}
+                ___________________________________________________________________________________________________________________
+                """
+            )
 
 
 main()
