@@ -759,7 +759,7 @@ def main():
                         ]["metric"],
                     }
                     if args.experiment == "exp2":
-                        for current_time in [60, 120, 300, 600, 900, 2700]:
+                        for current_time in [60, 120, 300, 600, 900, 1800, 2700]:
                             conf["time"] = current_time
                             confs.append(conf.copy())
                     else:
@@ -937,17 +937,20 @@ def main():
                 conf["dashboard_score"] = dashboard_score
                 print(f"\t\tDashboard score: {round(dashboard_score, 2)}")
 
-                print("\tPlotting")
-                for outlier_removal in [False, True]:
-                    conf["outlier"] = outlier_removal
-                    plot_path = os.path.join(
-                        conf["output_path"],
-                        conf["output_file_name"]
-                        + ("_outlier" if conf["outlier"] else "")
-                        + ".pdf",
-                    )
-                    if not os.path.exists(plot_path):
-                        save_figure(dashboard["solutions"], conf)
+                try:
+                    print("\tPlotting")
+                    for outlier_removal in [False, True]:
+                        conf["outlier"] = outlier_removal
+                        plot_path = os.path.join(
+                            conf["output_path"],
+                            conf["output_file_name"]
+                            + ("_outlier" if conf["outlier"] else "")
+                            + ".pdf",
+                        )
+                        if not os.path.exists(plot_path):
+                            save_figure(dashboard["solutions"], conf)
+                except:
+                    print("\tPlotting didn't success")
                 try:
                     timing_df = timing_df.append(
                         {
