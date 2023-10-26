@@ -746,7 +746,7 @@ def main():
                         ]["metric"],
                     }
                     if args.experiment == "exp2":
-                        for current_time in [60, 120, 300, 600, 900, 1800, 2700]:
+                        for current_time in [60, 120, 300, 600, 900, 1800, 2700, 3600, 5400, 7200]:
                             conf["time"] = current_time
                             confs.append(conf.copy())
                     else:
