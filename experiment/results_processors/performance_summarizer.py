@@ -77,10 +77,10 @@ def main():
     grouped.to_csv(os.path.join(output_path, "max_raw.csv"))
     grouped[opt_metrics].to_csv(os.path.join(output_path, "max.csv"))
 
-    for time in params:
-        new_grouped = results[results["time"] == time].groupby(by=["dataset", "approach", "time"]).max().reset_index()
-        new_grouped.to_csv(os.path.join(output_path, f"max_{time}_raw.csv"))
-        new_grouped[["dataset"] + opt_metrics].to_csv(os.path.join(output_path, f"max_{time}.csv"))
+    for time in [params[:(idx+1)] for idx, _ in enumerate(params)]:
+        new_grouped = results[results["time"].isin(time)].groupby(by=["dataset", "approach"]).max().reset_index()
+        new_grouped.to_csv(os.path.join(output_path, f"max_{time[-1]}_raw.csv"))
+        new_grouped[["dataset"] + opt_metrics].to_csv(os.path.join(output_path, f"max_{time[-1]}.csv"))
 
     grouped_filtered = results.groupby(by=["dataset"]).max()
     grouped_filtered.to_csv(os.path.join(output_path, "max_final_raw.csv"))

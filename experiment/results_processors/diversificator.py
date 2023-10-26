@@ -867,7 +867,9 @@ def main():
                 "hancer-extended",
                 "sil-tsne",
                 "sil-pca",
-                "dbi-tsne"
+                "dbi-tsne",
+                "sil",
+                "dbi"
             ]:
                 meta_features["optimization_internal_metric_value"] *= -1
                 meta_features["max_optimization_internal_metric_value"] *= -1
