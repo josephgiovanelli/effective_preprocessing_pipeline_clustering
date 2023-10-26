@@ -13,7 +13,7 @@ def make_dir(path):
 template = {
     "general": {"seed": 42, "space": "extended"},
     "optimizations": {
-        "smbo": {"budget_kind": "time", "budget": 7200, "metric": "sil-tsne"}
+        "smbo": {"budget_kind": "time", "budget": 7200, "metric": "dbi-tsne"}
     },
     "diversifications": {
         "mmr": {

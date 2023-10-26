@@ -114,19 +114,10 @@ dmypy.json
 .pyre/
 
 # Project
-./results/
-./results_less_older/
-./results_old/
-./results_older/
-./plots/
-./all_scenarios/
-results/
-comparison_results/
-results_less_older/
-results_old/
-results_older/
+*results*/
 plots/
 all_scenarios/
+toy*/
 
 # vs-code
 .vscode

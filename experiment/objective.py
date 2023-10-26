@@ -116,13 +116,18 @@ def objective(pipeline_config, algo_config, X, y, context, config):
                 func = TSNE if metric.split("-")[1] == "tsne" else PCA
                 Xt = func(n_components=2, random_state=42).fit_transform(Xt)
             metric = "sil"
+        if "dbi-" in metric:
+            if Xt.shape[1] > 2:
+                func = TSNE if metric.split("-")[1] == "tsne" else PCA
+                Xt = func(n_components=2, random_state=42).fit_transform(Xt)
+            metric = "dbi"
         if metric == "sil":
             internal_metric = 1 - silhouette_score(Xt, result)
             # sil_samples, intra_clust_dists, inter_clust_dists = my_silhouette_samples(Xt, result)
         elif metric == "ch":
             internal_metric = -1 * calinski_harabasz_score(Xt, result)
         elif metric == "dbi":
-            internal_metric = -davies_bouldin_score(Xt, result)
+            internal_metric = -1 * davies_bouldin_score(Xt, result)
         elif metric == "sdbw":
             internal_metric = S_Dbw(Xt, result)
         elif metric == "ssw":

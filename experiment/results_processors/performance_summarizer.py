@@ -18,12 +18,9 @@ def main():
 
     approaches = ["clustering"]
     get_metric = lambda approach: "ami" if approach == "clustering" else "jaccard"
-    params = [1800, 3600, 5400, 7200]
+    params = [60, 120, 300, 600, 900, 1800, 2700, 3600, 5400, 7200]
     datasets = [
-            "avila",
             "diabetes",
-            "isolet",
-            "postures",
             "blood",
             "ecoli",
             "parkinsons",
@@ -31,8 +28,6 @@ def main():
             "breast",
             "iris",
             "pendigits",
-            "statlog",
-            "synthetic",
             "wine",
             "thyroid",
             "vehicle",
