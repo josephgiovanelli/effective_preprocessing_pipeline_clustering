@@ -114,7 +114,8 @@ dmypy.json
 .pyre/
 
 # Project
-*results*/
+results/
+comparison_results/
 plots/
 all_scenarios/
 toy*/
