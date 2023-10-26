@@ -925,7 +925,7 @@ def main():
                 dashboard_score = dashboard["score"]
                 conf["dashboard_score"] = dashboard_score
                 print(f"\t\tDashboard score: {round(dashboard_score, 2)}")
-                pd.concat([
+                new_scores = pd.concat([
                     new_scores,
                     pd.DataFrame({
                         "dataset": [conf["dataset"]],
