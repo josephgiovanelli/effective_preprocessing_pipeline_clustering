@@ -127,7 +127,7 @@ def objective(pipeline_config, algo_config, X, y, context, config):
         elif metric == "ch":
             internal_metric = -1 * calinski_harabasz_score(Xt, result)
         elif metric == "dbi":
-            internal_metric = -1 * davies_bouldin_score(Xt, result)
+            internal_metric = davies_bouldin_score(Xt, result)
         elif metric == "sdbw":
             internal_metric = S_Dbw(Xt, result)
         elif metric == "ssw":
