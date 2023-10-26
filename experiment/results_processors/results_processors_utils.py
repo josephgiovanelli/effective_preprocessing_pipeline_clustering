@@ -9,8 +9,6 @@ from os import listdir
 from os.path import isfile, join
 from matplotlib import gridspec
 
-from pipeline.PrototypeSingleton import PrototypeSingleton
-
 
 def get_dataset(name):
     data = pd.read_csv(os.path.join("datasets", name + ".csv"))

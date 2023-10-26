@@ -35,6 +35,20 @@ from utils.utils import (
 from pipeline.outlier_detectors import LocalOutlierDetector
 from utils import datasets
 
+colors = [
+    "blue",
+    "orange",
+    "green",
+    "red",
+    "purple",
+    "brown",
+    "pink",
+    "grey",
+    "olive",
+    "cyan",
+    "indigo",
+    "black",
+] * 2
 
 
 def get_last_transformation(df, dataset, optimization_internal_metric, iteration, conf):
@@ -489,8 +503,7 @@ def evaluate_dashboard(solutions, conf, original_features):
                             {conf}"""
             )
 
-    # sim = solutions["optimization_internal_metric_value"].sum()
-    sim = np.array([1-(elem*-1) for elem in solutions["optimization_internal_metric_value"].to_numpy()]).sum()
+    sim = solutions["optimization_internal_metric_value"].sum()
     cc = list(itertools.combinations(list(solutions.index), 2))
     div = sum(
         [
@@ -710,7 +723,7 @@ def parse_args():
 def main():
     args = parse_args()
     scenarios = get_scenario_info()
-    new_scores = pd.DataFrame()
+
     scenario_with_results = {
         k: v for k, v in iteritems(scenarios) if v["results"] is not None
     }
@@ -925,14 +938,6 @@ def main():
                 dashboard_score = dashboard["score"]
                 conf["dashboard_score"] = dashboard_score
                 print(f"\t\tDashboard score: {round(dashboard_score, 2)}")
-                pd.concat([
-                    new_scores,
-                    pd.DataFrame({
-                        "dataset": conf["dataset"],
-                        "cadence": conf["time"],
-                        "score": round(dashboard_score, 2)
-                        })
-                ])
 
                 try:
                     print("\tPlotting")
@@ -975,7 +980,6 @@ def main():
                 ___________________________________________________________________________________________________________________
                 """
             )
-        new_scores.to_csv("results/new_scores.csv")
 
 
 main()
