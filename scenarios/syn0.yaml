@@ -12,13 +12,13 @@ diversifications:
     metric: ami
     num_results: 3
 general:
-  dataset: iris
+  dataset: syn0
   seed: 42
   space: extended
 optimizations:
   smbo:
     budget: 7200
     budget_kind: time
-    metric: dbi-tsne
+    metric: sil-tsne
 runs:
 - smbo_mmr
