@@ -771,7 +771,6 @@ def main():
 
     for i in range(len(confs)):
         try:
-        
             conf = confs[i]
             print(f"""{i+1}th conf out of {len(confs)}: {conf}""")
 
@@ -868,6 +867,7 @@ def main():
                 "hancer-extended",
                 "sil-tsne",
                 "sil-pca",
+                "dbi-tsne"
             ]:
                 meta_features["optimization_internal_metric_value"] *= -1
                 meta_features["max_optimization_internal_metric_value"] *= -1
