@@ -253,8 +253,8 @@ def set_figure(fig, num_plots, name):
 
 def new_plot_agg(normalize="none"):
 
-    SMALL_SIZE = 18
-    MEDIUM_SIZE = 25
+    SMALL_SIZE = 16
+    MEDIUM_SIZE = 20
 
     plt.rc("font", size=MEDIUM_SIZE)  # controls default text sizes
     plt.rc("axes", titlesize=MEDIUM_SIZE)  # fontsize of the axes title
@@ -269,7 +269,7 @@ def new_plot_agg(normalize="none"):
         "optimization_external_metric_value": "AMI",
     }
     div_measures = {
-        "score": "Norm. score",
+        "score": "Score",
         "timing": "Div. time"
         }
     measures = {**rel_measures, **div_measures}
@@ -313,11 +313,15 @@ def new_plot_agg(normalize="none"):
             )
             ax.set_xscale('log')
             ax.set_xlabel("Time (s)")
-            # ax.set_title(measure)
+            ax.set_title(measure)
             ax.set_xticks([60, 300, 900, 2700, 7200])
             ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
-            ax.set_ylim([0, 1.01])
-            ax.legend(ncol=1, title=measure, loc='lower right')
+            ax.set_ylim([0, 1.05])
+            ax.set_xlim([60, 7200])
+            ax.legend(
+                ncol=1,
+                # title=measure,
+                loc='lower right')
         set_figure(
             fig=fig,
             num_plots=len(new_measures),
