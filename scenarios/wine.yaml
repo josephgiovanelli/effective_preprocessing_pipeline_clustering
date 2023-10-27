@@ -19,6 +19,6 @@ optimizations:
   smbo:
     budget: 7200
     budget_kind: time
-    metric: dbi-tsne
+    metric: dbi
 runs:
 - smbo_mmr
