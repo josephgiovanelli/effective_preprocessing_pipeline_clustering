@@ -225,7 +225,6 @@ def new_plot_raw(normalize="none"):
     df = df.sort_values(by=["dataset", "cadence"])
 
     df.to_csv("trial.csv")
-
     for measure in measures:
         num_rows, num_cols = 4, 5
         fig, axs = plt.subplots(num_rows, num_cols)
@@ -246,53 +245,76 @@ def new_plot_raw(normalize="none"):
                 os.path.join("plots", f"{measure}_{normalize}.{ext}"),
             )
 
+def set_figure(fig, name):
+    fig.set_size_inches(16, 4)
+    for ext in ["png", "pdf"]:
+        fig.savefig(f"{name}.{ext}", bbox_inches='tight')
+
 
 def new_plot_agg(normalize="none"):
 
-    SMALL_SIZE = 15
-    MEDIUM_SIZE = 18
+    SMALL_SIZE = 13
+    MEDIUM_SIZE = 13
 
     plt.rc("font", size=MEDIUM_SIZE)  # controls default text sizes
     plt.rc("axes", titlesize=MEDIUM_SIZE)  # fontsize of the axes title
     plt.rc("axes", labelsize=MEDIUM_SIZE)  # fontsize of the x and y labels
     plt.rc("xtick", labelsize=SMALL_SIZE)  # fontsize of the tick labels
     plt.rc("ytick", labelsize=SMALL_SIZE)  # fontsize of the tick labels
-    plt.rc("legend", fontsize=MEDIUM_SIZE)  # legend fontsize
+    plt.rc("legend", fontsize=SMALL_SIZE)  # legend fontsize
     plt.rc("figure", titlesize=MEDIUM_SIZE)  # fontsize of the figure title
 
-    measures = ["score", "optimization_internal_metric_value", "optimization_external_metric_value"]
+    measures = {
+        "score": "Norm. score",
+        "optimization_internal_metric_value": "SIL",
+        "optimization_external_metric_value": "AMI"
+        }
 
     timing = pd.read_csv(os.path.join("results", "diversification", "timing_clustering.csv"))
     performance = pd.read_csv(os.path.join("results","diversification","summary","max_raw.csv")).rename(columns={"time": "cadence"})
     scores = pd.read_csv(os.path.join("results","new_scores.csv"))
     df = scores.merge(performance, on=["dataset", "cadence"])
-    df = df[["dataset", "cadence"] + measures]
+    df = df[["dataset", "cadence"] + list(measures.keys())]
+    df = df.rename(measures, axis="columns")
     df = df.sort_values(by=["dataset", "cadence"])
 
     df.to_csv("trial.csv")
 
+
+    for measure in measures.values():
+        for idx in range(20):
+            df.loc[df["dataset"] == f"syn{idx}", measure] = normalize_df(
+                df.loc[df["dataset"] == f"syn{idx}", measure].cummax(),
+                normalize
+            )
+    df = df.groupby("cadence").agg({column: {"mean": np.mean, "std": np.std} for column in measures.values()})
+    df.columns = df.columns.to_flat_index().str.join('_')
+
+
     num_rows, num_cols = 1, 3
-    fig, axs = plt.subplots(num_rows, num_cols)
-    for idx, measure in enumerate(measures):
-        df = df.groupby("cadence").mean()
-        current_df = normalize_df(
-            df,
-            normalize)
+    fig, axs = plt.subplots(num_rows, num_cols, sharey=True)
+    for idx, measure in enumerate(measures.values()):
         ax = axs[idx]
-        ax.plot(current_df.index, current_df[measure].cummax())
+        ax.plot(df.index, df[f"{measure}_mean"], color=f"C{idx}", label="mean")
+        ax.fill_between(
+            df.index,
+            df[f"{measure}_mean"] - df[f"{measure}_std"],
+            df[f"{measure}_mean"] + df[f"{measure}_std"],
+            alpha=0.5,
+            color=f"C{idx}",
+            label="std"
+        )
         ax.set_xscale('log')
         ax.set_xlabel("Time (s)")
-        ax.set_ylabel("Norm. score")
-        ax.set_title(f"syn{idx+1}")
+        # ax.set_title(measure)
         ax.set_xticks([60, 300, 900, 2700, 7200])
         ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
         ax.set_ylim([0, 1.01])
-    fig.set_size_inches(30, 30)
-    for ext in ["png", "pdf"]:
-        fig.savefig(
-            os.path.join("plots", f"agg_{normalize}.{ext}"),
-        )
-
+        ax.legend(ncol=3, title=measure, loc='lower right')
+    set_figure(
+        fig=fig,
+        name=os.path.join("plots", f"agg_{normalize}")
+    )
 
 def exps_table():
 
@@ -322,9 +344,7 @@ def main():
 
     # exp2_plot()
     # exps_table()
-    new_plot_raw()
-    new_plot_raw(normalize="max")
-    new_plot_raw(normalize="min_max")
+    new_plot_agg(normalize="max")
 
 if __name__ == "__main__":
     main()
