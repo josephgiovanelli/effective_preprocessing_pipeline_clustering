@@ -245,16 +245,16 @@ def new_plot_raw(normalize="none"):
                 os.path.join("plots", f"{measure}_{normalize}.{ext}"),
             )
 
-def set_figure(fig, name):
-    fig.set_size_inches(16, 4)
+def set_figure(fig, num_plots, name):
+    fig.set_size_inches(5*num_plots, 4)
     for ext in ["png", "pdf"]:
         fig.savefig(f"{name}.{ext}", bbox_inches='tight')
 
 
 def new_plot_agg(normalize="none"):
 
-    SMALL_SIZE = 13
-    MEDIUM_SIZE = 13
+    SMALL_SIZE = 18
+    MEDIUM_SIZE = 25
 
     plt.rc("font", size=MEDIUM_SIZE)  # controls default text sizes
     plt.rc("axes", titlesize=MEDIUM_SIZE)  # fontsize of the axes title
@@ -264,16 +264,21 @@ def new_plot_agg(normalize="none"):
     plt.rc("legend", fontsize=SMALL_SIZE)  # legend fontsize
     plt.rc("figure", titlesize=MEDIUM_SIZE)  # fontsize of the figure title
 
-    measures = {
-        "score": "Norm. score",
+    rel_measures ={
         "optimization_internal_metric_value": "SIL",
-        "optimization_external_metric_value": "AMI"
+        "optimization_external_metric_value": "AMI",
+    }
+    div_measures = {
+        "score": "Norm. score",
+        "timing": "Div. time"
         }
+    measures = {**rel_measures, **div_measures}
 
     timing = pd.read_csv(os.path.join("results", "diversification", "timing_clustering.csv"))
     performance = pd.read_csv(os.path.join("results","diversification","summary","max_raw.csv")).rename(columns={"time": "cadence"})
     scores = pd.read_csv(os.path.join("results","new_scores.csv"))
-    df = scores.merge(performance, on=["dataset", "cadence"])
+    df = scores.merge(performance, on=["dataset", "cadence"]).merge(timing[["dataset", "cadence", "timing"]], on=["dataset", "cadence"])
+
     df = df[["dataset", "cadence"] + list(measures.keys())]
     df = df.rename(measures, axis="columns")
     df = df.sort_values(by=["dataset", "cadence"])
@@ -291,30 +296,33 @@ def new_plot_agg(normalize="none"):
     df.columns = df.columns.to_flat_index().str.join('_')
 
 
-    num_rows, num_cols = 1, 3
-    fig, axs = plt.subplots(num_rows, num_cols, sharey=True)
-    for idx, measure in enumerate(measures.values()):
-        ax = axs[idx]
-        ax.plot(df.index, df[f"{measure}_mean"], color=f"C{idx}", label="mean")
-        ax.fill_between(
-            df.index,
-            df[f"{measure}_mean"] - df[f"{measure}_std"],
-            df[f"{measure}_mean"] + df[f"{measure}_std"],
-            alpha=0.5,
-            color=f"C{idx}",
-            label="std"
+    for file_name, new_measures in {"rel": rel_measures, "div": div_measures, "all": measures}.items():
+        num_rows, num_cols = 1, len(new_measures)
+        fig, axs = plt.subplots(num_rows, num_cols)
+        for idx, measure in enumerate(new_measures.values()):
+            ax = axs[idx]
+            color_idx = idx  + (0 if file_name != "div" else 2)
+            ax.plot(df.index, df[f"{measure}_mean"], color=f"C{color_idx}", label="mean")
+            ax.fill_between(
+                df.index,
+                df[f"{measure}_mean"] - df[f"{measure}_std"],
+                df[f"{measure}_mean"] + df[f"{measure}_std"],
+                alpha=0.5,
+                color=f"C{color_idx}",
+                label="std"
+            )
+            ax.set_xscale('log')
+            ax.set_xlabel("Time (s)")
+            # ax.set_title(measure)
+            ax.set_xticks([60, 300, 900, 2700, 7200])
+            ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+            ax.set_ylim([0, 1.01])
+            ax.legend(ncol=1, title=measure, loc='lower right')
+        set_figure(
+            fig=fig,
+            num_plots=len(new_measures),
+            name=os.path.join("plots", file_name)
         )
-        ax.set_xscale('log')
-        ax.set_xlabel("Time (s)")
-        # ax.set_title(measure)
-        ax.set_xticks([60, 300, 900, 2700, 7200])
-        ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
-        ax.set_ylim([0, 1.01])
-        ax.legend(ncol=3, title=measure, loc='lower right')
-    set_figure(
-        fig=fig,
-        name=os.path.join("plots", f"agg_{normalize}")
-    )
 
 def exps_table():
 
