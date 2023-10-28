@@ -989,7 +989,7 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import davies_bouldin_score, silhouette_score
 
 
 def main():
@@ -1054,7 +1054,8 @@ def main():
                     results,
                     pd.DataFrame({
                         "dataset": [name],
-                        "SIL": [silhouette_score(Xt, y_pred)]
+                        # "SIL": [silhouette_score(Xt, y_pred)],
+                        "DBI": [davies_bouldin_score(Xt, y_pred)]
                         })
                 ])
     except:
