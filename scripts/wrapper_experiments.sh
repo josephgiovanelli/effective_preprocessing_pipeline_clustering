@@ -11,4 +11,4 @@ printf '\n\nSUMMARIZATION\n\n'
 python experiment/results_processors/optimization_results_summarizer.py
 
 printf '\n\nDIVERSIFICATION\n\n'
-python experiment/results_processors/diversificator.py --experiment exp2 --cadence 1800 --max_time 7200
+python experiment/results_processors/diversificator.py --experiment exp2 --cadence 900 --max_time 900

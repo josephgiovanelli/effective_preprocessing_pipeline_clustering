@@ -85,32 +85,30 @@ You can easily write your own scenario based on the following template:
 
 ```
 general:
-  dataset: iris
+  dataset: syn0
   seed: 42
   space: extended
 optimizations:
   smbo:
-    metric: sil
+    budget: 7200
     budget_kind: time
-    budget: 200
+    metric: sil-tsne
 diversifications:
-  mmr:
-    num_results: 3
-    method: mmr
-    lambda: 0.7
-    criterion: features_set
-    metric: jaccard
   exhaustive:
+    criterion: clustering
+    lambda: 0.5
+    method: mmr
+    metric: ami
     num_results: 3
-    method: exhaustive
-    lambda: 0.7
-    criterion: features_set
-    metric: jaccard
+  mmr:
+    criterion: clustering
+    lambda: 0.5
+    method: mmr
+    metric: ami
+    num_results: 3
 runs:
-  - smbo_mmr
-  - smbo_exhaustive
-  - exhaustive_mmr
-  - exhaustive_exhaustive
+- smbo_mmr
+
 ```
 
 
